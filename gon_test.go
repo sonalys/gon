@@ -8,11 +8,12 @@ import (
 )
 
 func Test_Expression(t *testing.T) {
-	ctx := t.Context()
-	scope := gon.Context(ctx, map[string]gon.Expression{
-		"var1": gon.Static("name"),
-		"var2": gon.Static("name"),
-	})
+	scope := gon.NewScope().
+		WithContext(t.Context()).
+		WithVariables(map[string]gon.Expression{
+			"var1": gon.Static("name"),
+			"var2": gon.Static("name"),
+		})
 
 	expr := gon.Equal(
 		gon.Variable("var1"),
