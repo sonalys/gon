@@ -16,9 +16,17 @@ type (
 		Int() (value int, ok bool)
 		String() (value string, ok bool)
 		Time() (value time.Time, ok bool)
+		Slice() (value []Value, ok bool)
+		Callable() (value Callable, ok bool)
 	}
 
 	Expression interface {
 		Eval(scope Scope) Value
+	}
+
+	Definitions map[string]Expression
+
+	Callable interface {
+		Call(...Value) Value
 	}
 )

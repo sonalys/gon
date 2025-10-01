@@ -5,7 +5,7 @@ type equal struct {
 	second Expression
 }
 
-func Equal(first, second Expression) Expression {
+func Equal(first, second Expression) equal {
 	return equal{
 		first:  first,
 		second: second,

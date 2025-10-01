@@ -10,7 +10,9 @@ type (
 	Scope interface {
 		context.Context
 		Expression
-		Variable(key string) Expression
+
+		Definition(key string) Expression
+		Define(key string, expression Expression)
 	}
 
 	scope struct {
@@ -28,7 +30,7 @@ func NewScope() *scope {
 	}
 }
 
-func (s *scope) WithVariables(source map[string]Expression) *scope {
+func (s *scope) WithDefinitions(source map[string]Expression) *scope {
 	maps.Insert(s.store, maps.All(source))
 	s.store = source
 	return s
@@ -39,16 +41,20 @@ func (s *scope) WithContext(ctx context.Context) *scope {
 	return s
 }
 
-func (s *scope) Variable(key string) Expression {
+func (s *scope) Definition(key string) Expression {
 	value, ok := s.store[key]
 	if !ok {
 		if s.parentScope != nil {
-			return s.parentScope.Variable(key)
+			return s.parentScope.Definition(key)
 		}
 		return Static(errors.New("fact not found"))
 	}
 
 	return value
+}
+
+func (s *scope) Define(key string, expression Expression) {
+	s.store[key] = expression
 }
 
 func (s *scope) Eval(scope Scope) Value {

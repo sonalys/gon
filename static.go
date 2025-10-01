@@ -8,7 +8,7 @@ type (
 	}
 )
 
-func Static(value any) Value {
+func Static(value any) static {
 	return static{
 		value: value,
 	}
@@ -54,6 +54,16 @@ func (s static) String() (value string, ok bool) {
 
 func (s static) Time() (value time.Time, ok bool) {
 	value, ok = s.value.(time.Time)
+	return
+}
+
+func (s static) Slice() (value []Value, ok bool) {
+	values, ok := s.value.([]Value)
+	return values, ok
+}
+
+func (s static) Callable() (value Callable, ok bool) {
+	value, ok = s.value.(Callable)
 	return
 }
 
