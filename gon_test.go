@@ -15,40 +15,54 @@ func Test_Expression(t *testing.T) {
 	}
 
 	scope, err := gon.NewScope().
+		// Context cancellation
 		WithContext(t.Context()).
+		// Dynamic, decoupled scope for your rules.
 		WithDefinitions(map[string]gon.Expression{
+			// Support for static variables of any type.
 			"myName": gon.Static("friendName"),
+			// Support for structs and maps.
 			"friend": gon.Object(&Friend{
 				Name: "friendName",
 				Age:  5,
 			}),
+			// Support for callable function definitions.
 			"reply": gon.Function(func(name string, msg any) string {
 				fmt.Printf("Hello %s, you are %s!\n", name, msg)
 
 				return "surprise!"
 			}),
-			"theFinger": gon.Function(func() string {
-				return "fuck off stranger!"
+			"whoAreYou": gon.Function(func() string {
+				return "I don't know you!"
 			}),
 		})
+		// Error on invalid key names.
+		// Should start with a-z and only contain alphanumeric characters.
 	require.NoError(t, err)
 
+	// If-else branch.
 	rule := gon.If(
 		gon.Equal(
+			// Scope variable referencing.
 			gon.Definition("myName"),
 			gon.Definition("friend.Name"),
 		),
+		// Main branch if condition fulfilled.
 		gon.Call("reply",
 			gon.Definition("friend.Name"),
-			gon.If(gon.Greater(gon.Definition("friend.Age"), gon.Static(18)),
-				gon.Static("fucking old"),
-				gon.Static("fucking genz"),
+			gon.If(
+				gon.Greater(
+					gon.Definition("friend.Age"),
+					gon.Static(18),
+				),
+				gon.Static("old"),
+				gon.Static("young"),
 			),
 		),
-		gon.Call("theFinger"),
+		gon.Call("whoAreYou"),
 	)
-
 	resp := rule.Eval(scope)
+
 	t.Errorf("got resp: %v", resp.Any())
 }
 
