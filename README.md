@@ -87,3 +87,10 @@ func TestExample(t *testing.T) {
 
 * Encoder/Decoder
 * Support GON tags
+* Better slice definition and referencing
+* More operations:
+  * Between
+  * Contains
+  * Not
+  * Zero ( zero-value )
+  * Etc...

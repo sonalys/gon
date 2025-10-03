@@ -1,6 +1,9 @@
 package gon
 
-import "cmp"
+import (
+	"cmp"
+	"time"
+)
 
 func cmpAny(firstValue, secondValue any) (int, bool) {
 	switch c1 := firstValue.(type) {
@@ -88,6 +91,20 @@ func cmpAny(firstValue, secondValue any) (int, bool) {
 			return 0, false
 		}
 		return cmp.Compare(c1, c2), true
+	case time.Time:
+		c2, ok := secondValue.(time.Time)
+		if !ok {
+			return 0, false
+		}
+		if c1.Equal(c2) {
+			return 0, true
+		}
+
+		if c1.Before(c2) {
+			return -1, true
+		}
+
+		return 1, true
 	default:
 		return 0, false
 	}
