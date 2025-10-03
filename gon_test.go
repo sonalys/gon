@@ -8,27 +8,35 @@ import (
 )
 
 func Test_Expression(t *testing.T) {
+	type Friend struct {
+		Name string
+		Age  int
+	}
+
 	scope := gon.NewScope().
 		WithContext(t.Context()).
 		WithDefinitions(map[string]gon.Expression{
-			"myName":     gon.Static("name"),
-			"friendName": gon.Static("name2"),
-			"reply": gon.Static(gon.Function(func(name string, age int) string {
+			"myName": gon.Static("friendName"),
+			"friend": gon.Object(&Friend{
+				Name: "friendName",
+				Age:  50,
+			}),
+			"reply": gon.Function(func(name string, age int) string {
 				fmt.Printf("Hello %s, you are %d years old!\n", name, age)
 
 				return "surprise!"
-			})),
-			"theFinger": gon.Static(gon.Function(func() string {
+			}),
+			"theFinger": gon.Function(func() string {
 				return "fuck off stranger!"
-			})),
+			}),
 		})
 
 	rule := gon.If(
 		gon.Equal(
 			gon.Definition("myName"),
-			gon.Definition("friendName"),
+			gon.Definition("friend.Name"),
 		),
-		gon.Call("reply", gon.Definition("myName"), gon.Static(5)),
+		gon.Call("reply", gon.Definition("friend.Name"), gon.Definition("friend.Age")),
 		gon.Call("theFinger"),
 	)
 

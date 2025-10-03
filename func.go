@@ -16,19 +16,23 @@ type (
 	}
 )
 
-func Function(target any) Callable {
+func Function(target any) Expression {
 	valueOf := reflect.ValueOf(target)
+
+	if valueOf.Kind() != reflect.Func {
+		return Static(fmt.Errorf("target function is not callable: %T", valueOf.Interface()))
+	}
 
 	return function{
 		target: valueOf,
 	}
 }
 
-func (f function) Call(args ...Value) Value {
-	if f.target.Kind() != reflect.Func {
-		return Static(fmt.Errorf("target function is not callable: %T", f.target.Interface()))
-	}
+func (f function) Eval(scope Scope) Value {
+	return Static(f)
+}
 
+func (f function) Call(args ...Value) Value {
 	typeOf := f.target.Type()
 
 	if expArgs, gotArgs := typeOf.NumIn(), len(args); gotArgs != expArgs {

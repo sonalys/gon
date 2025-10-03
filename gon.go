@@ -27,6 +27,7 @@ type (
 	Definitions map[string]Expression
 
 	Callable interface {
+		Expression
 		Call(...Value) Value
 	}
 )

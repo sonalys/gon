@@ -19,14 +19,14 @@ type (
 		context.Context
 		parentScope Scope
 		expression  Expression
-		store       map[string]Expression
+		store       definitionResolver
 	}
 )
 
 func NewScope() *scope {
 	return &scope{
 		Context: context.Background(),
-		store:   make(map[string]Expression),
+		store:   make(definitionResolver),
 	}
 }
 
@@ -42,7 +42,7 @@ func (s *scope) WithContext(ctx context.Context) *scope {
 }
 
 func (s *scope) Definition(key string) Expression {
-	value, ok := s.store[key]
+	value, ok := s.store.Definition(key)
 	if !ok {
 		if s.parentScope != nil {
 			return s.parentScope.Definition(key)
