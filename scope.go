@@ -47,7 +47,7 @@ func (s *scope) Definition(key string) Expression {
 		if s.parentScope != nil {
 			return s.parentScope.Definition(key)
 		}
-		return Static(errors.New("fact not found"))
+		return Static(errors.New("definition not found"))
 	}
 
 	return value

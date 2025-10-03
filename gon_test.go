@@ -19,10 +19,10 @@ func Test_Expression(t *testing.T) {
 			"myName": gon.Static("friendName"),
 			"friend": gon.Object(&Friend{
 				Name: "friendName",
-				Age:  50,
+				Age:  5,
 			}),
-			"reply": gon.Function(func(name string, age int) string {
-				fmt.Printf("Hello %s, you are %d years old!\n", name, age)
+			"reply": gon.Function(func(name string, msg any) string {
+				fmt.Printf("Hello %s, you are %s!\n", name, msg)
 
 				return "surprise!"
 			}),
@@ -36,7 +36,13 @@ func Test_Expression(t *testing.T) {
 			gon.Definition("myName"),
 			gon.Definition("friend.Name"),
 		),
-		gon.Call("reply", gon.Definition("friend.Name"), gon.Definition("friend.Age")),
+		gon.Call("reply",
+			gon.Definition("friend.Name"),
+			gon.If(gon.Greater(gon.Definition("friend.Age"), gon.Static(18)),
+				gon.Static("fucking old"),
+				gon.Static("fucking genz"),
+			),
+		),
 		gon.Call("theFinger"),
 	)
 
