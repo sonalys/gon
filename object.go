@@ -19,8 +19,8 @@ func Object(target any) Expression {
 		valueOf = valueOf.Elem()
 	}
 
-	if valueOf.Kind() != reflect.Struct {
-		return Static(errors.New("object can only be defined as struct or pointer of struct"))
+	if valueOf.Kind() != reflect.Struct || valueOf.Kind() != reflect.Map {
+		return Static(errors.New("object can only be defined as pointer or value of struct or map"))
 	}
 
 	return &object{
@@ -36,7 +36,15 @@ func (o *object) Definition(key string) (Expression, bool) {
 	parts := strings.Split(key, ".")
 	topKey := parts[0]
 
-	fieldValue := o.valueOf.FieldByName(topKey)
+	var fieldValue reflect.Value
+
+	switch o.valueOf.Kind() {
+	case reflect.Struct:
+		fieldValue = o.valueOf.FieldByName(topKey)
+	case reflect.Map:
+		fieldValue = o.valueOf.MapIndex(reflect.ValueOf(topKey))
+	}
+
 	if !fieldValue.IsValid() {
 		return Static(errors.New("definition not found")), false
 	}
