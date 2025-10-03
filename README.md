@@ -82,3 +82,8 @@ func TestExample(t *testing.T) {
     // surprise!
 }
 ```
+
+## Roadmap
+
+* Encoder/Decoder
+* Support GON tags
