@@ -15,6 +15,8 @@ Gon is your dynamic and flexible rule-engine!
 
 * Iterations
 * Recursions
+* Statically validated expressions
+  * It won't give you validation ahead of execution for invalid operations
 
 
 ### Example Usage
