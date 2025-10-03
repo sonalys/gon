@@ -12,6 +12,14 @@ type (
 	}
 )
 
+func (e object) Name() (string, []KeyedExpression) {
+	return "object", nil
+}
+
+func (e object) Type() ExpressionType {
+	return ExpressionTypeValue
+}
+
 func Object(target any) Expression {
 	valueOf := reflect.ValueOf(target)
 
@@ -40,7 +48,11 @@ func (o *object) Definition(key string) (Expression, bool) {
 
 	switch o.valueOf.Kind() {
 	case reflect.Struct:
-		fieldValue = o.valueOf.FieldByName(topKey)
+		typeOf := o.valueOf.Type()
+		fieldValue = o.valueOf.FieldByNameFunc(func(fieldName string) bool {
+			field, ok := typeOf.FieldByName(fieldName)
+			return ok && field.Tag.Get("gon") == key
+		})
 	case reflect.Map:
 		fieldValue = o.valueOf.MapIndex(reflect.ValueOf(topKey))
 	}

@@ -10,8 +10,8 @@ import (
 
 func Test_Expression(t *testing.T) {
 	type Friend struct {
-		Name string
-		Age  int
+		Name string `gon:"name"`
+		Age  int    `gon:"age"`
 	}
 
 	scope, err := gon.NewScope().
@@ -45,14 +45,14 @@ func Test_Expression(t *testing.T) {
 		gon.Equal(
 			// Scope variable referencing.
 			gon.Definition("myName"),
-			gon.Definition("friend.Name"),
+			gon.Definition("friend.name"),
 		),
 		// Main branch if condition fulfilled.
 		gon.Call("reply",
-			gon.Definition("friend.Name"),
+			gon.Definition("friend.name"),
 			gon.If(
 				gon.Greater(
-					gon.Definition("friend.Age"),
+					gon.Definition("friend.age"),
 					gon.Static(18),
 				),
 				gon.Static("old"),
@@ -62,8 +62,12 @@ func Test_Expression(t *testing.T) {
 		gon.Call("whoAreYou"),
 	)
 	resp := rule.Eval(scope)
+	require.Equal(t, "surprise!", resp.Any())
 
-	t.Errorf("got resp: %v", resp.Any())
+	err = gon.Encode(t.Output(), rule)
+	require.NoError(t, err)
+
+	t.Fail()
 }
 
 func Benchmark_Equal(b *testing.B) {

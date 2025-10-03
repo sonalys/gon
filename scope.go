@@ -20,6 +20,14 @@ type (
 	}
 )
 
+func (s *scope) Name() (string, []KeyedExpression) {
+	return "scope", nil
+}
+
+func (s *scope) Type() ExpressionType {
+	return ExpressionTypeInvalid
+}
+
 func NewScope() *scope {
 	return &scope{
 		Context:            context.Background(),

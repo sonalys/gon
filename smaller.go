@@ -10,6 +10,24 @@ type smaller struct {
 	equal  bool
 }
 
+func (e smaller) Name() (string, []KeyedExpression) {
+	if e.equal {
+		return "lte", []KeyedExpression{
+			{Key: "first", Value: e.first},
+			{Key: "second", Value: e.second},
+		}
+	}
+
+	return "lt", []KeyedExpression{
+		{Key: "first", Value: e.first},
+		{Key: "second", Value: e.second},
+	}
+}
+
+func (e smaller) Type() ExpressionType {
+	return ExpressionTypeOperation
+}
+
 func Smaller(first, second Expression) smaller {
 	return smaller{
 		first:  first,

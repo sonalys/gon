@@ -7,6 +7,23 @@ type ifExpr struct {
 	expr      []Expression
 }
 
+func (e ifExpr) Name() (string, []KeyedExpression) {
+	kv := []KeyedExpression{
+		{Key: "condition", Value: e.condition},
+		{Key: "then", Value: e.expr[0]},
+	}
+	if len(e.expr) > 1 {
+		kv = append(kv, KeyedExpression{
+			Key: "else", Value: e.expr[1],
+		})
+	}
+	return "if", kv
+}
+
+func (e ifExpr) Type() ExpressionType {
+	return ExpressionTypeOperation
+}
+
 func If(condition Expression, expr ...Expression) Expression {
 	if len(expr) < 1 {
 		return Static(fmt.Errorf("no branches specified for if condition"))

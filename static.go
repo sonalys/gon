@@ -8,9 +8,38 @@ type (
 	}
 )
 
+func (s static) Name() (string, []KeyedExpression) {
+	switch s.value.(type) {
+	case time.Time:
+		return "time", nil
+	default:
+		return "static", nil
+	}
+}
+
+func (s static) Type() ExpressionType {
+	switch s.value.(type) {
+	case time.Time:
+		return ExpressionTypeOperation
+	default:
+		return ExpressionTypeValue
+	}
+}
+
 func Static(value any) static {
 	return static{
 		value: value,
+	}
+}
+
+func Time(t string) static {
+	parsed, err := time.Parse(time.RFC3339, t)
+	if err != nil {
+		return Static(err)
+	}
+
+	return static{
+		value: parsed,
 	}
 }
 

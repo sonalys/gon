@@ -30,6 +30,16 @@ type (
 	}
 )
 
+func (d definition) Name() (string, []KeyedExpression) {
+	return "definition", []KeyedExpression{
+		{Key: "", Value: Static(d.key)},
+	}
+}
+
+func (d definition) Type() ExpressionType {
+	return ExpressionTypeReference
+}
+
 func Definition(key string) definition {
 	return definition{
 		key: key,
@@ -88,3 +98,4 @@ func (s *definitionResolver) Define(key string, expression Expression) error {
 }
 
 var _ DefinitionResolver = &definitionResolver{}
+var _ Expression = &definition{}

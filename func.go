@@ -16,6 +16,29 @@ type (
 	}
 )
 
+func (c call) Name() (string, []KeyedExpression) {
+	kv := make([]KeyedExpression, 0, len(c.args)+1)
+	kv = append(kv, KeyedExpression{Key: "", Value: Static(c.callable)})
+
+	for i := range c.args {
+		kv = append(kv, KeyedExpression{Key: "", Value: c.args[i]})
+	}
+
+	return "call", kv
+}
+
+func (c call) Type() ExpressionType {
+	return ExpressionTypeOperation
+}
+
+func (f function) Name() (string, []KeyedExpression) {
+	return "function", nil
+}
+
+func (f function) Type() ExpressionType {
+	return ExpressionTypeInvalid
+}
+
 func Function(target any) Expression {
 	valueOf := reflect.ValueOf(target)
 
@@ -52,12 +75,12 @@ func (f function) Call(args ...Value) Value {
 	}
 
 	if typeOf.NumOut() == 1 {
-		return Static(resp[0])
+		return Static(resp[0].Interface())
 	}
 
 	respValue := make([]Value, 0, len(resp))
 	for i := range resp {
-		respValue = append(respValue, Static(resp[i]))
+		respValue = append(respValue, Static(resp[i].Interface()))
 	}
 
 	return Static(respValue)

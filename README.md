@@ -24,8 +24,8 @@ Gon is your dynamic and flexible rule-engine!
 ```go
 func TestExample(t *testing.T) {
 	type Friend struct {
-		Name string
-		Age  int
+		Name string `gon:"name"`
+		Age  int 	`gon:"age"`
 	}
 
 	scope, err := gon.NewScope().
@@ -59,14 +59,14 @@ func TestExample(t *testing.T) {
 		gon.Equal(
             // Scope variable referencing.
 			gon.Definition("myName"),
-			gon.Definition("friend.Name"),
+			gon.Definition("friend.name"),
 		),
         // Main branch if condition fulfilled.
 		gon.Call("reply",
-			gon.Definition("friend.Name"),
+			gon.Definition("friend.name"),
 			gon.If(
 				gon.Greater(
-					gon.Definition("friend.Age"),
+					gon.Definition("friend.age"),
 					gon.Static(18),
 				),
 				gon.Static("old"),
@@ -88,7 +88,6 @@ func TestExample(t *testing.T) {
 ## Roadmap
 
 * Encoder/Decoder
-* Support GON tags
 * Better slice definition and referencing
 * More operations:
   * Between

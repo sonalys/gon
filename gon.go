@@ -5,6 +5,33 @@ import (
 )
 
 type (
+	ExpressionType uint8
+
+	KeyedExpression struct {
+		Key   string
+		Value Expression
+	}
+
+	KeyedValue struct {
+		Key   string
+		Value Value
+	}
+
+	Typed interface {
+		Type() ExpressionType
+	}
+
+	Named interface {
+		Name() (string, []KeyedExpression)
+	}
+
+	Expression interface {
+		Typed
+		Named
+
+		Eval(scope Scope) Value
+	}
+
 	Value interface {
 		Expression
 
@@ -20,10 +47,6 @@ type (
 		Callable() (value Callable, ok bool)
 	}
 
-	Expression interface {
-		Eval(scope Scope) Value
-	}
-
 	Definitions map[string]Expression
 
 	Callable interface {
@@ -31,3 +54,38 @@ type (
 		Call(...Value) Value
 	}
 )
+
+const (
+	ExpressionTypeInvalid ExpressionType = iota
+	// ExpressionTypeOperation represents an operation() node type.
+	ExpressionTypeOperation
+	// ExpressionTypeReference represents a variable reference. Example: friend.name.
+	ExpressionTypeReference
+	// ExpressionTypeValue represents a direct value. Example: "string", 5.
+	ExpressionTypeValue
+)
+
+/*
+
+if(
+	expression: equal(
+		myName,
+		friend.name
+	),
+	then: call(
+		name: "reply",
+		args: if(
+			expression: greater(
+				friend.age,
+				18
+			),
+			then: "old"
+			else: "young"
+		),
+	),
+	else: call(
+		"whoAreYou"
+	)
+)
+
+*/

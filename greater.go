@@ -12,6 +12,24 @@ type (
 	}
 )
 
+func (e greater) Name() (string, []KeyedExpression) {
+	if e.equal {
+		return "gte", []KeyedExpression{
+			{Key: "first", Value: e.first},
+			{Key: "second", Value: e.second},
+		}
+	}
+
+	return "gt", []KeyedExpression{
+		{Key: "first", Value: e.first},
+		{Key: "second", Value: e.second},
+	}
+}
+
+func (e greater) Type() ExpressionType {
+	return ExpressionTypeOperation
+}
+
 func Greater(first, second Expression) greater {
 	return greater{
 		first:  first,
