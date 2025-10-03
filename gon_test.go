@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/sonalys/gon"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_Expression(t *testing.T) {
@@ -13,7 +14,7 @@ func Test_Expression(t *testing.T) {
 		Age  int
 	}
 
-	scope := gon.NewScope().
+	scope, err := gon.NewScope().
 		WithContext(t.Context()).
 		WithDefinitions(map[string]gon.Expression{
 			"myName": gon.Static("friendName"),
@@ -30,6 +31,7 @@ func Test_Expression(t *testing.T) {
 				return "fuck off stranger!"
 			}),
 		})
+	require.NoError(t, err)
 
 	rule := gon.If(
 		gon.Equal(
@@ -51,7 +53,7 @@ func Test_Expression(t *testing.T) {
 }
 
 func Benchmark_Equal(b *testing.B) {
-	scope := gon.NewScope().
+	scope, _ := gon.NewScope().
 		WithContext(b.Context()).
 		WithDefinitions(gon.Definitions{
 			"var1": gon.Static(1),

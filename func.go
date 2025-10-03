@@ -77,11 +77,16 @@ func (c call) Eval(scope Scope) Value {
 		values = append(values, c.args[i].Eval(scope))
 	}
 
-	definition := scope.Definition(c.callable).Eval(scope)
+	definition, ok := scope.Definition(c.callable)
+	if !ok {
+		return Static(fmt.Errorf("no callable definition found for %s", c.callable))
+	}
+
+	resp := definition.Eval(scope)
 
 	callable, ok := definition.Eval(scope).Callable()
 	if !ok {
-		return Static(fmt.Errorf("definition is not callable: %T", definition.Any()))
+		return Static(fmt.Errorf("definition is not callable: %T", resp.Any()))
 	}
 
 	return callable.Call(values...)

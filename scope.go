@@ -2,38 +2,38 @@ package gon
 
 import (
 	"context"
-	"errors"
-	"maps"
 )
 
 type (
 	Scope interface {
 		context.Context
 		Expression
-
-		Definition(key string) Expression
-		Define(key string, expression Expression)
+		DefinitionResolver
 	}
 
 	scope struct {
+		definitionResolver
 		context.Context
+
 		parentScope Scope
 		expression  Expression
-		store       definitionResolver
 	}
 )
 
 func NewScope() *scope {
 	return &scope{
-		Context: context.Background(),
-		store:   make(definitionResolver),
+		Context:            context.Background(),
+		definitionResolver: definitionResolver{store: make(map[string]Expression)},
 	}
 }
 
-func (s *scope) WithDefinitions(source map[string]Expression) *scope {
-	maps.Insert(s.store, maps.All(source))
-	s.store = source
-	return s
+func (s *scope) WithDefinitions(source map[string]Expression) (*scope, error) {
+	for key, value := range source {
+		if err := s.definitionResolver.Define(key, value); err != nil {
+			return nil, err
+		}
+	}
+	return s, nil
 }
 
 func (s *scope) WithContext(ctx context.Context) *scope {
@@ -41,20 +41,16 @@ func (s *scope) WithContext(ctx context.Context) *scope {
 	return s
 }
 
-func (s *scope) Definition(key string) Expression {
-	value, ok := s.store.Definition(key)
+func (s *scope) Definition(key string) (Expression, bool) {
+	value, ok := s.definitionResolver.Definition(key)
 	if !ok {
 		if s.parentScope != nil {
 			return s.parentScope.Definition(key)
 		}
-		return Static(errors.New("definition not found"))
+		return nil, false
 	}
 
-	return value
-}
-
-func (s *scope) Define(key string, expression Expression) {
-	s.store[key] = expression
+	return value, true
 }
 
 func (s *scope) Eval(scope Scope) Value {

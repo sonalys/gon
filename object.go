@@ -19,7 +19,7 @@ func Object(target any) Expression {
 		valueOf = valueOf.Elem()
 	}
 
-	if valueOf.Kind() != reflect.Struct || valueOf.Kind() != reflect.Map {
+	if valueOf.Kind() != reflect.Struct && valueOf.Kind() != reflect.Map {
 		return Static(errors.New("object can only be defined as pointer or value of struct or map"))
 	}
 
@@ -62,3 +62,5 @@ func (o *object) Definition(key string) (Expression, bool) {
 
 	return Static(errors.New("definition not found")), false
 }
+
+var _ DefinitionResolver = &object{}

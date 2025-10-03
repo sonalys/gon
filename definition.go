@@ -2,6 +2,8 @@ package gon
 
 import (
 	"errors"
+	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -14,7 +16,13 @@ type (
 		Definition(key string) (Expression, bool)
 	}
 
-	definitionResolver map[string]Expression
+	Definer interface {
+		Define(key string, expression Expression) error
+	}
+
+	definitionResolver struct {
+		store map[string]Expression
+	}
 
 	assignment struct {
 		definition string
@@ -29,19 +37,28 @@ func Definition(key string) definition {
 }
 
 func (d definition) Eval(scope Scope) Value {
-	return scope.Definition(d.key).Eval(scope)
+	def, ok := scope.Definition(d.key)
+	if !ok {
+		return Static(errors.New("definition not found"))
+	}
+
+	return def.Eval(scope)
 }
 
 func (a assignment) Eval(scope Scope) Value {
-	scope.Define(a.definition, a.expression)
-	return Static(nil)
+	definer, ok := scope.(Definer)
+	if !ok {
+		return Static(errors.New("scope is read-only"))
+	}
+
+	return Static(definer.Define(a.definition, a.expression))
 }
 
-func (s definitionResolver) Definition(key string) (Expression, bool) {
+func (s *definitionResolver) Definition(key string) (Expression, bool) {
 	parts := strings.Split(key, ".")
 	topKey := parts[0]
 
-	value, ok := s[topKey]
+	value, ok := s.store[topKey]
 	if !ok {
 		return Static(errors.New("definition not found")), false
 	}
@@ -57,3 +74,17 @@ func (s definitionResolver) Definition(key string) (Expression, bool) {
 
 	return Static(errors.New("definition doesn't have children")), false
 }
+
+var definitionNameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]*$")
+
+func (s *definitionResolver) Define(key string, expression Expression) error {
+	if !definitionNameRegex.MatchString(key) {
+		return fmt.Errorf("invalid definition key: %s", key)
+	}
+
+	s.store[key] = expression
+
+	return nil
+}
+
+var _ DefinitionResolver = &definitionResolver{}
