@@ -27,17 +27,17 @@ func Test_Expression(t *testing.T) {
 				Age:  5,
 			}),
 			// Support for callable function definitions.
-			"reply": gon.Function(func(name string, msg any) string {
+			"reply": gon.Static(func(name string, msg any) string {
 				fmt.Printf("Hello %s, you are %s!\n", name, msg)
 
 				return "surprise!"
 			}),
-			"whoAreYou": gon.Function(func() string {
+			"whoAreYou": gon.Static(func() string {
 				return "I don't know you!"
 			}),
 		})
-		// Error on invalid key names.
-		// Should start with a-z and only contain alphanumeric characters.
+	// Error on invalid key names.
+	// Should start with a-z and only contain alphanumeric characters.
 	require.NoError(t, err)
 
 	// If-else branch.

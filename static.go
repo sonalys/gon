@@ -1,6 +1,10 @@
 package gon
 
-import "time"
+import (
+	"fmt"
+	"reflect"
+	"time"
+)
 
 type (
 	static struct {
@@ -91,9 +95,40 @@ func (s static) Slice() (value []Value, ok bool) {
 	return values, ok
 }
 
-func (s static) Callable() (value Callable, ok bool) {
-	value, ok = s.value.(Callable)
-	return
+func (s static) Call(args ...Value) Value {
+	valueOf := reflect.ValueOf(s.value)
+	typeOf := valueOf.Type()
+
+	if valueOf.Kind() != reflect.Func {
+		return Static(fmt.Errorf("definition is not callable: %T", valueOf.Interface()))
+	}
+
+	if expArgs, gotArgs := typeOf.NumIn(), len(args); gotArgs != expArgs {
+		return Static(fmt.Errorf("expected %d args, got %d", expArgs, gotArgs))
+	}
+
+	argsValue := make([]reflect.Value, 0, len(args))
+	for i := range args {
+		argsValue = append(argsValue, reflect.ValueOf(args[i].Any()))
+	}
+
+	resp := valueOf.Call(argsValue)
+
+	expResp := typeOf.NumOut()
+	if expResp == 0 {
+		return Static(nil)
+	}
+
+	if typeOf.NumOut() == 1 {
+		return Static(resp[0].Interface())
+	}
+
+	respValue := make([]Value, 0, len(resp))
+	for i := range resp {
+		respValue = append(respValue, Static(resp[i].Interface()))
+	}
+
+	return Static(respValue)
 }
 
 var (

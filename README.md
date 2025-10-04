@@ -87,7 +87,7 @@ func TestExample(t *testing.T) {
 
 ## Roadmap
 
-* Encoder/Decoder
+* Decoder
 * Better slice definition and referencing
 * More operations:
   * Between

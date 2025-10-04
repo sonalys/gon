@@ -44,7 +44,6 @@ type (
 		String() (value string, ok bool)
 		Time() (value time.Time, ok bool)
 		Slice() (value []Value, ok bool)
-		Callable() (value Callable, ok bool)
 	}
 
 	Definitions map[string]Expression
