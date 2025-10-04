@@ -6,8 +6,12 @@ import (
 	"time"
 )
 
-func propagateErr(value any, mask string, args ...any) Value {
-	if err, ok := value.(error); ok {
+func propagateErr(value Value, mask string, args ...any) Value {
+	if value == nil {
+		return Static(fmt.Errorf(mask, args...))
+	}
+
+	if err, ok := value.Value().(error); ok {
 		return Static(err)
 	}
 

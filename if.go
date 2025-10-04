@@ -43,7 +43,7 @@ func (i ifExpr) Eval(scope Scope) Value {
 	value := i.condition.Eval(scope)
 	fulfilled, ok := value.Value().(bool)
 	if !ok {
-		return propagateErr(value, "condition should be bool, got %T", value.Value())
+		return propagateErr(value, "if expected bool, got %T", value.Value())
 	}
 
 	exprLen := len(i.expr)

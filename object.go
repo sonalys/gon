@@ -2,6 +2,7 @@ package gon
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -58,7 +59,7 @@ func (o *object) Definition(key string) (Expression, bool) {
 	}
 
 	if !fieldValue.IsValid() {
-		return Static(errors.New("definition not found")), false
+		return Static(fmt.Errorf("definition not found: %s", key)), false
 	}
 
 	value := fieldValue.Interface()
@@ -72,7 +73,7 @@ func (o *object) Definition(key string) (Expression, bool) {
 		return resolver.Definition(key[len(topKey):])
 	}
 
-	return propagateErr(value, "definition not found"), false
+	return propagateErr(nil, "definition not found: %s", key), false
 }
 
 var _ DefinitionResolver = &object{}

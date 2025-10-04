@@ -49,12 +49,12 @@ func Definition(key string) definition {
 }
 
 func (d definition) Eval(scope Scope) Value {
-	def, ok := scope.Definition(d.key)
+	expression, ok := scope.Definition(d.key)
 	if !ok {
-		return Static(errors.New("definition not found"))
+		return Static(fmt.Errorf("definition not found: %s", d.key))
 	}
 
-	return def.Eval(scope)
+	return expression.Eval(scope)
 }
 
 func (a assignment) Eval(scope Scope) Value {
@@ -72,7 +72,7 @@ func (s *definitionResolver) Definition(key string) (Expression, bool) {
 
 	value, ok := s.store[topKey]
 	if !ok {
-		return Static(errors.New("definition not found")), false
+		return Static(fmt.Errorf("definition not found: %s", topKey)), false
 	}
 
 	if len(parts) == 1 {
@@ -84,7 +84,7 @@ func (s *definitionResolver) Definition(key string) (Expression, bool) {
 		return resolver.Definition(key[len(topKey)+1:])
 	}
 
-	return propagateErr(value, "definition doesn't have children"), false
+	return propagateErr(nil, "definition doesn't have children"), false
 }
 
 var definitionNameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]*$")

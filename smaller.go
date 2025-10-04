@@ -1,5 +1,7 @@
 package gon
 
+import "errors"
+
 type smaller struct {
 	first  Expression
 	second Expression
@@ -44,9 +46,16 @@ func (e smaller) Eval(scope Scope) Value {
 	secondValue := e.second.Eval(scope).Value()
 
 	comparison, ok := cmpAny(firstValue, secondValue)
-
 	if !ok {
-		return propagateErr(nil, "cannot compare different types: %T and %T", firstValue, secondValue)
+		errs := make([]error, 0, 2)
+		if err, ok := firstValue.(error); ok {
+			errs = append(errs, err)
+		}
+		if err, ok := secondValue.(error); ok {
+			errs = append(errs, err)
+		}
+
+		return propagateErr(Static(errors.Join(errs...)), "cannot compare different types: %T and %T", firstValue, secondValue)
 	}
 
 	if e.equal {

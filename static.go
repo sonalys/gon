@@ -13,9 +13,11 @@ type (
 )
 
 func (s static) Name() (string, []KeyedExpression) {
-	switch s.value.(type) {
+	switch v := s.value.(type) {
 	case time.Time:
-		return "time", nil
+		return "time", []KeyedExpression{
+			{Key: "", Value: Static(v.Format(time.RFC3339))},
+		}
 	default:
 		return "static", nil
 	}
@@ -48,6 +50,10 @@ func Time(t string) static {
 }
 
 func (s static) Value() any {
+	if nested, ok := s.value.(Value); ok {
+		return nested.Value()
+	}
+
 	return s.value
 }
 

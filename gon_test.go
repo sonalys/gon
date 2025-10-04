@@ -3,6 +3,7 @@ package gon_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/sonalys/gon"
 	"github.com/stretchr/testify/require"
@@ -10,9 +11,11 @@ import (
 
 func Test_Expression(t *testing.T) {
 	type Friend struct {
-		Name string `gon:"name"`
-		Age  int    `gon:"age"`
+		Name     string    `gon:"name"`
+		Birthday time.Time `gon:"birthday"`
 	}
+
+	birthday := time.Now().AddDate(-15, 0, 0)
 
 	scope, err := gon.NewScope().
 		// Context cancellation
@@ -23,12 +26,17 @@ func Test_Expression(t *testing.T) {
 			"myName": gon.Static("friendName"),
 			// Support for structs and maps.
 			"friend": gon.Object(&Friend{
-				Name: "friendName",
-				Age:  5,
+				Name:     "friendName",
+				Birthday: birthday,
 			}),
 			// Support for callable function definitions.
 			"reply": gon.Static(func(name string, msg any) string {
-				fmt.Printf("Hello %s, you are %s!\n", name, msg)
+				switch msg := msg.(type) {
+				case error:
+					return fmt.Sprintf("unexpected error: %s", msg.Error())
+				case string:
+					fmt.Printf("Hello %s, you are %s!\n", name, msg)
+				}
 
 				return "surprise!"
 			}),
@@ -51,9 +59,9 @@ func Test_Expression(t *testing.T) {
 		gon.Call("reply",
 			gon.Definition("friend.name"),
 			gon.If(
-				gon.Greater(
-					gon.Definition("friend.age"),
-					gon.Static(18),
+				gon.Smaller(
+					gon.Definition("friend.birthday"),
+					gon.Static(time.Now().AddDate(-18, 0, 0)),
 				),
 				gon.Static("old"),
 				gon.Static("young"),

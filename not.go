@@ -21,12 +21,13 @@ func Not(expression Expression) not {
 }
 
 func (e not) Eval(scope Scope) Value {
-	value, ok := e.expression.Eval(scope).Value().(bool)
+	value := e.expression.Eval(scope)
+	resp, ok := value.Value().(bool)
 	if !ok {
 		return propagateErr(value, "cannot negate non-boolean expression")
 	}
 
-	return Static(!value)
+	return Static(!resp)
 }
 
 var (
