@@ -41,9 +41,9 @@ func If(condition Expression, expr ...Expression) Expression {
 
 func (i ifExpr) Eval(scope Scope) Value {
 	conditionEval := i.condition.Eval(scope)
-	fulfilled, ok := conditionEval.Bool()
+	fulfilled, ok := conditionEval.Value().(bool)
 	if !ok {
-		return Static(fmt.Errorf("condition should be bool, got %T", conditionEval.Any()))
+		return Static(fmt.Errorf("condition should be bool, got %T", conditionEval.Value()))
 	}
 
 	exprLen := len(i.expr)

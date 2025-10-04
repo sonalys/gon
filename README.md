@@ -22,46 +22,46 @@ Gon is your dynamic and flexible rule-engine!
 ### Example Usage
 
 ```go
-func TestExample(t *testing.T) {
+func Test_Expression(t *testing.T) {
 	type Friend struct {
 		Name string `gon:"name"`
-		Age  int 	`gon:"age"`
+		Age  int    `gon:"age"`
 	}
 
 	scope, err := gon.NewScope().
-        // Context cancellation
+		// Context cancellation
 		WithContext(t.Context()).
-        // Dynamic, decoupled scope for your rules.
+		// Dynamic, decoupled scope for your rules.
 		WithDefinitions(map[string]gon.Expression{
-            // Support for static variables of any type.
+			// Support for static variables of any type.
 			"myName": gon.Static("friendName"),
-            // Support for structs and maps.
+			// Support for structs and maps.
 			"friend": gon.Object(&Friend{
 				Name: "friendName",
 				Age:  5,
 			}),
-            // Support for callable function definitions.
-			"reply": gon.Function(func(name string, msg any) string {
+			// Support for callable function definitions.
+			"reply": gon.Static(func(name string, msg any) string {
 				fmt.Printf("Hello %s, you are %s!\n", name, msg)
 
 				return "surprise!"
 			}),
-			"whoAreYou": gon.Function(func() string {
+			"whoAreYou": gon.Static(func() string {
 				return "I don't know you!"
 			}),
 		})
-    // Error on invalid key names.
-    // Should start with a-z and only contain alphanumeric characters.
+	// Error on invalid key names.
+	// Should start with a-z and only contain alphanumeric characters.
 	require.NoError(t, err)
 
-    // If-else branch.
+	// If-else branch.
 	rule := gon.If(
 		gon.Equal(
-            // Scope variable referencing.
+			// Scope variable referencing.
 			gon.Definition("myName"),
 			gon.Definition("friend.name"),
 		),
-        // Main branch if condition fulfilled.
+		// Main branch if condition fulfilled.
 		gon.Call("reply",
 			gon.Definition("friend.name"),
 			gon.If(
@@ -75,14 +75,38 @@ func TestExample(t *testing.T) {
 		),
 		gon.Call("whoAreYou"),
 	)
-
 	resp := rule.Eval(scope)
-    // Prints:
-    // Hello friendName, you are young!
-    //
-    // Returns:
-    // surprise!
+	require.Equal(t, "surprise!", resp.Value())
+
+	err = gon.Encode(t.Output(), rule)
+	require.NoError(t, err)
+
+	t.Fail()
 }
+// Prints:
+// Hello friendName, you are young!
+//
+// Returns:
+// surprise!
+//
+// if(
+// 	condition: equal(
+// 		first: myName
+// 		second: friend.name
+// 	)
+// 	then: call("reply"
+// 		friend.name
+// 		if(
+// 			condition: gt(
+// 				first: friend.age
+// 				second: 18
+// 			)
+// 			then: "old"
+// 			else: "young"
+// 		)
+// 	)
+// 	else: call("whoAreYou")
+// )
 ```
 
 ## Roadmap

@@ -17,7 +17,7 @@ func (e object) Name() (string, []KeyedExpression) {
 }
 
 func (e object) Type() ExpressionType {
-	return ExpressionTypeValue
+	return ExpressionTypeInvalid
 }
 
 func Object(target any) Expression {

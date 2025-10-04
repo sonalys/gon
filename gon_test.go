@@ -62,7 +62,7 @@ func Test_Expression(t *testing.T) {
 		gon.Call("whoAreYou"),
 	)
 	resp := rule.Eval(scope)
-	require.Equal(t, "surprise!", resp.Any())
+	require.Equal(t, "surprise!", resp.Value())
 
 	err = gon.Encode(t.Output(), rule)
 	require.NoError(t, err)

@@ -47,52 +47,12 @@ func Time(t string) static {
 	}
 }
 
-func (s static) Any() any {
+func (s static) Value() any {
 	return s.value
-}
-
-func (s static) Bool() (value bool, ok bool) {
-	value, ok = s.value.(bool)
-	return
-}
-
-func (s static) Duration() (value time.Duration, ok bool) {
-	value, ok = s.value.(time.Duration)
-	return
-}
-
-func (s static) Error() error {
-	err, _ := s.value.(error)
-	return err
 }
 
 func (s static) Eval(scope Scope) Value {
 	return s
-}
-
-func (s static) Float() (value float64, ok bool) {
-	value, ok = s.value.(float64)
-	return
-}
-
-func (s static) Int() (value int, ok bool) {
-	value, ok = s.value.(int)
-	return
-}
-
-func (s static) String() (value string, ok bool) {
-	value, ok = s.value.(string)
-	return
-}
-
-func (s static) Time() (value time.Time, ok bool) {
-	value, ok = s.value.(time.Time)
-	return
-}
-
-func (s static) Slice() (value []Value, ok bool) {
-	values, ok := s.value.([]Value)
-	return values, ok
 }
 
 func (s static) Call(args ...Value) Value {
@@ -109,7 +69,7 @@ func (s static) Call(args ...Value) Value {
 
 	argsValue := make([]reflect.Value, 0, len(args))
 	for i := range args {
-		argsValue = append(argsValue, reflect.ValueOf(args[i].Any()))
+		argsValue = append(argsValue, reflect.ValueOf(args[i].Value()))
 	}
 
 	resp := valueOf.Call(argsValue)
@@ -132,5 +92,6 @@ func (s static) Call(args ...Value) Value {
 }
 
 var (
-	_ Value = static{}
+	_ Value    = static{}
+	_ Callable = static{}
 )

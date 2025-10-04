@@ -12,6 +12,8 @@ type (
 		key string
 	}
 
+	Definitions map[string]Expression
+
 	DefinitionResolver interface {
 		Definition(key string) (Expression, bool)
 	}

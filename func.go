@@ -9,6 +9,11 @@ type (
 		callable string
 		args     []Expression
 	}
+
+	Callable interface {
+		Expression
+		Call(...Value) Value
+	}
 )
 
 func (c call) Name() (string, []KeyedExpression) {

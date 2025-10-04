@@ -44,8 +44,8 @@ func SmallerOrEqual(first, second Expression) smaller {
 }
 
 func (e smaller) Eval(scope Scope) Value {
-	firstValue := e.first.Eval(scope).Any()
-	secondValue := e.second.Eval(scope).Any()
+	firstValue := e.first.Eval(scope).Value()
+	secondValue := e.second.Eval(scope).Value()
 
 	comparison, ok := cmpAny(firstValue, secondValue)
 

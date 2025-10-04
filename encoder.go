@@ -51,10 +51,10 @@ func encodeBody(w io.Writer, root Expression, indentation int) error {
 		print(0, ")")
 	case ExpressionTypeReference:
 		_, args := root.Name()
-		key := args[0].Value.(interface{ Any() any }).Any()
+		key := args[0].Value.(Value).Value()
 		print(0, "%v", key)
 	case ExpressionTypeValue:
-		value := root.(interface{ Any() any }).Any()
+		value := root.(Value).Value()
 		if str, ok := value.(string); ok {
 			value = strconv.Quote(str)
 		}
