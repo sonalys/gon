@@ -1,9 +1,5 @@
 package gon
 
-import (
-	"fmt"
-)
-
 type smaller struct {
 	first  Expression
 	second Expression
@@ -50,7 +46,7 @@ func (e smaller) Eval(scope Scope) Value {
 	comparison, ok := cmpAny(firstValue, secondValue)
 
 	if !ok {
-		return Static(fmt.Errorf("cannot compare different types: %T and %T", firstValue, secondValue))
+		return propagateErr(nil, "cannot compare different types: %T and %T", firstValue, secondValue)
 	}
 
 	if e.equal {

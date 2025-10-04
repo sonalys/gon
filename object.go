@@ -72,7 +72,7 @@ func (o *object) Definition(key string) (Expression, bool) {
 		return resolver.Definition(key[len(topKey):])
 	}
 
-	return Static(errors.New("definition not found")), false
+	return propagateErr(value, "definition not found"), false
 }
 
 var _ DefinitionResolver = &object{}

@@ -84,7 +84,7 @@ func (s *definitionResolver) Definition(key string) (Expression, bool) {
 		return resolver.Definition(key[len(topKey)+1:])
 	}
 
-	return Static(errors.New("definition doesn't have children")), false
+	return propagateErr(value, "definition doesn't have children"), false
 }
 
 var definitionNameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]*$")

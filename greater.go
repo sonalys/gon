@@ -1,9 +1,5 @@
 package gon
 
-import (
-	"fmt"
-)
-
 type (
 	greater struct {
 		first  Expression
@@ -50,9 +46,8 @@ func (e greater) Eval(scope Scope) Value {
 	secondValue := e.second.Eval(scope).Value()
 
 	comparison, ok := cmpAny(firstValue, secondValue)
-
 	if !ok {
-		return Static(fmt.Errorf("cannot compare different types: %T and %T", firstValue, secondValue))
+		return propagateErr(nil, "cannot compare different types: %T and %T", firstValue, secondValue)
 	}
 
 	if e.equal {

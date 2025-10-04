@@ -113,9 +113,8 @@ func Test_Expression(t *testing.T) {
 
 * Decoder
 * Better slice definition and referencing
+* Extensive test coverage
 * More operations:
-  * Between
   * Contains
-  * Not
   * Zero ( zero-value )
   * Etc...

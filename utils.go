@@ -2,8 +2,17 @@ package gon
 
 import (
 	"cmp"
+	"fmt"
 	"time"
 )
+
+func propagateErr(value any, mask string, args ...any) Value {
+	if err, ok := value.(error); ok {
+		return Static(err)
+	}
+
+	return Static(fmt.Errorf(mask, args...))
+}
 
 func cmpAny(firstValue, secondValue any) (int, bool) {
 	switch c1 := firstValue.(type) {
