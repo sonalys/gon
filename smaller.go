@@ -1,6 +1,8 @@
 package gon
 
-import "errors"
+import (
+	"errors"
+)
 
 type smaller struct {
 	first  Expression
@@ -8,22 +10,22 @@ type smaller struct {
 	equal  bool
 }
 
-func (e smaller) Name() (string, []KeyedExpression) {
+func (e smaller) Banner() (string, []KeyExpression) {
 	if e.equal {
-		return "lte", []KeyedExpression{
-			{Key: "first", Value: e.first},
-			{Key: "second", Value: e.second},
+		return "lte", []KeyExpression{
+			KeyExpression{"first", e.first},
+			KeyExpression{"second", e.second},
 		}
 	}
 
-	return "lt", []KeyedExpression{
-		{Key: "first", Value: e.first},
-		{Key: "second", Value: e.second},
+	return "lt", []KeyExpression{
+		KeyExpression{"first", e.first},
+		KeyExpression{"second", e.second},
 	}
 }
 
-func (e smaller) Type() ExpressionType {
-	return ExpressionTypeOperation
+func (e smaller) Type() NodeType {
+	return NodeTypeExpression
 }
 
 func Smaller(first, second Expression) smaller {

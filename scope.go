@@ -20,12 +20,12 @@ type (
 	}
 )
 
-func (s *scope) Name() (string, []KeyedExpression) {
+func (s *scope) Banner() (string, []KeyExpression) {
 	return "scope", nil
 }
 
-func (s *scope) Type() ExpressionType {
-	return ExpressionTypeInvalid
+func (s *scope) Type() NodeType {
+	return NodeTypeInvalid
 }
 
 func NewScope() *scope {

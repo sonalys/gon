@@ -1,27 +1,29 @@
 package gon
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type ifExpr struct {
 	condition Expression
 	expr      []Expression
 }
 
-func (e ifExpr) Name() (string, []KeyedExpression) {
-	kv := []KeyedExpression{
-		{Key: "condition", Value: e.condition},
-		{Key: "then", Value: e.expr[0]},
+func (e ifExpr) Banner() (string, []KeyExpression) {
+	kv := []KeyExpression{
+		KeyExpression{"condition", e.condition},
+		KeyExpression{"then", e.expr[0]},
 	}
 	if len(e.expr) > 1 {
-		kv = append(kv, KeyedExpression{
-			Key: "else", Value: e.expr[1],
-		})
+		kv = append(kv,
+			KeyExpression{"else", e.expr[1]},
+		)
 	}
 	return "if", kv
 }
 
-func (e ifExpr) Type() ExpressionType {
-	return ExpressionTypeOperation
+func (e ifExpr) Type() NodeType {
+	return NodeTypeExpression
 }
 
 func If(condition Expression, expr ...Expression) Expression {

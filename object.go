@@ -13,12 +13,12 @@ type (
 	}
 )
 
-func (e object) Name() (string, []KeyedExpression) {
+func (e object) Banner() (string, []KeyExpression) {
 	return "object", nil
 }
 
-func (e object) Type() ExpressionType {
-	return ExpressionTypeInvalid
+func (e object) Type() NodeType {
+	return NodeTypeInvalid
 }
 
 func Object(target any) Expression {

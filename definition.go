@@ -32,17 +32,15 @@ type (
 	}
 )
 
-func (d definition) Name() (string, []KeyedExpression) {
-	return "definition", []KeyedExpression{
-		{Key: "", Value: Static(d.key)},
-	}
+func (d definition) Banner() (string, []KeyExpression) {
+	return d.key, nil
 }
 
-func (d definition) Type() ExpressionType {
-	return ExpressionTypeReference
+func (d definition) Type() NodeType {
+	return NodeTypeReference
 }
 
-func Definition(key string) definition {
+func Reference(key string) definition {
 	return definition{
 		key: key,
 	}

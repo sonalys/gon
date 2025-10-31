@@ -4,14 +4,14 @@ type not struct {
 	expression Expression
 }
 
-func (e not) Name() (string, []KeyedExpression) {
-	return "not", []KeyedExpression{
-		{Key: "expression", Value: e.expression},
+func (e not) Banner() (string, []KeyExpression) {
+	return "not", []KeyExpression{
+		KeyExpression{"expression", e.expression},
 	}
 }
 
-func (e not) Type() ExpressionType {
-	return ExpressionTypeOperation
+func (e not) Type() NodeType {
+	return NodeTypeExpression
 }
 
 func Not(expression Expression) not {

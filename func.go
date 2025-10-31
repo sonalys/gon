@@ -16,19 +16,23 @@ type (
 	}
 )
 
-func (c call) Name() (string, []KeyedExpression) {
-	kv := make([]KeyedExpression, 0, len(c.args)+1)
-	kv = append(kv, KeyedExpression{Key: "", Value: Static(c.callable)})
+func (c call) Banner() (string, []KeyExpression) {
+	kv := make([]KeyExpression, 0, len(c.args)+1)
+	kv = append(kv,
+		KeyExpression{"", Static(c.callable)},
+	)
 
 	for i := range c.args {
-		kv = append(kv, KeyedExpression{Key: "", Value: c.args[i]})
+		kv = append(kv,
+			KeyExpression{"", c.args[i]},
+		)
 	}
 
 	return "call", kv
 }
 
-func (c call) Type() ExpressionType {
-	return ExpressionTypeOperation
+func (c call) Type() NodeType {
+	return NodeTypeExpression
 }
 
 func Call(callable string, args ...Expression) Expression {

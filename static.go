@@ -12,23 +12,23 @@ type (
 	}
 )
 
-func (s static) Name() (string, []KeyedExpression) {
+func (s static) Banner() (string, []KeyExpression) {
 	switch v := s.value.(type) {
 	case time.Time:
-		return "time", []KeyedExpression{
-			{Key: "", Value: Static(v.Format(time.RFC3339))},
+		return "time", []KeyExpression{
+			{"", Static(v.Format(time.RFC3339))},
 		}
 	default:
 		return "static", nil
 	}
 }
 
-func (s static) Type() ExpressionType {
+func (s static) Type() NodeType {
 	switch s.value.(type) {
 	case time.Time:
-		return ExpressionTypeOperation
+		return NodeTypeExpression
 	default:
-		return ExpressionTypeValue
+		return NodeTypeValue
 	}
 }
 

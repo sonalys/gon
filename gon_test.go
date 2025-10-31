@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/encoding/goncoder"
 	"github.com/stretchr/testify/require"
 )
 
@@ -52,15 +53,15 @@ func Test_Expression(t *testing.T) {
 	rule := gon.If(
 		gon.Equal(
 			// Scope variable referencing.
-			gon.Definition("myName"),
-			gon.Definition("friend.name"),
+			gon.Reference("myName"),
+			gon.Reference("friend.name"),
 		),
 		// Main branch if condition fulfilled.
 		gon.Call("reply",
-			gon.Definition("friend.name"),
+			gon.Reference("friend.name"),
 			gon.If(
 				gon.Smaller(
-					gon.Definition("friend.birthday"),
+					gon.Reference("friend.birthday"),
 					gon.Static(time.Now().AddDate(-18, 0, 0)),
 				),
 				gon.Static("old"),
@@ -72,7 +73,7 @@ func Test_Expression(t *testing.T) {
 	resp := rule.Eval(scope)
 	require.Equal(t, "surprise!", resp.Value())
 
-	err = gon.Encode(t.Output(), rule)
+	err = goncoder.Encode(t.Output(), rule)
 	require.NoError(t, err)
 
 	t.Fail()
@@ -87,8 +88,8 @@ func Benchmark_Equal(b *testing.B) {
 		})
 
 	isEqual := gon.Equal(
-		gon.Definition("var1"),
-		gon.Definition("var2"),
+		gon.Reference("var1"),
+		gon.Reference("var2"),
 	)
 
 	for b.Loop() {

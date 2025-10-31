@@ -8,22 +8,22 @@ type (
 	}
 )
 
-func (e greater) Name() (string, []KeyedExpression) {
+func (e greater) Banner() (string, []KeyExpression) {
 	if e.equal {
-		return "gte", []KeyedExpression{
-			{Key: "first", Value: e.first},
-			{Key: "second", Value: e.second},
+		return "gte", []KeyExpression{
+			KeyExpression{"first", e.first},
+			KeyExpression{"second", e.second},
 		}
 	}
 
-	return "gt", []KeyedExpression{
-		{Key: "first", Value: e.first},
-		{Key: "second", Value: e.second},
+	return "gt", []KeyExpression{
+		KeyExpression{"first", e.first},
+		KeyExpression{"second", e.second},
 	}
 }
 
-func (e greater) Type() ExpressionType {
-	return ExpressionTypeOperation
+func (e greater) Type() NodeType {
+	return NodeTypeExpression
 }
 
 func Greater(first, second Expression) greater {

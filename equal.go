@@ -5,15 +5,15 @@ type equal struct {
 	second Expression
 }
 
-func (e equal) Name() (string, []KeyedExpression) {
-	return "equal", []KeyedExpression{
-		{Key: "first", Value: e.first},
-		{Key: "second", Value: e.second},
+func (e equal) Banner() (string, []KeyExpression) {
+	return "equal", []KeyExpression{
+		KeyExpression{"first", e.first},
+		KeyExpression{"second", e.second},
 	}
 }
 
-func (e equal) Type() ExpressionType {
-	return ExpressionTypeOperation
+func (e equal) Type() NodeType {
+	return NodeTypeExpression
 }
 
 func Equal(first, second Expression) equal {
