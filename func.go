@@ -1,6 +1,7 @@
 package gon
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -12,7 +13,7 @@ type (
 
 	Callable interface {
 		Expression
-		Call(...Value) Value
+		Call(ctx context.Context, values ...Value) Value
 	}
 )
 
@@ -59,5 +60,5 @@ func (c call) Eval(scope Scope) Value {
 		return Static(fmt.Errorf("definition is not callable: %s", c.callable))
 	}
 
-	return callable.Call(values...)
+	return callable.Call(scope, values...)
 }

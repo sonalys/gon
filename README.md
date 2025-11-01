@@ -54,7 +54,7 @@ func Test_Expression(t *testing.T) {
 				Birthday: birthday,
 			}),
 			// Support for callable function definitions.
-			"reply": gon.Static(func(name string, msg any) string {
+			"reply": gon.Function(func(ctx context.Context, name string, msg any) string {
 				switch msg := msg.(type) {
 				case error:
 					return fmt.Sprintf("unexpected error: %s", msg.Error())
@@ -64,7 +64,7 @@ func Test_Expression(t *testing.T) {
 
 				return "surprise!"
 			}),
-			"whoAreYou": gon.Static(func() string {
+			"whoAreYou": gon.Function(func(ctx context.Context) string {
 				return "I don't know you!"
 			}),
 		})

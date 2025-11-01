@@ -1,6 +1,7 @@
 package gon
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"time"
@@ -38,7 +39,17 @@ func Static(value any) static {
 	}
 }
 
-func Time(t string) static {
+// Function receives a function in the format f(ctx, arg1, arg2, ...) (res1, res2, ...).
+// Example:
+//
+//	gon.Function(func(ctx context.Context, name string) string)
+func Function(f any) Expression {
+	return static{
+		value: f,
+	}
+}
+
+func Time(t string) Expression {
 	parsed, err := time.Parse(time.RFC3339, t)
 	if err != nil {
 		return Static(err)
@@ -61,31 +72,47 @@ func (s static) Eval(scope Scope) Value {
 	return s
 }
 
-func (s static) Call(args ...Value) Value {
-	valueOf := reflect.ValueOf(s.value)
-	typeOf := valueOf.Type()
+func (s static) Call(ctx context.Context, args ...Value) Value {
+	valueOfFunc := reflect.ValueOf(s.value)
+	typeOfFunc := valueOfFunc.Type()
 
-	if valueOf.Kind() != reflect.Func {
-		return Static(fmt.Errorf("definition is not callable: %T", valueOf.Interface()))
+	if valueOfFunc.Kind() != reflect.Func {
+		return Static(fmt.Errorf("definition is not callable: %T", valueOfFunc.Interface()))
 	}
 
-	if expArgs, gotArgs := typeOf.NumIn(), len(args); gotArgs != expArgs {
+	if expArgs, gotArgs := typeOfFunc.NumIn(), len(args)+1; gotArgs != expArgs {
 		return Static(fmt.Errorf("expected %d args, got %d", expArgs, gotArgs))
 	}
 
-	argsValue := make([]reflect.Value, 0, len(args))
-	for i := range args {
-		argsValue = append(argsValue, reflect.ValueOf(args[i].Value()))
+	valueOfContext := reflect.ValueOf(ctx)
+	if !valueOfContext.Type().AssignableTo(typeOfFunc.In(0)) {
+		return Static(fmt.Errorf("definition first argument must be assignable to context"))
+
 	}
 
-	resp := valueOf.Call(argsValue)
+	argsValue := make([]reflect.Value, 0, len(args)+1)
+	argsValue = append(argsValue, valueOfContext)
 
-	expResp := typeOf.NumOut()
+	for i := range args {
+		valueOfArg := reflect.ValueOf(args[i].Value())
+		typeOfArg := valueOfArg.Type()
+		expectedTypeOfArg := typeOfFunc.In(i + 1)
+
+		if !typeOfArg.AssignableTo(expectedTypeOfArg) {
+			return Static(fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", i+2, expectedTypeOfArg.String(), typeOfArg.String()))
+		}
+
+		argsValue = append(argsValue, valueOfArg)
+	}
+
+	resp := valueOfFunc.Call(argsValue)
+
+	expResp := typeOfFunc.NumOut()
 	if expResp == 0 {
 		return Static(nil)
 	}
 
-	if typeOf.NumOut() == 1 {
+	if typeOfFunc.NumOut() == 1 {
 		return Static(resp[0].Interface())
 	}
 
