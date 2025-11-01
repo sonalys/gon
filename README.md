@@ -2,6 +2,10 @@
 
 Gon is your dynamic and flexible rule-engine!
 
+### Experimental
+
+Gon is still experimental and under development, it's not yet stable for production.
+
 ## Goals
 
 * Provide dynamic rule/action script evaluation

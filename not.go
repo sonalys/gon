@@ -1,12 +1,14 @@
 package gon
 
+import "fmt"
+
 type not struct {
 	expression Expression
 }
 
 func (e not) Banner() (string, []KeyExpression) {
 	return "not", []KeyExpression{
-		KeyExpression{"expression", e.expression},
+		{"expression", e.expression},
 	}
 }
 
@@ -14,7 +16,11 @@ func (e not) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func Not(expression Expression) not {
+func Not(expression Expression) Expression {
+	if expression == nil {
+		return Static(fmt.Errorf("not expression cannot be unset"))
+	}
+
 	return not{
 		expression: expression,
 	}

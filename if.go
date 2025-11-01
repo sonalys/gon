@@ -2,6 +2,8 @@ package gon
 
 import (
 	"fmt"
+
+	"github.com/sonalys/gon/internal/sliceutils"
 )
 
 type ifExpr struct {
@@ -11,8 +13,8 @@ type ifExpr struct {
 
 func (e ifExpr) Banner() (string, []KeyExpression) {
 	kv := []KeyExpression{
-		KeyExpression{"condition", e.condition},
-		KeyExpression{"then", e.expr[0]},
+		{"condition", e.condition},
+		{"then", e.expr[0]},
 	}
 	if len(e.expr) > 1 {
 		kv = append(kv,
@@ -27,8 +29,14 @@ func (e ifExpr) Type() NodeType {
 }
 
 func If(condition Expression, expr ...Expression) Expression {
+	if condition == nil {
+		return Static(fmt.Errorf("if condition cannot be unset"))
+	}
+
+	expr = sliceutils.Filter(expr, func(e Expression) bool { return e != nil })
+
 	if len(expr) < 1 {
-		return Static(fmt.Errorf("no branches specified for if condition"))
+		return Static(fmt.Errorf("no set branches specified for if condition"))
 	}
 
 	if len(expr) > 2 {

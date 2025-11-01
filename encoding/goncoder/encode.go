@@ -12,6 +12,10 @@ import (
 	"github.com/sonalys/gon/internal/sliceutils"
 )
 
+type (
+	Codex map[string]func(args []gon.KeyExpression) gon.Expression
+)
+
 func Encode(w io.Writer, root gon.Expression) error {
 	astNode := ast.Parse(root)
 	return encodeBody(w, astNode, 0)
@@ -64,14 +68,41 @@ func encodeBody(w io.Writer, root ast.Node, indentation int) error {
 	return nil
 }
 
-var DefaultFactory = map[string]func(args []gon.KeyExpression) gon.Expression{
+func keyExpressionSplitter(arg gon.KeyExpression) (string, gon.Expression) {
+	return arg.Key, arg.Expression
+}
+
+var DefaultExpressionCodex = Codex{
 	"if": func(args []gon.KeyExpression) gon.Expression {
-		return gon.If(args[0].Expression, sliceutils.Map(args[1:], func(from gon.KeyExpression) gon.Expression { return from.Expression })...)
+		argMap := sliceutils.ToMap(args, keyExpressionSplitter)
+		return gon.If(argMap["condition"], argMap["then"], argMap["else"])
 	},
 	"equal": func(args []gon.KeyExpression) gon.Expression {
-		return gon.Equal(args[0].Expression, args[1].Expression)
+		argMap := sliceutils.ToMap(args, keyExpressionSplitter)
+		return gon.Equal(argMap["first"], argMap["second"])
 	},
-	"definition": func(args []gon.KeyExpression) gon.Expression {
-		return gon.Reference(args[0].Key)
+	"lt": func(args []gon.KeyExpression) gon.Expression {
+		argMap := sliceutils.ToMap(args, keyExpressionSplitter)
+		return gon.Smaller(argMap["first"], argMap["second"])
 	},
+	"lte": func(args []gon.KeyExpression) gon.Expression {
+		argMap := sliceutils.ToMap(args, keyExpressionSplitter)
+		return gon.SmallerOrEqual(argMap["first"], argMap["second"])
+	},
+	"gt": func(args []gon.KeyExpression) gon.Expression {
+		argMap := sliceutils.ToMap(args, keyExpressionSplitter)
+		return gon.Greater(argMap["first"], argMap["second"])
+	},
+	"gte": func(args []gon.KeyExpression) gon.Expression {
+		argMap := sliceutils.ToMap(args, keyExpressionSplitter)
+		return gon.GreaterOrEqual(argMap["first"], argMap["second"])
+	},
+	"not": func(args []gon.KeyExpression) gon.Expression {
+		argMap := sliceutils.ToMap(args, keyExpressionSplitter)
+		return gon.Not(argMap["expression"])
+	},
+}
+
+func Decode(r io.Reader) (gon.Expression, error) {
+	return nil, nil
 }

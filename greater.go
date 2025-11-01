@@ -1,5 +1,7 @@
 package gon
 
+import "fmt"
+
 type (
 	greater struct {
 		first  Expression
@@ -11,14 +13,14 @@ type (
 func (e greater) Banner() (string, []KeyExpression) {
 	if e.equal {
 		return "gte", []KeyExpression{
-			KeyExpression{"first", e.first},
-			KeyExpression{"second", e.second},
+			{"first", e.first},
+			{"second", e.second},
 		}
 	}
 
 	return "gt", []KeyExpression{
-		KeyExpression{"first", e.first},
-		KeyExpression{"second", e.second},
+		{"first", e.first},
+		{"second", e.second},
 	}
 }
 
@@ -26,14 +28,21 @@ func (e greater) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func Greater(first, second Expression) greater {
+func Greater(first, second Expression) Expression {
+	if first == nil || second == nil {
+		return Static(fmt.Errorf("greater expression cannot compare unset expressions"))
+	}
+
 	return greater{
 		first:  first,
 		second: second,
 	}
 }
 
-func GreaterOrEqual(first, second Expression) greater {
+func GreaterOrEqual(first, second Expression) Expression {
+	if first == nil || second == nil {
+		return Static(fmt.Errorf("greater or equal expression cannot compare unset expressions"))
+	}
 	return greater{
 		first:  first,
 		second: second,

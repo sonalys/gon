@@ -2,6 +2,7 @@ package gon
 
 import (
 	"errors"
+	"fmt"
 )
 
 type smaller struct {
@@ -13,14 +14,14 @@ type smaller struct {
 func (e smaller) Banner() (string, []KeyExpression) {
 	if e.equal {
 		return "lte", []KeyExpression{
-			KeyExpression{"first", e.first},
-			KeyExpression{"second", e.second},
+			{"first", e.first},
+			{"second", e.second},
 		}
 	}
 
 	return "lt", []KeyExpression{
-		KeyExpression{"first", e.first},
-		KeyExpression{"second", e.second},
+		{"first", e.first},
+		{"second", e.second},
 	}
 }
 
@@ -28,14 +29,22 @@ func (e smaller) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func Smaller(first, second Expression) smaller {
+func Smaller(first, second Expression) Expression {
+	if first == nil || second == nil {
+		return Static(fmt.Errorf("smaller expression cannot compare unset expressions"))
+	}
+
 	return smaller{
 		first:  first,
 		second: second,
 	}
 }
 
-func SmallerOrEqual(first, second Expression) smaller {
+func SmallerOrEqual(first, second Expression) Expression {
+	if first == nil || second == nil {
+		return Static(fmt.Errorf("smaller or equal expression cannot compare unset expressions"))
+	}
+
 	return smaller{
 		first:  first,
 		second: second,
