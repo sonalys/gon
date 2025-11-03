@@ -85,10 +85,10 @@ func (s *definitionResolver) Definition(key string) (Expression, bool) {
 	return propagateErr(nil, "definition doesn't have children"), false
 }
 
-var definitionNameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]*$")
+var NameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]{1,50}$")
 
 func (s *definitionResolver) Define(key string, expression Expression) error {
-	if !definitionNameRegex.MatchString(key) {
+	if !NameRegex.MatchString(key) {
 		return fmt.Errorf("invalid definition key: %s", key)
 	}
 
