@@ -1,6 +1,7 @@
 package goncoder
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -116,7 +117,7 @@ var DefaultExpressionCodex = Codex{
 }
 
 func Decode(buffer []byte) (gon.Expression, error) {
-	parser := newParser(string(buffer))
+	parser := newParser(buffer)
 
 	rootNode, err := parser.parse()
 	if err != nil {
@@ -129,12 +130,12 @@ func Decode(buffer []byte) (gon.Expression, error) {
 func translateNode(rootNode *Node) (gon.Expression, error) {
 	switch rootNode.Type {
 	case NodeTypeReference:
-		return gon.Reference(rootNode.Scalar), nil
+		return gon.Reference(string(rootNode.Scalar)), nil
 	case NodeTypeLiteral:
 		return gon.Static(rootNode.Value), nil
 	}
 
-	constructor, ok := DefaultExpressionCodex[rootNode.Scalar]
+	constructor, ok := DefaultExpressionCodex[string(rootNode.Scalar)]
 	if !ok {
 		return nil, fmt.Errorf("not found")
 	}
@@ -148,7 +149,7 @@ func translateNode(rootNode *Node) (gon.Expression, error) {
 			return nil, err
 		}
 		nodeChildren = append(nodeChildren, gon.KeyExpression{
-			Key:        child.Key,
+			Key:        string(child.Key),
 			Expression: nodeChild,
 		})
 	}
@@ -167,29 +168,18 @@ const (
 
 type Node struct {
 	Children []*Node
-	Key      string
-	Scalar   string
+	Key      []byte
+	Scalar   []byte
 	Value    any
 	Type     NodeType
 }
 
 type parser struct {
-	tokens []string
+	tokens [][]byte
 	index  int
 }
 
-func newParser(input string) *parser {
-	// Strip comments
-	lines := []string{}
-	for l := range strings.SplitSeq(input, "\n") {
-		l = strings.TrimSpace(l)
-		if l == "" || strings.HasPrefix(l, "//") {
-			continue
-		}
-		lines = append(lines, l)
-	}
-	input = strings.Join(lines, " ")
-
+func newParser(input []byte) *parser {
 	tokens := tokenize(input)
 	return &parser{tokens: tokens}
 }
@@ -204,22 +194,22 @@ func (p *parser) parse() (*Node, error) {
 
 func (p *parser) parseExpr() (*Node, error) {
 	// Named field
-	if p.peekNext() == ":" {
+	if p.isNext([]byte(":")) {
 		return nil, fmt.Errorf("invalid syntax")
 	}
 
 	// Function / object-style node
-	if p.peekNext() == "(" {
+	if p.isNext([]byte("(")) {
 		name := p.consume()
-		p.consumeExpected("(")
+		p.consumeExpected([]byte("("))
 
 		obj := &Node{
 			Scalar:   name,
 			Children: []*Node{},
 		}
 
-		for !p.done() && p.peek() != ")" {
-			if p.peekNext() == ":" {
+		for !p.done() && !bytes.Equal(p.peek(), []byte(")")) {
+			if p.isNext([]byte(":")) {
 				key := p.consume()
 				p.consume() // skip ':'
 				val, err := p.parseExpr()
@@ -228,27 +218,28 @@ func (p *parser) parseExpr() (*Node, error) {
 				}
 				val.Key = key
 				obj.Children = append(obj.Children, val)
-			} else {
-				// Unnamed child (e.g., call("reply"))
-				val, err := p.parseExpr()
-				if err != nil {
-					return nil, err
-				}
-				obj.Children = append(obj.Children, val)
+				continue
 			}
+
+			// Unnamed child (e.g., call("reply"))
+			val, err := p.parseExpr()
+			if err != nil {
+				return nil, err
+			}
+			obj.Children = append(obj.Children, val)
 		}
 
-		p.consumeExpected(")")
+		p.consumeExpected([]byte(")"))
 
 		return obj, nil
 	}
 
 	switch token := p.consume(); {
-	case strings.HasPrefix(token, "\"") && strings.HasSuffix(token, "\""):
-		val := strings.Trim(token, "\"")
-		return &Node{Value: val, Type: NodeTypeLiteral}, nil
-	case isInteger(token):
-		integer, err := strconv.ParseInt(token, 10, 64)
+	case bytes.HasPrefix(token, []byte("\"")) && bytes.HasSuffix(token, []byte("\"")):
+		val := bytes.Trim(token, "\"")
+		return &Node{Value: string(val), Type: NodeTypeLiteral}, nil
+	case isInteger(string(token)):
+		integer, err := strconv.ParseInt(string(token), 10, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -257,8 +248,8 @@ func (p *parser) parseExpr() (*Node, error) {
 			Type:  NodeTypeLiteral,
 			Value: integer,
 		}, nil
-	case isFloat(token):
-		float, err := strconv.ParseFloat(token, 64)
+	case isFloat(string(token)):
+		float, err := strconv.ParseFloat(string(token), 64)
 		if err != nil {
 			return nil, err
 		}
@@ -325,71 +316,97 @@ func isFloat(s string) bool {
 	return digitSeen && dotSeen
 }
 
-func tokenize(input string) []string {
-	var tokens []string
-	var current strings.Builder
-	inString := false
+func tokenize(input []byte) [][]byte {
+	var tokens [][]byte
 
-	for _, r := range input {
+	var startPos int
+
+	var inString bool
+	var inComment bool
+
+	for i, r := range input {
+		resetCursor := func() {
+			startPos = i + 1
+		}
+
+		getCurrent := func(inclusive bool) []byte {
+			defer resetCursor()
+			if inclusive {
+				return input[startPos : i+1]
+			}
+			return input[startPos:i]
+		}
+
+		curLength := i - startPos
+
 		switch {
+		case r == '\n':
+			if !inComment {
+				if curLength > 0 {
+					tokens = append(tokens, getCurrent(true))
+				}
+			}
+			inComment = false
+			resetCursor()
+		case inComment:
+		case bytes.Equal(input[i:i+2], []byte("//")):
+			inComment = true
 		case r == '"' && !inString:
 			inString = true
-			current.WriteRune(r)
 		case r == '"' && inString:
-			current.WriteRune(r)
-			tokens = append(tokens, strings.TrimSpace(current.String()))
-			current.Reset()
+			tokens = append(tokens, bytes.TrimSpace(getCurrent(true)))
 			inString = false
 		case inString:
-			current.WriteRune(r)
-		case unicode.IsSpace(r):
-			if current.Len() > 0 {
-				tokens = append(tokens, current.String())
-				current.Reset()
+		case unicode.IsSpace(rune(r)):
+			if !inComment && curLength > 0 {
+				tokens = append(tokens, getCurrent(false))
 			}
-		case strings.ContainsRune("():", r):
-			if current.Len() > 0 {
-				tokens = append(tokens, current.String())
-				current.Reset()
+			resetCursor()
+		case bytes.Contains([]byte("():"), input[i:i+1]):
+			if curLength > 0 {
+				tokens = append(tokens, getCurrent(false))
 			}
-			tokens = append(tokens, string(r))
-		// Ignore commas
+			tokens = append(tokens, input[i:i+1])
+			resetCursor()
 		case r == ',':
+			if curLength > 0 {
+				tokens = append(tokens, getCurrent(false))
+			}
+			resetCursor()
 		default:
-			current.WriteRune(r)
 		}
 	}
-	if current.Len() > 0 {
-		tokens = append(tokens, current.String())
+	if startPos < len(input) {
+		tokens = append(tokens, input[startPos:])
 	}
 	return tokens
 }
 
-func (p *parser) peek() string {
+func (p *parser) peek() []byte {
 	if p.index >= len(p.tokens) {
-		return ""
+		return nil
 	}
 	return p.tokens[p.index]
 }
 
-func (p *parser) peekNext() string {
+func (p *parser) isNext(next []byte) bool {
 	if p.index+1 >= len(p.tokens) {
-		return ""
+		return false
 	}
-	return p.tokens[p.index+1]
+	return bytes.Equal(p.tokens[p.index+1], next)
 }
 
-func (p *parser) consume() string {
+func (p *parser) consume() []byte {
 	if p.index >= len(p.tokens) {
-		return ""
+		return nil
 	}
 	t := p.tokens[p.index]
 	p.index++
 	return t
 }
 
-func (p *parser) consumeExpected(t string) {
-	if p.peek() == t {
+func (p *parser) consumeExpected(t []byte) {
+	if bytes.Equal(p.peek(), t) {
 		p.consume()
 	}
 }
