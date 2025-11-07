@@ -6,26 +6,32 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_Decode(t *testing.T) {
+func Test_DecodePretty(t *testing.T) {
 	input := `if(
-		  // comment block
 		  condition: equal(
-		      first: myName,
-		      second: friend.name,
+		      first: myName
+		      second: friend.name
 		  ),
 		  then: call(
-		      name: "reply",
-		      target: 10.23,
-			  else: 102,
+		      name: "reply"
+		      target: 10.23
+			  else: 102
 		  ),
 		  else: call("whoAreYou")
 		)`
 
-	got, err := Decode([]byte(input))
+	got, err := Decode([]byte(input), DefaultExpressionCodex)
 	require.NoError(t, err)
 
 	err = Encode(t.Output(), got)
 	require.NoError(t, err)
+}
 
-	t.Fail()
+func Test_DecodeInlined(t *testing.T) {
+	input := `if(condition: equal(first: myName, second: friend.name),then: call(name:"reply",target: 10.23,else: 102),else: call("whoAreYou"))`
+	got, err := Decode([]byte(input), DefaultExpressionCodex)
+	require.NoError(t, err)
+
+	err = Encode(t.Output(), got)
+	require.NoError(t, err)
 }

@@ -18,6 +18,14 @@ func propagateErr(value Value, mask string, args ...any) Value {
 	return Static(fmt.Errorf(mask, args...))
 }
 
+func tryGet[T any](slice []T, index int) T {
+	if len(slice) <= index {
+		var zero T
+		return zero
+	}
+	return slice[index]
+}
+
 func cmpAny(firstValue, secondValue any) (int, bool) {
 	switch c1 := firstValue.(type) {
 	case int:
