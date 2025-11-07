@@ -7,8 +7,12 @@ type equal struct {
 	second Expression
 }
 
-func (e equal) Banner() (string, []KeyExpression) {
-	return "equal", []KeyExpression{
+func (e equal) Name() string {
+	return "equal"
+}
+
+func (e equal) Shape() []KeyExpression {
+	return []KeyExpression{
 		{"first", e.first},
 		{"second", e.second},
 	}

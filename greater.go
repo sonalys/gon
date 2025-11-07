@@ -10,21 +10,29 @@ type (
 	}
 )
 
-func (e greater) Banner() (string, []KeyExpression) {
-	if e.equal {
-		return "gte", []KeyExpression{
-			{"first", e.first},
-			{"second", e.second},
+func (g greater) Name() string {
+	if g.equal {
+		return "gte"
+	}
+
+	return "gt"
+}
+
+func (g greater) Shape() []KeyExpression {
+	if g.equal {
+		return []KeyExpression{
+			{"first", g.first},
+			{"second", g.second},
 		}
 	}
 
-	return "gt", []KeyExpression{
-		{"first", e.first},
-		{"second", e.second},
+	return []KeyExpression{
+		{"first", g.first},
+		{"second", g.second},
 	}
 }
 
-func (e greater) Type() NodeType {
+func (g greater) Type() NodeType {
 	return NodeTypeExpression
 }
 
@@ -50,16 +58,16 @@ func GreaterOrEqual(first, second Expression) Expression {
 	}
 }
 
-func (e greater) Eval(scope Scope) Value {
-	firstValue := e.first.Eval(scope).Value()
-	secondValue := e.second.Eval(scope).Value()
+func (g greater) Eval(scope Scope) Value {
+	firstValue := g.first.Eval(scope).Value()
+	secondValue := g.second.Eval(scope).Value()
 
 	comparison, ok := cmpAny(firstValue, secondValue)
 	if !ok {
 		return propagateErr(nil, "cannot compare different types: %T and %T", firstValue, secondValue)
 	}
 
-	if e.equal {
+	if g.equal {
 		return Static(comparison >= 0)
 	}
 

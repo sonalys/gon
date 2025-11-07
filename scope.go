@@ -7,7 +7,6 @@ import (
 type (
 	Scope interface {
 		context.Context
-		Expression
 		DefinitionResolver
 	}
 
@@ -19,10 +18,6 @@ type (
 		expression  Expression
 	}
 )
-
-func (s *scope) Banner() (string, []KeyExpression) {
-	return "scope", nil
-}
 
 func (s *scope) Type() NodeType {
 	return NodeTypeInvalid

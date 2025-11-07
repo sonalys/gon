@@ -11,15 +11,23 @@ type smaller struct {
 	equal  bool
 }
 
-func (e smaller) Banner() (string, []KeyExpression) {
+func (e smaller) Name() string {
 	if e.equal {
-		return "lte", []KeyExpression{
+		return "lte"
+	}
+
+	return "lt"
+}
+
+func (e smaller) Shape() []KeyExpression {
+	if e.equal {
+		return []KeyExpression{
 			{"first", e.first},
 			{"second", e.second},
 		}
 	}
 
-	return "lt", []KeyExpression{
+	return []KeyExpression{
 		{"first", e.first},
 		{"second", e.second},
 	}

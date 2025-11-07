@@ -10,7 +10,11 @@ type IfNode struct {
 	elseBranch Expression
 }
 
-func (node IfNode) Banner() (string, []KeyExpression) {
+func (node IfNode) Name() string {
+	return "if"
+}
+
+func (node IfNode) Shape() []KeyExpression {
 	kv := []KeyExpression{
 		{"condition", node.condition},
 		{"then", node.thenBranch},
@@ -20,7 +24,7 @@ func (node IfNode) Banner() (string, []KeyExpression) {
 			KeyExpression{"else", node.elseBranch},
 		)
 	}
-	return "if", kv
+	return kv
 }
 
 func (node IfNode) Type() NodeType {

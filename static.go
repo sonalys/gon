@@ -13,14 +13,23 @@ type (
 	}
 )
 
-func (s static) Banner() (string, []KeyExpression) {
+func (s static) Name() string {
+	switch s.value.(type) {
+	case time.Time:
+		return "time"
+	default:
+		return "static"
+	}
+}
+
+func (s static) Shape() []KeyExpression {
 	switch v := s.value.(type) {
 	case time.Time:
-		return "time", []KeyExpression{
+		return []KeyExpression{
 			{"", Static(v.Format(time.RFC3339))},
 		}
 	default:
-		return "static", nil
+		return nil
 	}
 }
 

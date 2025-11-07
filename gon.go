@@ -1,15 +1,30 @@
 package gon
 
 type (
-	NodeType uint8
+	Valued interface {
+		Value() any
+	}
+
+	Value interface {
+		Expression
+		Valued
+	}
 
 	Typed interface {
 		Type() NodeType
-		Banner() (string, []KeyExpression)
+	}
+
+	Named interface {
+		Name() string
+	}
+
+	Shaped interface {
+		Shape() []KeyExpression
 	}
 
 	Expression interface {
-		Typed
+		Named
+		Shaped
 
 		Eval(scope Scope) Value
 	}
@@ -18,23 +33,4 @@ type (
 		Key        string
 		Expression Expression
 	}
-
-	Valuer interface {
-		Value() any
-	}
-
-	Value interface {
-		Expression
-		Valuer
-	}
-)
-
-const (
-	NodeTypeInvalid NodeType = iota
-	// NodeTypeExpression represents an expression() node type. Example: if()
-	NodeTypeExpression
-	// NodeTypeReference represents a variable reference. Example: friend.name.
-	NodeTypeReference
-	// NodeTypeValue represents a direct value. Example: "string", 5.
-	NodeTypeValue
 )

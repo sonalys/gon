@@ -21,7 +21,10 @@ type (
 )
 
 func Encode(w io.Writer, root gon.Expression) error {
-	astNode := ast.Parse(root)
+	astNode, err := ast.Parse(root)
+	if err != nil {
+		return fmt.Errorf("encoding root expression: %w", err)
+	}
 	return encodeBody(w, astNode, 0)
 }
 
@@ -146,7 +149,7 @@ var DefaultExpressionCodex = Codex{
 		return gon.Not(orderedArgs["expression"]), nil
 	},
 	"call": func(args []gon.KeyExpression) (gon.Expression, error) {
-		valuer := args[0].Expression.(gon.Valuer)
+		valuer := args[0].Expression.(gon.Valued)
 
 		expressionTransform := func(from gon.KeyExpression) gon.Expression {
 			return from.Expression

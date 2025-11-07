@@ -17,7 +17,11 @@ type (
 	}
 )
 
-func (c call) Banner() (string, []KeyExpression) {
+func (c call) Name() string {
+	return "call"
+}
+
+func (c call) Shape() []KeyExpression {
 	kv := make([]KeyExpression, 0, len(c.args)+1)
 	kv = append(kv,
 		KeyExpression{"", Static(c.callable)},
@@ -29,7 +33,7 @@ func (c call) Banner() (string, []KeyExpression) {
 		)
 	}
 
-	return "call", kv
+	return kv
 }
 
 func (c call) Type() NodeType {

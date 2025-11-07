@@ -32,8 +32,12 @@ type (
 	}
 )
 
-func (d definition) Banner() (string, []KeyExpression) {
-	return d.key, nil
+func (d definition) Name() string {
+	return d.key
+}
+
+func (d definition) Shape() []KeyExpression {
+	return nil
 }
 
 func (d definition) Type() NodeType {

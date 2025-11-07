@@ -13,11 +13,15 @@ type (
 	}
 )
 
-func (e object) Banner() (string, []KeyExpression) {
-	return "object", nil
+func (o object) Name() string {
+	return "object"
 }
 
-func (e object) Type() NodeType {
+func (o object) Shape() []KeyExpression {
+	return nil
+}
+
+func (o object) Type() NodeType {
 	return NodeTypeInvalid
 }
 

@@ -6,13 +6,17 @@ type not struct {
 	expression Expression
 }
 
-func (e not) Banner() (string, []KeyExpression) {
-	return "not", []KeyExpression{
-		{"expression", e.expression},
+func (n not) Name() string {
+	return "not"
+}
+
+func (n not) Shape() []KeyExpression {
+	return []KeyExpression{
+		{"expression", n.expression},
 	}
 }
 
-func (e not) Type() NodeType {
+func (n not) Type() NodeType {
 	return NodeTypeExpression
 }
 
@@ -26,8 +30,8 @@ func Not(expression Expression) Expression {
 	}
 }
 
-func (e not) Eval(scope Scope) Value {
-	value := e.expression.Eval(scope)
+func (n not) Eval(scope Scope) Value {
+	value := n.expression.Eval(scope)
 	resp, ok := value.Value().(bool)
 	if !ok {
 		return propagateErr(value, "cannot negate non-boolean expression")
