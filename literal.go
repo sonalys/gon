@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -13,37 +14,8 @@ type (
 	}
 )
 
-func (node literalNode) Name() string {
-	switch node.value.(type) {
-	case time.Time:
-		return "time"
-	default:
-		return "literal"
-	}
-}
-
-func (node literalNode) Shape() []KeyExpression {
-	switch v := node.value.(type) {
-	case time.Time:
-		return []KeyExpression{
-			{"", Literal(v.Format(time.RFC3339))},
-		}
-	default:
-		return nil
-	}
-}
-
-func (node literalNode) Type() NodeType {
-	switch node.value.(type) {
-	case time.Time:
-		return NodeTypeExpression
-	default:
-		return NodeTypeValue
-	}
-}
-
-func Literal(value any) literalNode {
-	return literalNode{
+func Literal(value any) Value {
+	return &literalNode{
 		value: value,
 	}
 }
@@ -53,7 +25,7 @@ func Literal(value any) literalNode {
 //
 //	gon.Function(func(ctx context.Context, name string) string)
 func Function(f any) Expression {
-	return literalNode{
+	return &literalNode{
 		value: f,
 	}
 }
@@ -64,12 +36,41 @@ func Time(t string) Expression {
 		return Literal(err)
 	}
 
-	return literalNode{
+	return &literalNode{
 		value: parsed,
 	}
 }
 
-func (node literalNode) Value() any {
+func (node *literalNode) Name() string {
+	switch node.value.(type) {
+	case time.Time:
+		return "time"
+	default:
+		return "literal"
+	}
+}
+
+func (node *literalNode) Shape() []KeyExpression {
+	switch v := node.value.(type) {
+	case time.Time:
+		return []KeyExpression{
+			{"", Literal(v.Format(time.RFC3339))},
+		}
+	default:
+		return nil
+	}
+}
+
+func (node *literalNode) Type() NodeType {
+	switch node.value.(type) {
+	case time.Time:
+		return NodeTypeExpression
+	default:
+		return NodeTypeValue
+	}
+}
+
+func (node *literalNode) Value() any {
 	if nested, ok := node.value.(Value); ok {
 		return nested.Value()
 	}
@@ -77,11 +78,11 @@ func (node literalNode) Value() any {
 	return node.value
 }
 
-func (node literalNode) Eval(scope Scope) Value {
+func (node *literalNode) Eval(scope Scope) Value {
 	return node
 }
 
-func (node literalNode) Call(ctx context.Context, args ...Value) Value {
+func (node *literalNode) Call(ctx context.Context, args ...Value) Value {
 	valueOfFunc := reflect.ValueOf(node.value)
 	typeOfFunc := valueOfFunc.Type()
 
@@ -144,7 +145,44 @@ func (node literalNode) Call(ctx context.Context, args ...Value) Value {
 	return Literal(respValue)
 }
 
+func (node *literalNode) Definition(key string) (Expression, bool) {
+	parts := strings.Split(key, ".")
+
+	valueOf := reflect.ValueOf(node.value)
+
+	switch valueOf.Kind() {
+	case reflect.Struct, reflect.Map, reflect.Pointer:
+	default:
+		return Literal(fmt.Errorf("literal of type %T cannot define children attributes", node.value)), false
+	}
+
+	curValue := valueOf
+	for i, partKey := range parts {
+		// Pointer resolver.
+		for ; curValue.Kind() == reflect.Pointer; curValue = curValue.Elem() {
+		}
+		switch curValue.Kind() {
+		case reflect.Struct:
+			typeOf := curValue.Type()
+			curValue = curValue.FieldByNameFunc(func(fieldName string) bool {
+				field, ok := typeOf.FieldByName(fieldName)
+				return ok && field.Tag.Get("gon") == partKey
+			})
+		case reflect.Map:
+			curValue = curValue.MapIndex(reflect.ValueOf(partKey))
+		}
+
+		if curValue.IsZero() {
+			return Literal(fmt.Errorf("definition not found: %s", strings.Join(parts[:i+1], "."))), false
+		}
+	}
+
+	value := curValue.Interface()
+	return Literal(value), true
+}
+
 var (
-	_ Value    = literalNode{}
-	_ Callable = literalNode{}
+	_ Value              = &literalNode{}
+	_ Callable           = &literalNode{}
+	_ DefinitionResolver = &literalNode{}
 )

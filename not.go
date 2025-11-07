@@ -6,6 +6,16 @@ type notNode struct {
 	expression Expression
 }
 
+func Not(expression Expression) Expression {
+	if expression == nil {
+		return Literal(fmt.Errorf("not expression cannot be unset"))
+	}
+
+	return notNode{
+		expression: expression,
+	}
+}
+
 func (node notNode) Name() string {
 	return "not"
 }
@@ -20,16 +30,6 @@ func (node notNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func Not(expression Expression) Expression {
-	if expression == nil {
-		return Literal(fmt.Errorf("not expression cannot be unset"))
-	}
-
-	return notNode{
-		expression: expression,
-	}
-}
-
 func (node notNode) Eval(scope Scope) Value {
 	value := node.expression.Eval(scope)
 	resp, ok := value.Value().(bool)
@@ -39,7 +39,3 @@ func (node notNode) Eval(scope Scope) Value {
 
 	return Literal(!resp)
 }
-
-var (
-	_ Expression = notNode{}
-)

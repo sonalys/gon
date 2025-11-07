@@ -10,6 +10,18 @@ type IfNode struct {
 	elseBranch Expression
 }
 
+func If(condition, thenBranch Expression, elseBranch ...Expression) Expression {
+	if condition == nil {
+		return Literal(fmt.Errorf("if condition cannot be unset"))
+	}
+
+	return IfNode{
+		condition:  condition,
+		thenBranch: thenBranch,
+		elseBranch: safeGet(elseBranch, 0),
+	}
+}
+
 func (node IfNode) Name() string {
 	return "if"
 }
@@ -29,18 +41,6 @@ func (node IfNode) Shape() []KeyExpression {
 
 func (node IfNode) Type() NodeType {
 	return NodeTypeExpression
-}
-
-func If(condition, thenBranch Expression, elseBranch ...Expression) Expression {
-	if condition == nil {
-		return Literal(fmt.Errorf("if condition cannot be unset"))
-	}
-
-	return IfNode{
-		condition:  condition,
-		thenBranch: thenBranch,
-		elseBranch: safeGet(elseBranch, 0),
-	}
 }
 
 func (node IfNode) Eval(scope Scope) Value {

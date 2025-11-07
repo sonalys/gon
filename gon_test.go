@@ -26,8 +26,8 @@ func Test_Expression(t *testing.T) {
 		WithDefinitions(map[string]gon.Expression{
 			// Support for static variables of any type.
 			"myName": gon.Literal("friendName"),
-			// Support for structs and maps.
-			"friend": gon.Object(&Friend{
+			// Support for structs and maps for children attributes.
+			"friend": gon.Literal(&Friend{
 				Name:     "friendName",
 				Birthday: birthday,
 			}),

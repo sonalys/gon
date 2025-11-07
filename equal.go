@@ -7,6 +7,17 @@ type equalNode struct {
 	second Expression
 }
 
+func Equal(first, second Expression) Expression {
+	if first == nil || second == nil {
+		return Literal(fmt.Errorf("equal expression cannot compare unset expressions"))
+	}
+
+	return equalNode{
+		first:  first,
+		second: second,
+	}
+}
+
 func (node equalNode) Name() string {
 	return "equal"
 }
@@ -22,24 +33,9 @@ func (node equalNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func Equal(first, second Expression) Expression {
-	if first == nil || second == nil {
-		return Literal(fmt.Errorf("equal expression cannot compare unset expressions"))
-	}
-
-	return equalNode{
-		first:  first,
-		second: second,
-	}
-}
-
 func (node equalNode) Eval(scope Scope) Value {
 	firstValue := node.first.Eval(scope)
 	secondValue := node.second.Eval(scope)
 
-	return Literal(firstValue == secondValue)
+	return Literal(firstValue.Value() == secondValue.Value())
 }
-
-var (
-	_ Expression = equalNode{}
-)

@@ -1,17 +1,12 @@
 package gon
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
 )
 
 type (
-	referenceNode struct {
-		definitionName string
-	}
-
 	Definitions map[string]Expression
 
 	DefinitionResolver interface {
@@ -25,48 +20,9 @@ type (
 	definitionResolver struct {
 		store map[string]Expression
 	}
-
-	assignment struct {
-		definition string
-		expression Expression
-	}
 )
 
-func (node referenceNode) Name() string {
-	return node.definitionName
-}
-
-func (node referenceNode) Shape() []KeyExpression {
-	return nil
-}
-
-func (node referenceNode) Type() NodeType {
-	return NodeTypeReference
-}
-
-func Reference(key string) referenceNode {
-	return referenceNode{
-		definitionName: key,
-	}
-}
-
-func (node referenceNode) Eval(scope Scope) Value {
-	expression, ok := scope.Definition(node.definitionName)
-	if !ok {
-		return Literal(fmt.Errorf("definition not found: %s", node.definitionName))
-	}
-
-	return expression.Eval(scope)
-}
-
-func (a assignment) Eval(scope Scope) Value {
-	definer, ok := scope.(Definer)
-	if !ok {
-		return Literal(errors.New("scope is read-only"))
-	}
-
-	return Literal(definer.Define(a.definition, a.expression))
-}
+var nameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]{1,50}$")
 
 func (r *definitionResolver) Definition(key string) (Expression, bool) {
 	parts := strings.Split(key, ".")
@@ -89,8 +45,6 @@ func (r *definitionResolver) Definition(key string) (Expression, bool) {
 	return propagateErr(nil, "definition doesn't have children"), false
 }
 
-var nameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]{1,50}$")
-
 func (r *definitionResolver) Define(key string, expression Expression) error {
 	if !nameRegex.MatchString(key) {
 		return fmt.Errorf("invalid definition key: %s", key)
@@ -102,4 +56,3 @@ func (r *definitionResolver) Define(key string, expression Expression) error {
 }
 
 var _ DefinitionResolver = &definitionResolver{}
-var _ Expression = &referenceNode{}

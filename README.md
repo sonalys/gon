@@ -45,9 +45,9 @@ func Test_Expression(t *testing.T) {
 		// Dynamic, decoupled scope for your rules.
 		WithDefinitions(map[string]gon.Expression{
 			// Support for static variables of any type.
-			"myName": gon.Static("friendName"),
-			// Support for structs and maps.
-			"friend": gon.Object(&Friend{
+			"myName": gon.Literal("friendName"),
+			// Support for structs and maps for children attributes.
+			"friend": gon.Literal(&Friend{
 				Name:     "friendName",
 				Birthday: birthday,
 			}),
@@ -71,24 +71,27 @@ func Test_Expression(t *testing.T) {
 	require.NoError(t, err)
 
 	ruleStr := `if(
-		condition: equal(myName, friend.name),
-		then: call("reply"
-			friend.name
-			if(lt(friend.birthday, time("2007-10-31T11:07:39+01:00")), "old", "young")
-		),
-		else: call("whoAreYou")
-	)`
+	condition: equal(myName, friend.name),
+	then: call("reply"
+		friend.name
+		if(lt(friend.birthday, time("2016-10-31T11:07:39+01:00")), "old", "young")
+	),
+	else: call("whoAreYou")
+)`
 
-	rule, err := goncoder.Decode([]byte(ruleStr), goncoder.DefaultExpressionCodex)
+	rule, err := encoding.Decode([]byte(ruleStr), encoding.DefaultExpressionCodex)
 	require.NoError(t, err)
 
 	resp := rule.Eval(scope)
 	require.Equal(t, "surprise!", resp.Value())
 
-	err = goncoder.Encode(t.Output(), rule)
+	err = encoding.Encode(t.Output(), rule)
 	require.NoError(t, err)
+
+	t.Fail()
 	// Prints:
-	// 	Hello friendName, you are young!
+	// 	Hello friendName, you are old!
+	// --- FAIL: Test_Expression (0.00s)
 	//     if(
 	//     	condition: equal(
 	//     		first: myName
@@ -99,7 +102,7 @@ func Test_Expression(t *testing.T) {
 	//     		if(
 	//     			condition: lt(
 	//     				first: friend.birthday
-	//     				second: time("2007-10-31T11:07:39+01:00")
+	//     				second: time("2016-10-31T11:07:39+01:00")
 	//     			)
 	//     			then: "old"
 	//     			else: "young"
@@ -107,8 +110,6 @@ func Test_Expression(t *testing.T) {
 	//     	)
 	//     	else: call("whoAreYou")
 	//     )
-
-	t.Fail()
 }
 ```
 

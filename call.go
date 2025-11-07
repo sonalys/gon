@@ -17,6 +17,13 @@ type (
 	}
 )
 
+func Call(callable string, args ...Expression) Expression {
+	return callNode{
+		funcName: callable,
+		args:     args,
+	}
+}
+
 func (node callNode) Name() string {
 	return "call"
 }
@@ -38,13 +45,6 @@ func (node callNode) Shape() []KeyExpression {
 
 func (node callNode) Type() NodeType {
 	return NodeTypeExpression
-}
-
-func Call(callable string, args ...Expression) Expression {
-	return callNode{
-		funcName: callable,
-		args:     args,
-	}
 }
 
 func (node callNode) Eval(scope Scope) Value {
