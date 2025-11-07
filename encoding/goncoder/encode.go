@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/sonalys/gon"
 	"github.com/sonalys/gon/ast"
@@ -86,8 +88,9 @@ func argSorter(from []gon.KeyExpression, keys ...string) (map[string]gon.Express
 gotArgLoop:
 	for fromIndex := range from {
 		for keyIndex := range keys {
-			if from[fromIndex].Key == keys[keyIndex] {
+			if from[fromIndex].Key == "" || from[fromIndex].Key == keys[keyIndex] {
 				expectedMap[keys[keyIndex]] = from[fromIndex].Expression
+				keys = slices.Delete(keys, keyIndex, keyIndex+1)
 				continue gotArgLoop
 			}
 		}
@@ -158,6 +161,21 @@ var DefaultExpressionCodex = Codex{
 		transformedArgs := sliceutils.Map(args[1:], expressionTransform)
 
 		return gon.Call(valuer.Value().(string), transformedArgs...), nil
+	},
+	"time": func(args []gon.KeyExpression) (gon.Expression, error) {
+		valuer := args[0].Expression.(gon.Valued)
+
+		rawTime, ok := valuer.Value().(string)
+		if !ok {
+			return nil, fmt.Errorf("time should be parsed only from string")
+		}
+
+		t, err := time.Parse(time.RFC3339, rawTime)
+		if err != nil {
+			return nil, fmt.Errorf("time is invalid: %w", err)
+		}
+
+		return gon.Static(t), nil
 	},
 }
 

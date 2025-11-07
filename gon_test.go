@@ -50,27 +50,18 @@ func Test_Expression(t *testing.T) {
 	// Should start with a-z and only contain alphanumeric characters.
 	require.NoError(t, err)
 
-	// If-else branch.
-	rule := gon.If(
-		gon.Equal(
-			// Scope variable referencing.
-			gon.Reference("myName"),
-			gon.Reference("friend.name"),
-		),
-		// Main branch if condition fulfilled.
-		gon.Call("reply",
-			gon.Reference("friend.name"),
-			gon.If(
-				gon.Smaller(
-					gon.Reference("friend.birthday"),
-					gon.Static(time.Now().AddDate(-18, 0, 0)),
-				),
-				gon.Static("old"),
-				gon.Static("young"),
-			),
-		),
-		gon.Call("whoAreYou"),
-	)
+	ruleStr := `if(
+	condition: equal(myName, friend.name),
+	then: call("reply"
+		friend.name
+		if(lt(friend.birthday, time("2007-10-31T11:07:39+01:00")), "old", "young")
+	),
+	else: call("whoAreYou")
+)`
+
+	rule, err := goncoder.Decode([]byte(ruleStr), goncoder.DefaultExpressionCodex)
+	require.NoError(t, err)
+
 	resp := rule.Eval(scope)
 	require.Equal(t, "surprise!", resp.Value())
 
