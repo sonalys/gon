@@ -89,26 +89,37 @@ func (node literalNode) Call(ctx context.Context, args ...Value) Value {
 		return Literal(fmt.Errorf("definition is not callable: %T", valueOfFunc.Interface()))
 	}
 
-	if expArgs, gotArgs := typeOfFunc.NumIn(), len(args)+1; gotArgs != expArgs {
+	expArgs := typeOfFunc.NumIn()
+	gotArgs := len(args)
+	var gotContext bool
+	if expArgs > 0 {
+		if reflect.TypeOf(ctx).AssignableTo(typeOfFunc.In(0)) {
+			gotArgs += 1
+			gotContext = true
+		}
+	}
+
+	if gotArgs != expArgs {
 		return Literal(fmt.Errorf("expected %d args, got %d", expArgs, gotArgs))
 	}
 
-	valueOfContext := reflect.ValueOf(ctx)
-	if !valueOfContext.Type().AssignableTo(typeOfFunc.In(0)) {
-		return Literal(fmt.Errorf("definition first argument must be assignable to context"))
-
+	argsValue := make([]reflect.Value, 0, expArgs)
+	if gotContext {
+		argsValue = append(argsValue, reflect.ValueOf(ctx))
 	}
-
-	argsValue := make([]reflect.Value, 0, len(args)+1)
-	argsValue = append(argsValue, valueOfContext)
 
 	for i := range args {
 		valueOfArg := reflect.ValueOf(args[i].Value())
 		typeOfArg := valueOfArg.Type()
-		expectedTypeOfArg := typeOfFunc.In(i + 1)
+
+		targetParamIndex := i
+		if gotContext {
+			targetParamIndex += 1
+		}
+		expectedTypeOfArg := typeOfFunc.In(targetParamIndex)
 
 		if !typeOfArg.AssignableTo(expectedTypeOfArg) {
-			return Literal(fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", i+2, expectedTypeOfArg.String(), typeOfArg.String()))
+			return Literal(fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", targetParamIndex, expectedTypeOfArg.String(), typeOfArg.String()))
 		}
 
 		argsValue = append(argsValue, valueOfArg)

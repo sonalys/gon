@@ -31,7 +31,7 @@ func Test_Expression(t *testing.T) {
 				Name:     "friendName",
 				Birthday: birthday,
 			}),
-			// Support for callable function definitions.
+			// Support for callable function definitions, with or without implicit context.
 			"reply": gon.Function(func(ctx context.Context, name string, msg any) string {
 				switch msg := msg.(type) {
 				case error:
@@ -42,7 +42,7 @@ func Test_Expression(t *testing.T) {
 
 				return "surprise!"
 			}),
-			"whoAreYou": gon.Function(func(ctx context.Context) string {
+			"whoAreYou": gon.Function(func() string {
 				return "I don't know you!"
 			}),
 		})
