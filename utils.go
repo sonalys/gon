@@ -18,7 +18,7 @@ func propagateErr(value Value, mask string, args ...any) Value {
 	return Literal(fmt.Errorf(mask, args...))
 }
 
-func tryGet[T any](slice []T, index int) T {
+func safeGet[T any](slice []T, index int) T {
 	if len(slice) <= index {
 		var zero T
 		return zero

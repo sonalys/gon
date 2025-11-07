@@ -1,4 +1,4 @@
-package goncoder
+package encoding
 
 func isInteger(s string) bool {
 	if s == "" {

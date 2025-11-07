@@ -47,37 +47,29 @@ func (node *objectNode) Eval(scope Scope) Value {
 
 func (node *objectNode) Definition(key string) (Expression, bool) {
 	parts := strings.Split(key, ".")
-	topKey := parts[0]
 
-	var fieldValue reflect.Value
+	curValue := node.valueOf
+	for i, partKey := range parts {
+		switch curValue.Kind() {
+		case reflect.Pointer:
+			curValue = curValue.Elem()
+		case reflect.Struct:
+			typeOf := curValue.Type()
+			curValue = curValue.FieldByNameFunc(func(fieldName string) bool {
+				field, ok := typeOf.FieldByName(fieldName)
+				return ok && field.Tag.Get("gon") == partKey
+			})
+		case reflect.Map:
+			curValue = curValue.MapIndex(reflect.ValueOf(partKey))
+		}
 
-	switch node.valueOf.Kind() {
-	case reflect.Struct:
-		typeOf := node.valueOf.Type()
-		fieldValue = node.valueOf.FieldByNameFunc(func(fieldName string) bool {
-			field, ok := typeOf.FieldByName(fieldName)
-			return ok && field.Tag.Get("gon") == key
-		})
-	case reflect.Map:
-		fieldValue = node.valueOf.MapIndex(reflect.ValueOf(topKey))
+		if curValue.IsZero() {
+			return Literal(fmt.Errorf("definition not found: %s", strings.Join(parts[:i+1], "."))), false
+		}
 	}
 
-	if !fieldValue.IsValid() {
-		return Literal(fmt.Errorf("definition not found: %s", key)), false
-	}
-
-	value := fieldValue.Interface()
-
-	if len(parts) == 1 {
-		return Literal(value), true
-	}
-
-	resolver, isResolver := value.(DefinitionResolver)
-	if isResolver {
-		return resolver.Definition(key[len(topKey):])
-	}
-
-	return propagateErr(nil, "definition not found: %s", key), false
+	value := curValue.Interface()
+	return Literal(value), true
 }
 
 var _ DefinitionResolver = &objectNode{}

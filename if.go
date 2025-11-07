@@ -39,7 +39,7 @@ func If(condition, thenBranch Expression, elseBranch ...Expression) Expression {
 	return IfNode{
 		condition:  condition,
 		thenBranch: thenBranch,
-		elseBranch: tryGet(elseBranch, 0),
+		elseBranch: safeGet(elseBranch, 0),
 	}
 }
 

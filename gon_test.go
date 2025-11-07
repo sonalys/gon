@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/sonalys/gon"
-	"github.com/sonalys/gon/encoding/goncoder"
+	"github.com/sonalys/gon/encoding"
 	"github.com/stretchr/testify/require"
 )
 
@@ -54,18 +54,18 @@ func Test_Expression(t *testing.T) {
 	condition: equal(myName, friend.name),
 	then: call("reply"
 		friend.name
-		if(lt(friend.birthday, time("2007-10-31T11:07:39+01:00")), "old", "young")
+		if(lt(friend.birthday, time("2016-10-31T11:07:39+01:00")), "old", "young")
 	),
 	else: call("whoAreYou")
 )`
 
-	rule, err := goncoder.Decode([]byte(ruleStr), goncoder.DefaultExpressionCodex)
+	rule, err := encoding.Decode([]byte(ruleStr), encoding.DefaultExpressionCodex)
 	require.NoError(t, err)
 
 	resp := rule.Eval(scope)
 	require.Equal(t, "surprise!", resp.Value())
 
-	err = goncoder.Encode(t.Output(), rule)
+	err = encoding.Encode(t.Output(), rule)
 	require.NoError(t, err)
 
 	t.Fail()

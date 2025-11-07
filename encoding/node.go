@@ -1,4 +1,4 @@
-package goncoder
+package encoding
 
 import (
 	"fmt"
