@@ -17,6 +17,11 @@ var DefaultExpressionCodex = Codex{
 
 		return gon.If(orderedArgs["condition"], orderedArgs["then"], rest...), nil
 	},
+	"or": func(args []gon.KeyExpression) (gon.Expression, error) {
+		_, argsSlice, _ := argSorter(args)
+
+		return gon.Or(argsSlice...), nil
+	},
 	"equal": func(args []gon.KeyExpression) (gon.Expression, error) {
 		orderedArgs, _, err := argSorter(args, "first", "second")
 		if err != nil {
