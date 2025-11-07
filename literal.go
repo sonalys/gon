@@ -20,27 +20,6 @@ func Literal(value any) Value {
 	}
 }
 
-// Function receives a function in the format f(ctx, arg1, arg2, ...) (res1, res2, ...).
-// Example:
-//
-//	gon.Function(func(ctx context.Context, name string) string)
-func Function(f any) Expression {
-	return &literalNode{
-		value: f,
-	}
-}
-
-func Time(t string) Expression {
-	parsed, err := time.Parse(time.RFC3339, t)
-	if err != nil {
-		return Literal(err)
-	}
-
-	return &literalNode{
-		value: parsed,
-	}
-}
-
 func (node *literalNode) Name() string {
 	switch node.value.(type) {
 	case time.Time:
