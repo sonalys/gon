@@ -8,14 +8,14 @@ import (
 
 func propagateErr(value Value, mask string, args ...any) Value {
 	if value == nil {
-		return Static(fmt.Errorf(mask, args...))
+		return Literal(fmt.Errorf(mask, args...))
 	}
 
 	if err, ok := value.Value().(error); ok {
-		return Static(err)
+		return Literal(err)
 	}
 
-	return Static(fmt.Errorf(mask, args...))
+	return Literal(fmt.Errorf(mask, args...))
 }
 
 func tryGet[T any](slice []T, index int) T {

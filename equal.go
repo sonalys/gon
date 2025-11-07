@@ -2,44 +2,44 @@ package gon
 
 import "fmt"
 
-type equal struct {
+type equalNode struct {
 	first  Expression
 	second Expression
 }
 
-func (e equal) Name() string {
+func (node equalNode) Name() string {
 	return "equal"
 }
 
-func (e equal) Shape() []KeyExpression {
+func (node equalNode) Shape() []KeyExpression {
 	return []KeyExpression{
-		{"first", e.first},
-		{"second", e.second},
+		{"first", node.first},
+		{"second", node.second},
 	}
 }
 
-func (e equal) Type() NodeType {
+func (node equalNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
 func Equal(first, second Expression) Expression {
 	if first == nil || second == nil {
-		return Static(fmt.Errorf("equal expression cannot compare unset expressions"))
+		return Literal(fmt.Errorf("equal expression cannot compare unset expressions"))
 	}
 
-	return equal{
+	return equalNode{
 		first:  first,
 		second: second,
 	}
 }
 
-func (e equal) Eval(scope Scope) Value {
-	firstValue := e.first.Eval(scope)
-	secondValue := e.second.Eval(scope)
+func (node equalNode) Eval(scope Scope) Value {
+	firstValue := node.first.Eval(scope)
+	secondValue := node.second.Eval(scope)
 
-	return Static(firstValue == secondValue)
+	return Literal(firstValue == secondValue)
 }
 
 var (
-	_ Expression = equal{}
+	_ Expression = equalNode{}
 )

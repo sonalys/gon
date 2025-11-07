@@ -175,7 +175,7 @@ var DefaultExpressionCodex = Codex{
 			return nil, fmt.Errorf("time is invalid: %w", err)
 		}
 
-		return gon.Static(t), nil
+		return gon.Literal(t), nil
 	},
 }
 

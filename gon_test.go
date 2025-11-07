@@ -25,7 +25,7 @@ func Test_Expression(t *testing.T) {
 		// Dynamic, decoupled scope for your rules.
 		WithDefinitions(map[string]gon.Expression{
 			// Support for static variables of any type.
-			"myName": gon.Static("friendName"),
+			"myName": gon.Literal("friendName"),
 			// Support for structs and maps.
 			"friend": gon.Object(&Friend{
 				Name:     "friendName",
@@ -75,8 +75,8 @@ func Benchmark_Equal(b *testing.B) {
 	scope, _ := gon.NewScope().
 		WithContext(b.Context()).
 		WithDefinitions(gon.Definitions{
-			"var1": gon.Static(1),
-			"var2": gon.Static(1),
+			"var1": gon.Literal(1),
+			"var2": gon.Literal(1),
 		})
 
 	isEqual := gon.Equal(

@@ -8,33 +8,33 @@ import (
 )
 
 type (
-	static struct {
+	literalNode struct {
 		value any
 	}
 )
 
-func (s static) Name() string {
-	switch s.value.(type) {
+func (node literalNode) Name() string {
+	switch node.value.(type) {
 	case time.Time:
 		return "time"
 	default:
-		return "static"
+		return "literal"
 	}
 }
 
-func (s static) Shape() []KeyExpression {
-	switch v := s.value.(type) {
+func (node literalNode) Shape() []KeyExpression {
+	switch v := node.value.(type) {
 	case time.Time:
 		return []KeyExpression{
-			{"", Static(v.Format(time.RFC3339))},
+			{"", Literal(v.Format(time.RFC3339))},
 		}
 	default:
 		return nil
 	}
 }
 
-func (s static) Type() NodeType {
-	switch s.value.(type) {
+func (node literalNode) Type() NodeType {
+	switch node.value.(type) {
 	case time.Time:
 		return NodeTypeExpression
 	default:
@@ -42,8 +42,8 @@ func (s static) Type() NodeType {
 	}
 }
 
-func Static(value any) static {
-	return static{
+func Literal(value any) literalNode {
+	return literalNode{
 		value: value,
 	}
 }
@@ -53,7 +53,7 @@ func Static(value any) static {
 //
 //	gon.Function(func(ctx context.Context, name string) string)
 func Function(f any) Expression {
-	return static{
+	return literalNode{
 		value: f,
 	}
 }
@@ -61,41 +61,41 @@ func Function(f any) Expression {
 func Time(t string) Expression {
 	parsed, err := time.Parse(time.RFC3339, t)
 	if err != nil {
-		return Static(err)
+		return Literal(err)
 	}
 
-	return static{
+	return literalNode{
 		value: parsed,
 	}
 }
 
-func (s static) Value() any {
-	if nested, ok := s.value.(Value); ok {
+func (node literalNode) Value() any {
+	if nested, ok := node.value.(Value); ok {
 		return nested.Value()
 	}
 
-	return s.value
+	return node.value
 }
 
-func (s static) Eval(scope Scope) Value {
-	return s
+func (node literalNode) Eval(scope Scope) Value {
+	return node
 }
 
-func (s static) Call(ctx context.Context, args ...Value) Value {
-	valueOfFunc := reflect.ValueOf(s.value)
+func (node literalNode) Call(ctx context.Context, args ...Value) Value {
+	valueOfFunc := reflect.ValueOf(node.value)
 	typeOfFunc := valueOfFunc.Type()
 
 	if valueOfFunc.Kind() != reflect.Func {
-		return Static(fmt.Errorf("definition is not callable: %T", valueOfFunc.Interface()))
+		return Literal(fmt.Errorf("definition is not callable: %T", valueOfFunc.Interface()))
 	}
 
 	if expArgs, gotArgs := typeOfFunc.NumIn(), len(args)+1; gotArgs != expArgs {
-		return Static(fmt.Errorf("expected %d args, got %d", expArgs, gotArgs))
+		return Literal(fmt.Errorf("expected %d args, got %d", expArgs, gotArgs))
 	}
 
 	valueOfContext := reflect.ValueOf(ctx)
 	if !valueOfContext.Type().AssignableTo(typeOfFunc.In(0)) {
-		return Static(fmt.Errorf("definition first argument must be assignable to context"))
+		return Literal(fmt.Errorf("definition first argument must be assignable to context"))
 
 	}
 
@@ -108,7 +108,7 @@ func (s static) Call(ctx context.Context, args ...Value) Value {
 		expectedTypeOfArg := typeOfFunc.In(i + 1)
 
 		if !typeOfArg.AssignableTo(expectedTypeOfArg) {
-			return Static(fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", i+2, expectedTypeOfArg.String(), typeOfArg.String()))
+			return Literal(fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", i+2, expectedTypeOfArg.String(), typeOfArg.String()))
 		}
 
 		argsValue = append(argsValue, valueOfArg)
@@ -118,22 +118,22 @@ func (s static) Call(ctx context.Context, args ...Value) Value {
 
 	expResp := typeOfFunc.NumOut()
 	if expResp == 0 {
-		return Static(nil)
+		return Literal(nil)
 	}
 
 	if typeOfFunc.NumOut() == 1 {
-		return Static(resp[0].Interface())
+		return Literal(resp[0].Interface())
 	}
 
 	respValue := make([]Value, 0, len(resp))
 	for i := range resp {
-		respValue = append(respValue, Static(resp[i].Interface()))
+		respValue = append(respValue, Literal(resp[i].Interface()))
 	}
 
-	return Static(respValue)
+	return Literal(respValue)
 }
 
 var (
-	_ Value    = static{}
-	_ Callable = static{}
+	_ Value    = literalNode{}
+	_ Callable = literalNode{}
 )

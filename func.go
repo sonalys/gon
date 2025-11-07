@@ -6,8 +6,8 @@ import (
 )
 
 type (
-	call struct {
-		callable string
+	callNode struct {
+		funcName string
 		args     []Expression
 	}
 
@@ -17,51 +17,51 @@ type (
 	}
 )
 
-func (c call) Name() string {
+func (node callNode) Name() string {
 	return "call"
 }
 
-func (c call) Shape() []KeyExpression {
-	kv := make([]KeyExpression, 0, len(c.args)+1)
+func (node callNode) Shape() []KeyExpression {
+	kv := make([]KeyExpression, 0, len(node.args)+1)
 	kv = append(kv,
-		KeyExpression{"", Static(c.callable)},
+		KeyExpression{"", Literal(node.funcName)},
 	)
 
-	for i := range c.args {
+	for i := range node.args {
 		kv = append(kv,
-			KeyExpression{"", c.args[i]},
+			KeyExpression{"", node.args[i]},
 		)
 	}
 
 	return kv
 }
 
-func (c call) Type() NodeType {
+func (node callNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
 func Call(callable string, args ...Expression) Expression {
-	return call{
-		callable: callable,
+	return callNode{
+		funcName: callable,
 		args:     args,
 	}
 }
 
-func (c call) Eval(scope Scope) Value {
-	values := make([]Value, 0, len(c.args))
+func (node callNode) Eval(scope Scope) Value {
+	values := make([]Value, 0, len(node.args))
 
-	for i := range c.args {
-		values = append(values, c.args[i].Eval(scope))
+	for i := range node.args {
+		values = append(values, node.args[i].Eval(scope))
 	}
 
-	definition, ok := scope.Definition(c.callable)
+	definition, ok := scope.Definition(node.funcName)
 	if !ok {
-		return Static(fmt.Errorf("no callable definition found for %s", c.callable))
+		return Literal(fmt.Errorf("no callable definition found for %s", node.funcName))
 	}
 
 	callable, ok := definition.(Callable)
 	if !ok {
-		return Static(fmt.Errorf("definition is not callable: %s", c.callable))
+		return Literal(fmt.Errorf("definition is not callable: %s", node.funcName))
 	}
 
 	return callable.Call(scope, values...)

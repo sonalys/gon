@@ -8,8 +8,8 @@ import (
 )
 
 type (
-	definition struct {
-		key string
+	referenceNode struct {
+		definitionName string
 	}
 
 	Definitions map[string]Expression
@@ -32,28 +32,28 @@ type (
 	}
 )
 
-func (d definition) Name() string {
-	return d.key
+func (node referenceNode) Name() string {
+	return node.definitionName
 }
 
-func (d definition) Shape() []KeyExpression {
+func (node referenceNode) Shape() []KeyExpression {
 	return nil
 }
 
-func (d definition) Type() NodeType {
+func (node referenceNode) Type() NodeType {
 	return NodeTypeReference
 }
 
-func Reference(key string) definition {
-	return definition{
-		key: key,
+func Reference(key string) referenceNode {
+	return referenceNode{
+		definitionName: key,
 	}
 }
 
-func (d definition) Eval(scope Scope) Value {
-	expression, ok := scope.Definition(d.key)
+func (node referenceNode) Eval(scope Scope) Value {
+	expression, ok := scope.Definition(node.definitionName)
 	if !ok {
-		return Static(fmt.Errorf("definition not found: %s", d.key))
+		return Literal(fmt.Errorf("definition not found: %s", node.definitionName))
 	}
 
 	return expression.Eval(scope)
@@ -62,19 +62,19 @@ func (d definition) Eval(scope Scope) Value {
 func (a assignment) Eval(scope Scope) Value {
 	definer, ok := scope.(Definer)
 	if !ok {
-		return Static(errors.New("scope is read-only"))
+		return Literal(errors.New("scope is read-only"))
 	}
 
-	return Static(definer.Define(a.definition, a.expression))
+	return Literal(definer.Define(a.definition, a.expression))
 }
 
-func (s *definitionResolver) Definition(key string) (Expression, bool) {
+func (r *definitionResolver) Definition(key string) (Expression, bool) {
 	parts := strings.Split(key, ".")
 	topKey := parts[0]
 
-	value, ok := s.store[topKey]
+	value, ok := r.store[topKey]
 	if !ok {
-		return Static(fmt.Errorf("definition not found: %s", topKey)), false
+		return Literal(fmt.Errorf("definition not found: %s", topKey)), false
 	}
 
 	if len(parts) == 1 {
@@ -89,17 +89,17 @@ func (s *definitionResolver) Definition(key string) (Expression, bool) {
 	return propagateErr(nil, "definition doesn't have children"), false
 }
 
-var NameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]{1,50}$")
+var nameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]{1,50}$")
 
-func (s *definitionResolver) Define(key string, expression Expression) error {
-	if !NameRegex.MatchString(key) {
+func (r *definitionResolver) Define(key string, expression Expression) error {
+	if !nameRegex.MatchString(key) {
 		return fmt.Errorf("invalid definition key: %s", key)
 	}
 
-	s.store[key] = expression
+	r.store[key] = expression
 
 	return nil
 }
 
 var _ DefinitionResolver = &definitionResolver{}
-var _ Expression = &definition{}
+var _ Expression = &referenceNode{}

@@ -3,45 +3,45 @@ package gon
 import "fmt"
 
 type (
-	greater struct {
-		first  Expression
-		second Expression
-		equal  bool
+	greaterNode struct {
+		first     Expression
+		second    Expression
+		inclusive bool
 	}
 )
 
-func (g greater) Name() string {
-	if g.equal {
+func (node greaterNode) Name() string {
+	if node.inclusive {
 		return "gte"
 	}
 
 	return "gt"
 }
 
-func (g greater) Shape() []KeyExpression {
-	if g.equal {
+func (node greaterNode) Shape() []KeyExpression {
+	if node.inclusive {
 		return []KeyExpression{
-			{"first", g.first},
-			{"second", g.second},
+			{"first", node.first},
+			{"second", node.second},
 		}
 	}
 
 	return []KeyExpression{
-		{"first", g.first},
-		{"second", g.second},
+		{"first", node.first},
+		{"second", node.second},
 	}
 }
 
-func (g greater) Type() NodeType {
+func (node greaterNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
 func Greater(first, second Expression) Expression {
 	if first == nil || second == nil {
-		return Static(fmt.Errorf("greater expression cannot compare unset expressions"))
+		return Literal(fmt.Errorf("greater expression cannot compare unset expressions"))
 	}
 
-	return greater{
+	return greaterNode{
 		first:  first,
 		second: second,
 	}
@@ -49,31 +49,31 @@ func Greater(first, second Expression) Expression {
 
 func GreaterOrEqual(first, second Expression) Expression {
 	if first == nil || second == nil {
-		return Static(fmt.Errorf("greater or equal expression cannot compare unset expressions"))
+		return Literal(fmt.Errorf("greater or equal expression cannot compare unset expressions"))
 	}
-	return greater{
-		first:  first,
-		second: second,
-		equal:  true,
+	return greaterNode{
+		first:     first,
+		second:    second,
+		inclusive: true,
 	}
 }
 
-func (g greater) Eval(scope Scope) Value {
-	firstValue := g.first.Eval(scope).Value()
-	secondValue := g.second.Eval(scope).Value()
+func (node greaterNode) Eval(scope Scope) Value {
+	firstValue := node.first.Eval(scope).Value()
+	secondValue := node.second.Eval(scope).Value()
 
 	comparison, ok := cmpAny(firstValue, secondValue)
 	if !ok {
 		return propagateErr(nil, "cannot compare different types: %T and %T", firstValue, secondValue)
 	}
 
-	if g.equal {
-		return Static(comparison >= 0)
+	if node.inclusive {
+		return Literal(comparison >= 0)
 	}
 
-	return Static(comparison > 0)
+	return Literal(comparison > 0)
 }
 
 var (
-	_ Expression = greater{}
+	_ Expression = greaterNode{}
 )

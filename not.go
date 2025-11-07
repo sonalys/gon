@@ -2,44 +2,44 @@ package gon
 
 import "fmt"
 
-type not struct {
+type notNode struct {
 	expression Expression
 }
 
-func (n not) Name() string {
+func (node notNode) Name() string {
 	return "not"
 }
 
-func (n not) Shape() []KeyExpression {
+func (node notNode) Shape() []KeyExpression {
 	return []KeyExpression{
-		{"expression", n.expression},
+		{"expression", node.expression},
 	}
 }
 
-func (n not) Type() NodeType {
+func (node notNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
 func Not(expression Expression) Expression {
 	if expression == nil {
-		return Static(fmt.Errorf("not expression cannot be unset"))
+		return Literal(fmt.Errorf("not expression cannot be unset"))
 	}
 
-	return not{
+	return notNode{
 		expression: expression,
 	}
 }
 
-func (n not) Eval(scope Scope) Value {
-	value := n.expression.Eval(scope)
+func (node notNode) Eval(scope Scope) Value {
+	value := node.expression.Eval(scope)
 	resp, ok := value.Value().(bool)
 	if !ok {
 		return propagateErr(value, "cannot negate non-boolean expression")
 	}
 
-	return Static(!resp)
+	return Literal(!resp)
 }
 
 var (
-	_ Expression = not{}
+	_ Expression = notNode{}
 )

@@ -5,44 +5,44 @@ import (
 	"fmt"
 )
 
-type smaller struct {
-	first  Expression
-	second Expression
-	equal  bool
+type smallerNode struct {
+	first     Expression
+	second    Expression
+	inclusive bool
 }
 
-func (e smaller) Name() string {
-	if e.equal {
+func (node smallerNode) Name() string {
+	if node.inclusive {
 		return "lte"
 	}
 
 	return "lt"
 }
 
-func (e smaller) Shape() []KeyExpression {
-	if e.equal {
+func (node smallerNode) Shape() []KeyExpression {
+	if node.inclusive {
 		return []KeyExpression{
-			{"first", e.first},
-			{"second", e.second},
+			{"first", node.first},
+			{"second", node.second},
 		}
 	}
 
 	return []KeyExpression{
-		{"first", e.first},
-		{"second", e.second},
+		{"first", node.first},
+		{"second", node.second},
 	}
 }
 
-func (e smaller) Type() NodeType {
+func (node smallerNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
 func Smaller(first, second Expression) Expression {
 	if first == nil || second == nil {
-		return Static(fmt.Errorf("smaller expression cannot compare unset expressions"))
+		return Literal(fmt.Errorf("smaller expression cannot compare unset expressions"))
 	}
 
-	return smaller{
+	return smallerNode{
 		first:  first,
 		second: second,
 	}
@@ -50,19 +50,19 @@ func Smaller(first, second Expression) Expression {
 
 func SmallerOrEqual(first, second Expression) Expression {
 	if first == nil || second == nil {
-		return Static(fmt.Errorf("smaller or equal expression cannot compare unset expressions"))
+		return Literal(fmt.Errorf("smaller or equal expression cannot compare unset expressions"))
 	}
 
-	return smaller{
-		first:  first,
-		second: second,
-		equal:  true,
+	return smallerNode{
+		first:     first,
+		second:    second,
+		inclusive: true,
 	}
 }
 
-func (e smaller) Eval(scope Scope) Value {
-	firstValue := e.first.Eval(scope).Value()
-	secondValue := e.second.Eval(scope).Value()
+func (node smallerNode) Eval(scope Scope) Value {
+	firstValue := node.first.Eval(scope).Value()
+	secondValue := node.second.Eval(scope).Value()
 
 	comparison, ok := cmpAny(firstValue, secondValue)
 	if !ok {
@@ -74,16 +74,16 @@ func (e smaller) Eval(scope Scope) Value {
 			errs = append(errs, err)
 		}
 
-		return propagateErr(Static(errors.Join(errs...)), "cannot compare different types: %T and %T", firstValue, secondValue)
+		return propagateErr(Literal(errors.Join(errs...)), "cannot compare different types: %T and %T", firstValue, secondValue)
 	}
 
-	if e.equal {
-		return Static(comparison <= 0)
+	if node.inclusive {
+		return Literal(comparison <= 0)
 	}
 
-	return Static(comparison < 0)
+	return Literal(comparison < 0)
 }
 
 var (
-	_ Expression = smaller{}
+	_ Expression = smallerNode{}
 )

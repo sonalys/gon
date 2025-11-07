@@ -28,7 +28,7 @@ func translateNode(rootNode *Node, codex Codex) (gon.Expression, error) {
 	case NodeTypeReference:
 		return gon.Reference(string(rootNode.Scalar)), nil
 	case NodeTypeLiteral:
-		return gon.Static(rootNode.Value), nil
+		return gon.Literal(rootNode.Value), nil
 	}
 
 	constructor, ok := codex[string(rootNode.Scalar)]

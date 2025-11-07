@@ -33,7 +33,7 @@ func (node IfNode) Type() NodeType {
 
 func If(condition, thenBranch Expression, elseBranch ...Expression) Expression {
 	if condition == nil {
-		return Static(fmt.Errorf("if condition cannot be unset"))
+		return Literal(fmt.Errorf("if condition cannot be unset"))
 	}
 
 	return IfNode{
@@ -58,5 +58,5 @@ func (node IfNode) Eval(scope Scope) Value {
 		return node.elseBranch.Eval(scope)
 	}
 
-	return Static(false)
+	return Literal(false)
 }

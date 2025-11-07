@@ -63,7 +63,7 @@ func (s *scope) Eval(scope Scope) Value {
 		return s.expression.Eval(scope)
 	}
 
-	return Static(error(nil))
+	return Literal(error(nil))
 }
 
 var (
