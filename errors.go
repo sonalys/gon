@@ -6,16 +6,16 @@ import (
 )
 
 type NodeError struct {
-	Scalar string
-	Cause  error
+	NodeName string
+	Cause    error
 }
 
 func (e NodeError) Error() string {
 	if errors.As(e.Cause, &NodeError{}) {
-		return fmt.Sprintf("%s.%s", e.Scalar, e.Cause.Error())
+		return fmt.Sprintf("%s.%s", e.NodeName, e.Cause.Error())
 	}
 
-	return fmt.Sprintf("%s: %s", e.Scalar, e.Cause.Error())
+	return fmt.Sprintf("%s: %s", e.NodeName, e.Cause.Error())
 }
 
 func (e NodeError) Unwrap() error {

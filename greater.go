@@ -4,17 +4,19 @@ import "fmt"
 
 type (
 	greaterNode struct {
-		first     Expression
-		second    Expression
+		first     Node
+		second    Node
 		inclusive bool
 	}
 )
 
-func Greater(first, second Expression) Expression {
+// Greater defines a greater node, all input nodes should evaluate to the same type, and be not nil.
+// Returns a boolean value indicating whether the first node is greater than the second.
+func Greater(first, second Node) Node {
 	if first == nil || second == nil {
 		return Literal(NodeError{
-			Scalar: "gt",
-			Cause:  fmt.Errorf("cannot compare unset expressions"),
+			NodeName: "gt",
+			Cause:    fmt.Errorf("cannot compare unset expressions"),
 		})
 	}
 
@@ -24,11 +26,13 @@ func Greater(first, second Expression) Expression {
 	}
 }
 
-func GreaterOrEqual(first, second Expression) Expression {
+// Greater defines a greater node, all input nodes should evaluate to the same type, and be not nil.
+// Returns a boolean value indicating whether the first node is greater or equal than the second.
+func GreaterOrEqual(first, second Node) Node {
 	if first == nil || second == nil {
 		return Literal(NodeError{
-			Scalar: "gte",
-			Cause:  fmt.Errorf("cannot compare unset expressions"),
+			NodeName: "gte",
+			Cause:    fmt.Errorf("cannot compare unset expressions"),
 		})
 	}
 	return greaterNode{
@@ -46,15 +50,15 @@ func (node greaterNode) Name() string {
 	return "gt"
 }
 
-func (node greaterNode) Shape() []KeyExpression {
+func (node greaterNode) Shape() []KeyNode {
 	if node.inclusive {
-		return []KeyExpression{
+		return []KeyNode{
 			{"first", node.first},
 			{"second", node.second},
 		}
 	}
 
-	return []KeyExpression{
+	return []KeyNode{
 		{"first", node.first},
 		{"second", node.second},
 	}
@@ -72,27 +76,27 @@ func (node greaterNode) Eval(scope Scope) Value {
 	if !ok {
 		if err, ok := firstValue.(error); ok {
 			return Literal(NodeError{
-				Scalar: node.Name(),
+				NodeName: node.Name(),
 				Cause: NodeError{
-					Scalar: "firstValue",
-					Cause:  err,
+					NodeName: "firstValue",
+					Cause:    err,
 				},
 			})
 		}
 
 		if err, ok := secondValue.(error); ok {
 			return Literal(NodeError{
-				Scalar: node.Name(),
+				NodeName: node.Name(),
 				Cause: NodeError{
-					Scalar: "secondValue",
-					Cause:  err,
+					NodeName: "secondValue",
+					Cause:    err,
 				},
 			})
 		}
 
 		return Literal(NodeError{
-			Scalar: node.Name(),
-			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
+			NodeName: node.Name(),
+			Cause:    fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
 		})
 	}
 

@@ -3,13 +3,18 @@ package gon
 import "fmt"
 
 type equalNode struct {
-	first  Expression
-	second Expression
+	first  Node
+	second Node
 }
 
-func Equal(first, second Expression) Expression {
+// Equal defines an equality node, all input nodes should evaluate to the same type, and be not nil.
+// Returns a boolean value indicating whether the inputs are equal.
+func Equal(first, second Node) Node {
 	if first == nil || second == nil {
-		return Literal(fmt.Errorf("equal expression cannot compare unset expressions"))
+		return Literal(NodeError{
+			NodeName: "equal",
+			Cause:    fmt.Errorf("all inputs should be not-nil"),
+		})
 	}
 
 	return equalNode{
@@ -22,8 +27,8 @@ func (node equalNode) Name() string {
 	return "equal"
 }
 
-func (node equalNode) Shape() []KeyExpression {
-	return []KeyExpression{
+func (node equalNode) Shape() []KeyNode {
+	return []KeyNode{
 		{"first", node.first},
 		{"second", node.second},
 	}
@@ -41,27 +46,27 @@ func (node equalNode) Eval(scope Scope) Value {
 	if !ok {
 		if err, ok := firstValue.(error); ok {
 			return Literal(NodeError{
-				Scalar: node.Name(),
+				NodeName: node.Name(),
 				Cause: NodeError{
-					Scalar: "firstValue",
-					Cause:  err,
+					NodeName: "firstValue",
+					Cause:    err,
 				},
 			})
 		}
 
 		if err, ok := secondValue.(error); ok {
 			return Literal(NodeError{
-				Scalar: node.Name(),
+				NodeName: node.Name(),
 				Cause: NodeError{
-					Scalar: "secondValue",
-					Cause:  err,
+					NodeName: "secondValue",
+					Cause:    err,
 				},
 			})
 		}
 
 		return Literal(NodeError{
-			Scalar: node.Name(),
-			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
+			NodeName: node.Name(),
+			Cause:    fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
 		})
 	}
 

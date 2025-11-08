@@ -7,20 +7,22 @@ import (
 )
 
 type (
+	// Definitions defines how scope definitions are configured.
+	// The key must be an alphanumeric string from length 1 to 50, not starting with a digit.
 	Definitions map[string]Value
 
 	DefinitionResolver interface {
 		Definition(key string) (Value, bool)
 	}
 
-	definitionResolver struct {
+	definitionStore struct {
 		store map[string]Value
 	}
 )
 
 var nameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]{1,50}$")
 
-func (r *definitionResolver) Definition(key string) (Value, bool) {
+func (r *definitionStore) Definition(key string) (Value, bool) {
 	parts := strings.Split(key, ".")
 	topKey := parts[0]
 
@@ -41,17 +43,14 @@ func (r *definitionResolver) Definition(key string) (Value, bool) {
 	return Literal(fmt.Errorf("definition '%s' doesn't have children attributes", topKey)), false
 }
 
-func (r *definitionResolver) Define(key string, definition Value) error {
+func (r *definitionStore) Define(key string, value Value) error {
 	if !nameRegex.MatchString(key) {
-		return NodeError{
-			Scalar: "call",
-			Cause:  fmt.Errorf("definition key '%s' is invalid", key),
-		}
+		return fmt.Errorf("definition key '%s' is invalid", key)
 	}
 
-	r.store[key] = definition
+	r.store[key] = value
 
 	return nil
 }
 
-var _ DefinitionResolver = &definitionResolver{}
+var _ DefinitionResolver = &definitionStore{}

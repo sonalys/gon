@@ -9,7 +9,7 @@ import (
 )
 
 var DefaultExpressionCodex = Codex{
-	"if": func(args []gon.KeyExpression) (gon.Expression, error) {
+	"if": func(args []gon.KeyNode) (gon.Node, error) {
 		orderedArgs, rest, err := argSorter(args, "condition", "then")
 		if err != nil {
 			return nil, fmt.Errorf("error decoding 'if' node: %w", err)
@@ -17,66 +17,66 @@ var DefaultExpressionCodex = Codex{
 
 		return gon.If(orderedArgs["condition"], orderedArgs["then"], rest...), nil
 	},
-	"or": func(args []gon.KeyExpression) (gon.Expression, error) {
+	"or": func(args []gon.KeyNode) (gon.Node, error) {
 		_, argsSlice, _ := argSorter(args)
 
 		return gon.Or(argsSlice...), nil
 	},
-	"equal": func(args []gon.KeyExpression) (gon.Expression, error) {
+	"equal": func(args []gon.KeyNode) (gon.Node, error) {
 		orderedArgs, _, err := argSorter(args, "first", "second")
 		if err != nil {
 			return nil, fmt.Errorf("error decoding 'equal' node: %w", err)
 		}
 		return gon.Equal(orderedArgs["first"], orderedArgs["second"]), nil
 	},
-	"lt": func(args []gon.KeyExpression) (gon.Expression, error) {
+	"lt": func(args []gon.KeyNode) (gon.Node, error) {
 		orderedArgs, _, err := argSorter(args, "first", "second")
 		if err != nil {
 			return nil, fmt.Errorf("error decoding 'lt' node: %w", err)
 		}
 		return gon.Smaller(orderedArgs["first"], orderedArgs["second"]), nil
 	},
-	"lte": func(args []gon.KeyExpression) (gon.Expression, error) {
+	"lte": func(args []gon.KeyNode) (gon.Node, error) {
 		orderedArgs, _, err := argSorter(args, "first", "second")
 		if err != nil {
 			return nil, fmt.Errorf("error decoding 'lte' node: %w", err)
 		}
 		return gon.SmallerOrEqual(orderedArgs["first"], orderedArgs["second"]), nil
 	},
-	"gt": func(args []gon.KeyExpression) (gon.Expression, error) {
+	"gt": func(args []gon.KeyNode) (gon.Node, error) {
 		orderedArgs, _, err := argSorter(args, "first", "second")
 		if err != nil {
 			return nil, fmt.Errorf("error decoding 'gt' node: %w", err)
 		}
 		return gon.Greater(orderedArgs["first"], orderedArgs["second"]), nil
 	},
-	"gte": func(args []gon.KeyExpression) (gon.Expression, error) {
+	"gte": func(args []gon.KeyNode) (gon.Node, error) {
 		orderedArgs, _, err := argSorter(args, "first", "second")
 		if err != nil {
 			return nil, fmt.Errorf("error decoding 'gte' node: %w", err)
 		}
 		return gon.GreaterOrEqual(orderedArgs["first"], orderedArgs["second"]), nil
 	},
-	"not": func(args []gon.KeyExpression) (gon.Expression, error) {
+	"not": func(args []gon.KeyNode) (gon.Node, error) {
 		orderedArgs, _, err := argSorter(args, "expression")
 		if err != nil {
 			return nil, fmt.Errorf("error decoding 'not' node: %w", err)
 		}
 		return gon.Not(orderedArgs["expression"]), nil
 	},
-	"call": func(args []gon.KeyExpression) (gon.Expression, error) {
-		valuer := args[0].Expression.(gon.Valued)
+	"call": func(args []gon.KeyNode) (gon.Node, error) {
+		valuer := args[0].Node.(gon.Valued)
 
-		expressionTransform := func(from gon.KeyExpression) gon.Expression {
-			return from.Expression
+		expressionTransform := func(from gon.KeyNode) gon.Node {
+			return from.Node
 		}
 
 		transformedArgs := sliceutils.Map(args[1:], expressionTransform)
 
 		return gon.Call(valuer.Value().(string), transformedArgs...), nil
 	},
-	"time": func(args []gon.KeyExpression) (gon.Expression, error) {
-		valuer := args[0].Expression.(gon.Valued)
+	"time": func(args []gon.KeyNode) (gon.Node, error) {
+		valuer := args[0].Node.(gon.Valued)
 
 		rawTime, ok := valuer.Value().(string)
 		if !ok {

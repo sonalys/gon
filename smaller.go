@@ -5,42 +5,18 @@ import (
 )
 
 type smallerNode struct {
-	first     Expression
-	second    Expression
+	first     Node
+	second    Node
 	inclusive bool
 }
 
-func (node smallerNode) Name() string {
-	if node.inclusive {
-		return "lte"
-	}
-
-	return "lt"
-}
-
-func (node smallerNode) Shape() []KeyExpression {
-	if node.inclusive {
-		return []KeyExpression{
-			{"first", node.first},
-			{"second", node.second},
-		}
-	}
-
-	return []KeyExpression{
-		{"first", node.first},
-		{"second", node.second},
-	}
-}
-
-func (node smallerNode) Type() NodeType {
-	return NodeTypeExpression
-}
-
-func Smaller(first, second Expression) Expression {
+// Smaller defines a smaller node, all input nodes should evaluate to the same type, and be not nil.
+// Returns a boolean value indicating whether the first node is smaller to the second.
+func Smaller(first, second Node) Node {
 	if first == nil || second == nil {
 		return Literal(NodeError{
-			Scalar: "lt",
-			Cause:  fmt.Errorf("cannot compare unset expressions"),
+			NodeName: "lt",
+			Cause:    fmt.Errorf("cannot compare unset expressions"),
 		})
 	}
 
@@ -50,11 +26,13 @@ func Smaller(first, second Expression) Expression {
 	}
 }
 
-func SmallerOrEqual(first, second Expression) Expression {
+// SmallerOrEqual defines a greater node, all input nodes should evaluate to the same type, and be not nil.
+// Returns a boolean value indicating whether the first node is smaller or equal to the second.
+func SmallerOrEqual(first, second Node) Node {
 	if first == nil || second == nil {
 		return Literal(NodeError{
-			Scalar: "lte",
-			Cause:  fmt.Errorf("cannot compare unset expressions"),
+			NodeName: "lte",
+			Cause:    fmt.Errorf("cannot compare unset expressions"),
 		})
 	}
 
@@ -65,6 +43,32 @@ func SmallerOrEqual(first, second Expression) Expression {
 	}
 }
 
+func (node smallerNode) Name() string {
+	if node.inclusive {
+		return "lte"
+	}
+
+	return "lt"
+}
+
+func (node smallerNode) Shape() []KeyNode {
+	if node.inclusive {
+		return []KeyNode{
+			{"first", node.first},
+			{"second", node.second},
+		}
+	}
+
+	return []KeyNode{
+		{"first", node.first},
+		{"second", node.second},
+	}
+}
+
+func (node smallerNode) Type() NodeType {
+	return NodeTypeExpression
+}
+
 func (node smallerNode) Eval(scope Scope) Value {
 	firstValue := node.first.Eval(scope).Value()
 	secondValue := node.second.Eval(scope).Value()
@@ -73,27 +77,27 @@ func (node smallerNode) Eval(scope Scope) Value {
 	if !ok {
 		if err, ok := firstValue.(error); ok {
 			return Literal(NodeError{
-				Scalar: node.Name(),
+				NodeName: node.Name(),
 				Cause: NodeError{
-					Scalar: "firstValue",
-					Cause:  err,
+					NodeName: "firstValue",
+					Cause:    err,
 				},
 			})
 		}
 
 		if err, ok := secondValue.(error); ok {
 			return Literal(NodeError{
-				Scalar: node.Name(),
+				NodeName: node.Name(),
 				Cause: NodeError{
-					Scalar: "secondValue",
-					Cause:  err,
+					NodeName: "secondValue",
+					Cause:    err,
 				},
 			})
 		}
 
 		return Literal(NodeError{
-			Scalar: node.Name(),
-			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
+			NodeName: node.Name(),
+			Cause:    fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
 		})
 	}
 
@@ -105,5 +109,5 @@ func (node smallerNode) Eval(scope Scope) Value {
 }
 
 var (
-	_ Expression = smallerNode{}
+	_ Node = smallerNode{}
 )

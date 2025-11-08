@@ -184,3 +184,27 @@ func Test_Literal_Definition(t *testing.T) {
 		require.Equal(t, expected, gotValue.Value())
 	})
 }
+
+func Test_Literal_Call(t *testing.T) {
+	t.Run("should resolve callable attribute", func(t *testing.T) {
+		expected := 5
+
+		node := gon.Literal(map[string]map[string]func() int{
+			"attribute": {
+				"value": func() int { return expected },
+			},
+		})
+
+		valued := node.Call(t.Context(), "attribute.value")
+		require.Equal(t, expected, valued.Value())
+
+		scope, err := gon.NewScope().WithDefinitions(gon.Definitions{
+			"var": node,
+		})
+		require.NoError(t, err)
+
+		scopeValued := gon.Call("var.attribute.value").Eval(scope)
+		require.Equal(t, expected, scopeValued.Value())
+
+	})
+}

@@ -23,7 +23,7 @@ type Node struct {
 	Type     NodeType
 }
 
-func translateNode(rootNode *Node, codex Codex) (gon.Expression, error) {
+func translateNode(rootNode *Node, codex Codex) (gon.Node, error) {
 	switch rootNode.Type {
 	case NodeTypeReference:
 		return gon.Reference(string(rootNode.Scalar)), nil
@@ -37,16 +37,16 @@ func translateNode(rootNode *Node, codex Codex) (gon.Expression, error) {
 	}
 
 	children := rootNode.Children
-	nodeChildren := make([]gon.KeyExpression, 0, len(children))
+	nodeChildren := make([]gon.KeyNode, 0, len(children))
 
 	for _, child := range children {
 		nodeChild, err := translateNode(child, codex)
 		if err != nil {
 			return nil, err
 		}
-		nodeChildren = append(nodeChildren, gon.KeyExpression{
-			Key:        string(child.Key),
-			Expression: nodeChild,
+		nodeChildren = append(nodeChildren, gon.KeyNode{
+			Key:  string(child.Key),
+			Node: nodeChild,
 		})
 	}
 

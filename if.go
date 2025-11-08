@@ -5,12 +5,12 @@ import (
 )
 
 type IfNode struct {
-	condition  Expression
-	thenBranch Expression
-	elseBranch Expression
+	condition  Node
+	thenBranch Node
+	elseBranch Node
 }
 
-func If(condition, thenBranch Expression, elseBranch ...Expression) Expression {
+func If(condition, thenBranch Node, elseBranch ...Node) Node {
 	if condition == nil {
 		return Literal(fmt.Errorf("if condition cannot be unset"))
 	}
@@ -26,14 +26,14 @@ func (node IfNode) Name() string {
 	return "if"
 }
 
-func (node IfNode) Shape() []KeyExpression {
-	kv := []KeyExpression{
+func (node IfNode) Shape() []KeyNode {
+	kv := []KeyNode{
 		{"condition", node.condition},
 		{"then", node.thenBranch},
 	}
 	if node.elseBranch != nil {
 		kv = append(kv,
-			KeyExpression{"else", node.elseBranch},
+			KeyNode{"else", node.elseBranch},
 		)
 	}
 	return kv
@@ -49,13 +49,13 @@ func (node IfNode) Eval(scope Scope) Value {
 	if !ok {
 		if err, ok := value.Value().(error); ok {
 			return Literal(NodeError{
-				Scalar: node.Name(),
-				Cause:  err,
+				NodeName: node.Name(),
+				Cause:    err,
 			})
 		}
 		return Literal(NodeError{
-			Scalar: node.Name(),
-			Cause:  fmt.Errorf("expected a boolean value"),
+			NodeName: node.Name(),
+			Cause:    fmt.Errorf("expected a boolean value"),
 		})
 	}
 

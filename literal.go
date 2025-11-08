@@ -14,7 +14,11 @@ type (
 	}
 )
 
-func Literal(value any) Value {
+// Literal represents a value/node.
+// Use Literal with functions to define callable definitions.
+// Use Literal with structs or maps to define definitions with children attributes.
+// time.Time is serialized as time(RFC3339) by default.
+func Literal(value any) *literalNode {
 	return &literalNode{
 		value: value,
 	}
@@ -29,10 +33,10 @@ func (node *literalNode) Name() string {
 	}
 }
 
-func (node *literalNode) Shape() []KeyExpression {
+func (node *literalNode) Shape() []KeyNode {
 	switch v := node.value.(type) {
 	case time.Time:
-		return []KeyExpression{
+		return []KeyNode{
 			{"", Literal(v.Format(time.RFC3339))},
 		}
 	default:
@@ -61,15 +65,40 @@ func (node *literalNode) Eval(scope Scope) Value {
 	return node
 }
 
-func (node *literalNode) Call(ctx context.Context, name string, args ...Value) Value {
-	valueOfFunc := reflect.ValueOf(node.value)
-	typeOfFunc := valueOfFunc.Type()
+func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Value {
+	parts := strings.Split(key, ".")
 
-	if valueOfFunc.Kind() != reflect.Func {
+	curValue := reflect.ValueOf(node.value)
+	for i, partKey := range parts {
+		// Pointer resolver.
+		for ; curValue.Kind() == reflect.Pointer; curValue = curValue.Elem() {
+		}
+		switch curValue.Kind() {
+		case reflect.Struct:
+			typeOf := curValue.Type()
+			curValue = curValue.FieldByNameFunc(func(fieldName string) bool {
+				field, ok := typeOf.FieldByName(fieldName)
+				return ok && field.Tag.Get("gon") == partKey
+			})
+		case reflect.Map:
+			curValue = curValue.MapIndex(reflect.ValueOf(partKey))
+		}
+
+		if !curValue.IsValid() || curValue.IsZero() {
+			return Literal(NodeError{
+				NodeName: "literal",
+				Cause:    fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
+			})
+		}
+	}
+
+	typeOfFunc := curValue.Type()
+
+	if curValue.Kind() != reflect.Func {
 		return Literal(NodeError{
-			Scalar: "literal",
+			NodeName: "literal",
 			Cause: DefinitionNotCallable{
-				DefinitionName: name,
+				DefinitionName: key,
 			},
 		})
 	}
@@ -86,8 +115,8 @@ func (node *literalNode) Call(ctx context.Context, name string, args ...Value) V
 
 	if gotArgs != expArgs {
 		return Literal(NodeError{
-			Scalar: "literal",
-			Cause:  fmt.Errorf("expected %d args, got %d", expArgs, gotArgs),
+			NodeName: "literal",
+			Cause:    fmt.Errorf("expected %d args, got %d", expArgs, gotArgs),
 		})
 	}
 
@@ -108,15 +137,15 @@ func (node *literalNode) Call(ctx context.Context, name string, args ...Value) V
 
 		if !typeOfArg.AssignableTo(expectedTypeOfArg) {
 			return Literal(NodeError{
-				Scalar: "literal",
-				Cause:  fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", targetParamIndex, expectedTypeOfArg.String(), typeOfArg.String()),
+				NodeName: "literal",
+				Cause:    fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", targetParamIndex, expectedTypeOfArg.String(), typeOfArg.String()),
 			})
 		}
 
 		argsValue = append(argsValue, valueOfArg)
 	}
 
-	resp := valueOfFunc.Call(argsValue)
+	resp := curValue.Call(argsValue)
 
 	expResp := typeOfFunc.NumOut()
 	if expResp == 0 {
@@ -156,8 +185,8 @@ func (node *literalNode) Definition(key string) (Value, bool) {
 
 		if !curValue.IsValid() || curValue.IsZero() {
 			return Literal(NodeError{
-				Scalar: "literal",
-				Cause:  fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
+				NodeName: "literal",
+				Cause:    fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
 			}), false
 		}
 	}

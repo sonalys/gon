@@ -12,14 +12,14 @@ import (
 )
 
 type (
-	NodeConstructor func(args []gon.KeyExpression) (gon.Expression, error)
+	NodeConstructor func(args []gon.KeyNode) (gon.Node, error)
 	Codex           map[string]NodeConstructor
 	DecodeConfig    struct {
 		NodeCodex Codex
 	}
 )
 
-func Encode(w io.Writer, root gon.Expression) error {
+func Encode(w io.Writer, root gon.Node) error {
 	astNode, err := ast.Parse(root)
 	if err != nil {
 		return fmt.Errorf("encoding root expression: %w", err)
@@ -74,7 +74,7 @@ func encodeBody(w io.Writer, root ast.Node, indentation int) error {
 	return nil
 }
 
-func Decode(buffer []byte, codex Codex) (gon.Expression, error) {
+func Decode(buffer []byte, codex Codex) (gon.Node, error) {
 	tokens := tokenize(buffer)
 	parser := newParser(tokens)
 

@@ -58,7 +58,7 @@ type NodeExpression interface {
 	gon.Shaped
 }
 
-func Parse(rootExpression gon.Expression) (Node, error) {
+func Parse(rootExpression gon.Node) (Node, error) {
 	nodeExpression, ok := rootExpression.(NodeExpression)
 	if !ok {
 		return nil, fmt.Errorf("could not parse node to ast: %T", rootExpression)
@@ -72,7 +72,7 @@ func Parse(rootExpression gon.Expression) (Node, error) {
 		keyArgs := make([]KeyNode, 0, len(keyExpressions))
 
 		for i := range keyExpressions {
-			parsed, err := Parse(keyExpressions[i].Expression)
+			parsed, err := Parse(keyExpressions[i].Node)
 			if err != nil {
 				return nil, fmt.Errorf("parsing keyed expression: %w", err)
 			}

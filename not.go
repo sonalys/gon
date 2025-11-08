@@ -3,10 +3,12 @@ package gon
 import "fmt"
 
 type notNode struct {
-	expression Expression
+	expression Node
 }
 
-func Not(expression Expression) Expression {
+// Not defines a not node, the input node should evaluate to boolean and be not-nil.
+// It inverts the result of the evaluated boolean.
+func Not(expression Node) Node {
 	if expression == nil {
 		return Literal(fmt.Errorf("not expression cannot be unset"))
 	}
@@ -20,8 +22,8 @@ func (node notNode) Name() string {
 	return "not"
 }
 
-func (node notNode) Shape() []KeyExpression {
-	return []KeyExpression{
+func (node notNode) Shape() []KeyNode {
+	return []KeyNode{
 		{"expression", node.expression},
 	}
 }
@@ -35,8 +37,8 @@ func (node notNode) Eval(scope Scope) Value {
 	resp, ok := value.Value().(bool)
 	if !ok {
 		return Literal(NodeError{
-			Scalar: "not",
-			Cause:  fmt.Errorf("expected value is not boolean"),
+			NodeName: "not",
+			Cause:    fmt.Errorf("expected value is not boolean"),
 		})
 	}
 
