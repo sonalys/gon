@@ -87,6 +87,7 @@ func Example_ageVerification() {
 * [Lazy value](./examples/lazy-value/example_test.go)
 * [Custom Node](./examples/custom-node/example_test.go)
 * [Functions](./examples/functions/example_test.go)
+* [Object access rule](./examples/object-access-rule/example_test.go)
 
 ## Standard Nodes
 
@@ -103,6 +104,11 @@ func Example_ageVerification() {
 * HasSuffix
 * Sum
 * Avg
+
+## Limitations
+
+* Uses reflect package
+* Some node types like Literal, Bool and Time are still not fully customizable
 
 ## Roadmap
 

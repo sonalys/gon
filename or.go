@@ -1,6 +1,10 @@
 package gon
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/sonalys/gon/internal/sliceutils"
+)
 
 type orNode struct {
 	nodes []Node
@@ -35,7 +39,7 @@ func (node orNode) Name() string {
 }
 
 func (node orNode) Shape() []KeyNode {
-	return nil
+	return sliceutils.Map(node.nodes, func(from Node) KeyNode { return KeyNode{Node: from} })
 }
 
 func (node orNode) Type() NodeType {

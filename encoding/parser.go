@@ -79,10 +79,23 @@ func (p *parser) parse() (*Node, error) {
 			Value: float,
 		}, nil
 	default:
-		return &Node{
-			Type:   NodeTypeReference,
-			Scalar: token,
-		}, nil
+		switch string(token) {
+		case "true", "True":
+			return &Node{
+				Type:  NodeTypeLiteral,
+				Value: true,
+			}, nil
+		case "false", "False":
+			return &Node{
+				Type:  NodeTypeLiteral,
+				Value: false,
+			}, nil
+		default:
+			return &Node{
+				Type:   NodeTypeReference,
+				Scalar: token,
+			}, nil
+		}
 	}
 }
 

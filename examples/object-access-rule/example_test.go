@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/sonalys/gon"
 	"github.com/sonalys/gon/encoding"
@@ -35,8 +36,8 @@ func Example_objectAccessRule() {
 			equal(file.gid, 102),
 			hasPrefix(file.path, "/shared")
 		),
-		then: "pass",
-		else: "fail"
+		then: true,
+		else: false
 	)`
 
 	policy, err := encoding.Decode([]byte(fileAccessPolicy), encoding.DefaultExpressionCodex)
@@ -44,12 +45,35 @@ func Example_objectAccessRule() {
 		panic(err)
 	}
 
-	value, err := scope.Compute(policy)
+	isAuthorized, err := scope.Compute(policy)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(value)
+
+	err = encoding.Encode(os.Stdout, policy)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("\nIs authorized? %v", isAuthorized)
 
 	// Output:
-	// pass
+	// if(
+	// 	condition: or(equal(
+	// 			first: file.uid
+	// 			second: 1023
+	// 		)
+	// 		equal(
+	// 			first: file.gid
+	// 			second: 102
+	// 		)
+	// 		hasPrefix(
+	// 			text: file.path
+	// 			prefix: "/shared"
+	// 		)
+	// 	)
+	// 	then: true
+	// 	else: false
+	// )
+	// Is authorized? true
 }

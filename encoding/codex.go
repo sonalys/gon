@@ -76,7 +76,10 @@ var DefaultExpressionCodex = Codex{
 		return gon.Call(valuer.Value().(string), transformedArgs...), nil
 	},
 	"time": func(args []gon.KeyNode) (gon.Node, error) {
-		valuer := args[0].Node.(gon.Valued)
+		valuer, ok := args[0].Node.(gon.Valued)
+		if !ok {
+			return nil, fmt.Errorf("time should be parsed only from string")
+		}
 
 		rawTime, ok := valuer.Value().(string)
 		if !ok {
