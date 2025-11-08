@@ -50,7 +50,7 @@ func encodeBody(w io.Writer, root ast.Node, indentation int) error {
 		}
 
 		for i, arg := range node.KeyArgs {
-			if len(node.KeyArgs) != 1 && (i == 0 && arg.Key != "" || i > 0) {
+			if i > 0 || len(node.KeyArgs) != 1 || (i == 0 && len(node.KeyArgs) > 1 && arg.Key != "" && node.KeyArgs[i+1].Key != "") {
 				if err := print(0, "\n"); err != nil {
 					return err
 				}

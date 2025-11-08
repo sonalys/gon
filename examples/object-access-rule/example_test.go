@@ -59,7 +59,8 @@ func Example_objectAccessRule() {
 
 	// Output:
 	// if(
-	// 	condition: or(equal(
+	// 	condition: or(
+	// 		equal(
 	// 			first: file.uid
 	// 			second: 1023
 	// 		)
