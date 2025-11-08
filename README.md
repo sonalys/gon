@@ -78,6 +78,7 @@ func Example_ageVerification() {
 * [Dynamic Comparison](./examples/dynamic-comparison/example_test.go)
 * [Lazy value](./examples/lazy-value/example_test.go)
 * [Custom Node](./examples/custom-node/example_test.go)
+* [Functions](./examples/functions/example_test.go)
 
 ## Standard Nodes
 

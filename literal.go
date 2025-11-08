@@ -23,9 +23,12 @@ var typeOfContext = reflect.TypeOf(context.Background())
 // time.Time is serialized as time(RFC3339) by default.
 func Literal(value any) *literalNode {
 	valueOf := reflect.ValueOf(value)
-	typeOf := valueOf.Type()
 
-	isLazy := typeOf.Kind() == reflect.Func && (typeOf.NumIn() == 0 || typeOfContext.AssignableTo(typeOf.In(0)))
+	var isLazy bool
+	if valueOf.IsValid() {
+		typeOf := valueOf.Type()
+		isLazy = typeOf.Kind() == reflect.Func && (typeOf.NumIn() == 0 || typeOfContext.AssignableTo(typeOf.In(0)))
+	}
 
 	return &literalNode{
 		value:  valueOf,
@@ -63,11 +66,14 @@ func (node *literalNode) Type() NodeType {
 }
 
 func (node *literalNode) Value() any {
-	if nested, ok := node.value.Interface().(Value); ok {
-		return nested.Value()
+	if node.value.IsValid() {
+		if nested, ok := node.value.Interface().(Value); ok {
+			return nested.Value()
+		}
+		return node.value.Interface()
 	}
 
-	return node.value.Interface()
+	return nil
 }
 
 func (node *literalNode) Eval(scope Scope) Value {
@@ -85,6 +91,14 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 		// Pointer resolver.
 		for ; curValue.Kind() == reflect.Pointer; curValue = curValue.Elem() {
 		}
+
+		if !curValue.IsValid() || curValue.IsZero() {
+			return Literal(NodeError{
+				NodeName: "literal",
+				Cause:    fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
+			})
+		}
+
 		switch curValue.Kind() {
 		case reflect.Struct:
 			typeOf := curValue.Type()
@@ -94,13 +108,6 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 			})
 		case reflect.Map:
 			curValue = curValue.MapIndex(reflect.ValueOf(partKey))
-		}
-
-		if !curValue.IsValid() || curValue.IsZero() {
-			return Literal(NodeError{
-				NodeName: "literal",
-				Cause:    fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
-			})
 		}
 	}
 
