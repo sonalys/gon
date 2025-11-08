@@ -10,22 +10,31 @@ import (
 
 type (
 	literalNode struct {
-		value any
+		value  reflect.Value
+		isLazy bool
 	}
 )
+
+var typeOfContext = reflect.TypeOf(context.Background())
 
 // Literal represents a value/node.
 // Use Literal with functions to define callable definitions.
 // Use Literal with structs or maps to define definitions with children attributes.
 // time.Time is serialized as time(RFC3339) by default.
 func Literal(value any) *literalNode {
+	valueOf := reflect.ValueOf(value)
+	typeOf := valueOf.Type()
+
+	isLazy := typeOf.Kind() == reflect.Func && (typeOf.NumIn() == 0 || typeOfContext.AssignableTo(typeOf.In(0)))
+
 	return &literalNode{
-		value: value,
+		value:  valueOf,
+		isLazy: isLazy,
 	}
 }
 
 func (node *literalNode) Name() string {
-	switch node.value.(type) {
+	switch node.value.Interface().(type) {
 	case time.Time:
 		return "time"
 	default:
@@ -34,7 +43,7 @@ func (node *literalNode) Name() string {
 }
 
 func (node *literalNode) Shape() []KeyNode {
-	switch v := node.value.(type) {
+	switch v := node.value.Interface().(type) {
 	case time.Time:
 		return []KeyNode{
 			{"", Literal(v.Format(time.RFC3339))},
@@ -45,7 +54,7 @@ func (node *literalNode) Shape() []KeyNode {
 }
 
 func (node *literalNode) Type() NodeType {
-	switch node.value.(type) {
+	switch node.value.Interface().(type) {
 	case time.Time:
 		return NodeTypeExpression
 	default:
@@ -54,21 +63,24 @@ func (node *literalNode) Type() NodeType {
 }
 
 func (node *literalNode) Value() any {
-	if nested, ok := node.value.(Value); ok {
+	if nested, ok := node.value.Interface().(Value); ok {
 		return nested.Value()
 	}
 
-	return node.value
+	return node.value.Interface()
 }
 
 func (node *literalNode) Eval(scope Scope) Value {
+	if node.isLazy {
+		return node.Call(scope, "")
+	}
 	return node
 }
 
 func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Value {
 	parts := strings.Split(key, ".")
 
-	curValue := reflect.ValueOf(node.value)
+	curValue := node.value
 	for i, partKey := range parts {
 		// Pointer resolver.
 		for ; curValue.Kind() == reflect.Pointer; curValue = curValue.Elem() {
@@ -167,7 +179,7 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 func (node *literalNode) Definition(key string) (Value, bool) {
 	parts := strings.Split(key, ".")
 
-	curValue := reflect.ValueOf(node.value)
+	curValue := node.value
 	for i, partKey := range parts {
 		// Pointer resolver.
 		for ; curValue.Kind() == reflect.Pointer; curValue = curValue.Elem() {

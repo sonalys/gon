@@ -40,5 +40,5 @@ func (node referenceNode) Eval(scope Scope) Value {
 		})
 	}
 
-	return value
+	return value.Eval(scope)
 }

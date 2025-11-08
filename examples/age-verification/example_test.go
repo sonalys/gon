@@ -7,7 +7,7 @@ import (
 	"github.com/sonalys/gon/encoding"
 )
 
-func Example_gonAgeVerification() {
+func Example_ageVerification() {
 	type Person struct {
 		Age int64 `gon:"age"`
 	}
