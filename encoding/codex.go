@@ -90,4 +90,36 @@ var DefaultExpressionCodex = Codex{
 
 		return gon.Literal(t), nil
 	},
+	"hasPrefix": func(args []gon.KeyNode) (gon.Node, error) {
+		orderedArgs, _, err := argSorter(args, "text", "prefix")
+		if err != nil {
+			return nil, fmt.Errorf("error decoding 'not' node: %w", err)
+		}
+
+		return gon.HasPrefix(orderedArgs["text"], orderedArgs["prefix"]), nil
+	},
+	"hasSuffix": func(args []gon.KeyNode) (gon.Node, error) {
+		orderedArgs, _, err := argSorter(args, "text", "prefix")
+		if err != nil {
+			return nil, fmt.Errorf("error decoding 'not' node: %w", err)
+		}
+
+		return gon.HasSuffix(orderedArgs["text"], orderedArgs["prefix"]), nil
+	},
+	"sum": func(args []gon.KeyNode) (gon.Node, error) {
+		_, rest, err := argSorter(args)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding 'sum' node: %w", err)
+		}
+
+		return gon.Sum(rest...), nil
+	},
+	"avg": func(args []gon.KeyNode) (gon.Node, error) {
+		_, rest, err := argSorter(args)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding 'avg' node: %w", err)
+		}
+
+		return gon.Avg(rest...), nil
+	},
 }

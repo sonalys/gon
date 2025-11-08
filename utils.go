@@ -3,6 +3,8 @@ package gon
 import (
 	"cmp"
 	"time"
+
+	"golang.org/x/exp/constraints"
 )
 
 func safeGet[T any](slice []T, index int) T {
@@ -116,4 +118,219 @@ func cmpAny(firstValue, secondValue any) (int, bool) {
 	default:
 		return 0, false
 	}
+}
+
+func sumAny(values ...any) (any, bool) {
+	if len(values) == 0 {
+		return 0, false
+	}
+
+	switch values[0].(type) {
+	case int:
+		values, ok := castAll[int](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case int8:
+		values, ok := castAll[int8](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case int16:
+		values, ok := castAll[int16](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case int32:
+		values, ok := castAll[int32](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case int64:
+		values, ok := castAll[int64](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case uint:
+		values, ok := castAll[uint](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case uint8:
+		values, ok := castAll[uint8](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case uint16:
+		values, ok := castAll[uint16](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case uint32:
+		values, ok := castAll[uint32](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case uint64:
+		values, ok := castAll[uint64](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case uintptr:
+		values, ok := castAll[uintptr](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case float32:
+		values, ok := castAll[float32](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	case float64:
+		values, ok := castAll[float64](values...)
+		if !ok {
+			return 0, false
+		}
+		return sum(values...), true
+	default:
+		return 0, false
+	}
+}
+
+func avgAny(values ...any) (any, bool) {
+	if len(values) == 0 {
+		return 0, false
+	}
+
+	switch values[0].(type) {
+	case int:
+		values, ok := castAll[int](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case int8:
+		values, ok := castAll[int8](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case int16:
+		values, ok := castAll[int16](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case int32:
+		values, ok := castAll[int32](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case int64:
+		values, ok := castAll[int64](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case uint:
+		values, ok := castAll[uint](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case uint8:
+		values, ok := castAll[uint8](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case uint16:
+		values, ok := castAll[uint16](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case uint32:
+		values, ok := castAll[uint32](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case uint64:
+		values, ok := castAll[uint64](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case uintptr:
+		values, ok := castAll[uintptr](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case float32:
+		values, ok := castAll[float32](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	case float64:
+		values, ok := castAll[float64](values...)
+		if !ok {
+			return 0, false
+		}
+		return avg(values...), true
+	default:
+		return 0, false
+	}
+}
+
+func sum[T constraints.Float | constraints.Integer](values ...T) T {
+	var total T
+
+	for i := range values {
+		total += values[i]
+	}
+
+	return total
+}
+
+func avg[T constraints.Float | constraints.Integer](values ...T) T {
+	if len(values) == 0 {
+		var zero T
+		return zero
+	}
+
+	count := T(len(values))
+	sum := sum(values...)
+
+	return sum / count
+}
+
+func castAll[T any](values ...any) ([]T, bool) {
+	output := make([]T, 0, len(values))
+
+	for i := range values {
+		value, ok := values[i].(T)
+		if !ok {
+			return nil, false
+		}
+
+		output = append(output, value)
+	}
+
+	return output, true
 }

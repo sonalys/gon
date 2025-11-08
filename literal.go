@@ -92,13 +92,6 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 		for ; curValue.Kind() == reflect.Pointer; curValue = curValue.Elem() {
 		}
 
-		if !curValue.IsValid() || curValue.IsZero() {
-			return Literal(NodeError{
-				NodeName: "literal",
-				Cause:    fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
-			})
-		}
-
 		switch curValue.Kind() {
 		case reflect.Struct:
 			typeOf := curValue.Type()
@@ -108,6 +101,13 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 			})
 		case reflect.Map:
 			curValue = curValue.MapIndex(reflect.ValueOf(partKey))
+		}
+
+		if !curValue.IsValid() || curValue.IsZero() {
+			return Literal(NodeError{
+				NodeName: "literal",
+				Cause:    fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
+			})
 		}
 	}
 
@@ -187,17 +187,14 @@ func (node *literalNode) Definition(key string) (Value, bool) {
 	parts := strings.Split(key, ".")
 
 	curValue := node.value
+
+	if !curValue.IsValid() || curValue.IsZero() {
+		return Literal(nil), false
+	}
+
 	for i, partKey := range parts {
 		// Pointer reference resolver, necessary to resolve pointer fields.
 		for ; curValue.Kind() == reflect.Pointer; curValue = curValue.Elem() {
-		}
-
-		if !curValue.IsValid() || curValue.IsZero() {
-			partPath := strings.Join(parts[:i+1], ".")
-
-			return Literal(DefinitionNotFoundError{
-				DefinitionName: partPath,
-			}), false
 		}
 
 		switch curValue.Kind() {
@@ -209,6 +206,14 @@ func (node *literalNode) Definition(key string) (Value, bool) {
 			})
 		case reflect.Map:
 			curValue = curValue.MapIndex(reflect.ValueOf(partKey))
+		}
+
+		if !curValue.IsValid() || curValue.IsZero() {
+			partPath := strings.Join(parts[:i+1], ".")
+
+			return Literal(DefinitionNotFoundError{
+				DefinitionName: partPath,
+			}), false
 		}
 	}
 

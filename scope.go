@@ -11,6 +11,7 @@ type (
 	Scope interface {
 		context.Context
 		DefinitionResolver
+		Compute(Node) (any, error)
 	}
 
 	scope struct {

@@ -99,6 +99,10 @@ func Example_ageVerification() {
 * If
 * Or
 * Not
+* HasPrefix
+* HasSuffix
+* Sum
+* Avg
 
 ## Roadmap
 
