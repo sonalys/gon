@@ -2,37 +2,41 @@ name: Unit tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-    
-    - run: go install github.com/jstemmer/go-junit-report/v2@latest
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
 
-    - name: Test
-      run: go test -v -coverprofile=coverage.out 2>&1 ./... | go-junit-report -set-exit-code > report.xml
+      - run: go install github.com/jstemmer/go-junit-report/v2@latest
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+      - run: mkdir -p ./output
 
-    - name: Upload test results to Codecov
-      if: ${{ !cancelled() }}
-      uses: codecov/test-results-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./report.xml
+      - name: Test
+        run: go test -v -coverprofile=./output/coverage.out 2>&1 ./... | go-junit-report -set-exit-code > ./output/report.xml
 
-    - uses: actions/upload-artifact@v4
-      with:
-        name: junit-report
-        path: ./report.xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./output/report.xml
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: junit-report
+          path: ./output/report.xml

@@ -28,24 +28,40 @@ func Encode(w io.Writer, root gon.Node) error {
 }
 
 func encodeBody(w io.Writer, root ast.Node, indentation int) error {
-	print := func(indentation int, mask string, args ...any) {
+	print := func(indentation int, mask string, args ...any) error {
 		if indentation > 0 {
-			fmt.Fprint(w, strings.Repeat("\t", indentation))
+			_, err := fmt.Fprint(w, strings.Repeat("\t", indentation))
+			if err != nil {
+				return err
+			}
 		}
-		fmt.Fprintf(w, mask, args...)
+		_, err := fmt.Fprintf(w, mask, args...)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	}
 
 	switch node := root.(type) {
 	case ast.Expression:
-		print(0, "%s(", node.Name)
+		if err := print(0, "%s(", node.Name); err != nil {
+			return err
+		}
 
 		for i, arg := range node.KeyArgs {
 			if len(node.KeyArgs) != 1 && (i == 0 && arg.Key != "" || i > 0) {
-				print(0, "\n")
-				print(indentation+1, "")
+				if err := print(0, "\n"); err != nil {
+					return err
+				}
+				if err := print(indentation+1, ""); err != nil {
+					return err
+				}
 			}
 			if arg.Key != "" {
-				print(0, "%s: ", arg.Key)
+				if err := print(0, "%s: ", arg.Key); err != nil {
+					return err
+				}
 			}
 
 			if err := encodeBody(w, arg.Node, indentation+1); err != nil {
@@ -54,20 +70,30 @@ func encodeBody(w io.Writer, root ast.Node, indentation int) error {
 		}
 
 		if len(node.KeyArgs) > 1 {
-			print(0, "\n")
-			print(indentation, ")")
+			if err := print(0, "\n"); err != nil {
+				return err
+			}
+			if err := print(indentation, ")"); err != nil {
+				return err
+			}
 			break
 		}
 
-		print(0, ")")
+		if err := print(0, ")"); err != nil {
+			return err
+		}
 	case ast.Reference:
-		print(0, "%v", node.Name)
+		if err := print(0, "%v", node.Name); err != nil {
+			return err
+		}
 	case ast.StaticValue:
 		value := node.Value
 		if str, ok := value.(string); ok {
 			value = strconv.Quote(str)
 		}
-		print(0, "%v", value)
+		if err := print(0, "%v", value); err != nil {
+			return err
+		}
 	default:
 		return errors.New("cannot encode invalid expression type")
 	}

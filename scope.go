@@ -18,7 +18,6 @@ type (
 		context.Context
 
 		parentScope Scope
-		expression  Node
 	}
 )
 
@@ -41,7 +40,7 @@ func (s *scope) WithDefinitions(source Definitions) (*scope, error) {
 		if !nameRegex.MatchString(key) {
 			return nil, fmt.Errorf("invalid definition name: %s", key)
 		}
-		if err := s.definitionStore.Define(key, value); err != nil {
+		if err := s.Define(key, value); err != nil {
 			return nil, err
 		}
 	}
