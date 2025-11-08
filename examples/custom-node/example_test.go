@@ -44,7 +44,7 @@ func Example_customNode() {
 
 	buffer := bytes.NewBuffer(make([]byte, 0))
 
-	err := encoding.Encode(buffer, myExpression)
+	err := encoding.HumanEncode(buffer, myExpression)
 	if err != nil {
 		panic(err)
 	}
@@ -82,7 +82,7 @@ func Example_customNode() {
 
 	//Output:
 	// if(
-	// 	condition: customNode(myCustomParam: "my-param")
+	// 	condition: customNode(myCustomParam: "my-param"),
 	// 	then: "works!"
 	// )
 	// got: my-param

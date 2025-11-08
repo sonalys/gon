@@ -23,7 +23,7 @@ func Test_DecodePretty(t *testing.T) {
 	got, err := Decode([]byte(input), DefaultExpressionCodex)
 	require.NoError(t, err)
 
-	err = Encode(t.Output(), got)
+	err = HumanEncode(t.Output(), got)
 	require.NoError(t, err)
 }
 
@@ -32,6 +32,6 @@ func Test_DecodeInlined(t *testing.T) {
 	got, err := Decode([]byte(input), DefaultExpressionCodex)
 	require.NoError(t, err)
 
-	err = Encode(t.Output(), got)
+	err = HumanEncode(t.Output(), got)
 	require.NoError(t, err)
 }

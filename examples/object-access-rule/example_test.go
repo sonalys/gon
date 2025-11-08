@@ -50,7 +50,7 @@ func Example_objectAccessRule() {
 		panic(err)
 	}
 
-	err = encoding.Encode(os.Stdout, policy)
+	err = encoding.HumanEncode(os.Stdout, policy)
 	if err != nil {
 		panic(err)
 	}
@@ -61,19 +61,19 @@ func Example_objectAccessRule() {
 	// if(
 	// 	condition: or(
 	// 		equal(
-	// 			first: file.uid
+	// 			first: file.uid,
 	// 			second: 1023
-	// 		)
+	// 		),
 	// 		equal(
-	// 			first: file.gid
+	// 			first: file.gid,
 	// 			second: 102
-	// 		)
+	// 		),
 	// 		hasPrefix(
-	// 			text: file.path
+	// 			text: file.path,
 	// 			prefix: "/shared"
 	// 		)
-	// 	)
-	// 	then: true
+	// 	),
+	// 	then: true,
 	// 	else: false
 	// )
 	// Is authorized? true

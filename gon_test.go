@@ -66,7 +66,7 @@ func Test_Expression(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "surprise!", resp)
 
-	err = encoding.Encode(t.Output(), rule)
+	err = encoding.HumanEncode(t.Output(), rule)
 	require.NoError(t, err)
 }
 
