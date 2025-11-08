@@ -59,8 +59,8 @@ func (s *scope) Definition(key string) (Value, bool) {
 	return value, true
 }
 
-func (s *scope) Compute(expression Computable) (any, error) {
-	result := expression.Eval(s)
+func (s *scope) Compute(node Node) (any, error) {
+	result := node.Eval(s)
 	switch t := result.Value().(type) {
 	case error:
 		return nil, t

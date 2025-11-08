@@ -54,6 +54,7 @@ func recursiveWalk(rootNode Node, walkFunc func(Node) bool) bool {
 }
 
 type NodeExpression interface {
+	gon.Named
 	gon.Typed
 	gon.Shaped
 }
@@ -64,10 +65,10 @@ func Parse(rootExpression gon.Node) (Node, error) {
 		return nil, fmt.Errorf("could not parse node to ast: %T", rootExpression)
 	}
 
-	switch nodeExpression.Type() {
+	switch t := nodeExpression.Type(); t {
 	case gon.NodeTypeExpression:
-		name := rootExpression.Name()
-		keyExpressions := rootExpression.Shape()
+		name := nodeExpression.Name()
+		keyExpressions := nodeExpression.Shape()
 
 		keyArgs := make([]KeyNode, 0, len(keyExpressions))
 
@@ -88,12 +89,17 @@ func Parse(rootExpression gon.Node) (Node, error) {
 			KeyArgs: keyArgs,
 		}, nil
 	case gon.NodeTypeReference:
-		name := rootExpression.Name()
+		name := nodeExpression.Name()
 		return Reference{
 			Name: name,
 		}, nil
 	case gon.NodeTypeValue:
-		valuer := rootExpression.(gon.Valued)
+		valuer, ok := rootExpression.(gon.Valued)
+		if !ok {
+			return InvalidNode{
+				Error: fmt.Errorf("node type %v should implement %T", t, new(gon.Valued)),
+			}, nil
+		}
 
 		return StaticValue{
 			Value: valuer.Value(),
