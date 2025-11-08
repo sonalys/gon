@@ -208,3 +208,22 @@ func Test_Literal_Call(t *testing.T) {
 
 	})
 }
+
+func Test_Literal_Value(t *testing.T) {
+	t.Run("nil should not panic", func(t *testing.T) {
+		node := gon.Literal(nil)
+
+		require.NotPanics(t, func() {
+			got := node.Value()
+			require.Nil(t, got)
+		})
+	})
+
+	t.Run("nested value should unwrap", func(t *testing.T) {
+		inner := gon.Literal(1)
+		outer := gon.Literal(inner)
+
+		got := outer.Value()
+		require.Equal(t, 1, got)
+	})
+}
