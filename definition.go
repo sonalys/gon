@@ -8,7 +8,7 @@ import (
 
 type (
 	// Definitions defines how scope definitions are configured.
-	// The key must be an alphanumeric string from length 1 to 50, not starting with a digit.
+	// The key must be an alphanumeric+underscore+dash string from length 1 to 50, starting with a letter.
 	Definitions map[string]Value
 
 	DefinitionResolver interface {
@@ -20,7 +20,7 @@ type (
 	}
 )
 
-var nameRegex = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9]{1,50}$")
+var nameRegex = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_\-]{1,50}$`)
 
 func (r *definitionStore) Definition(key string) (Value, bool) {
 	parts := strings.Split(key, ".")

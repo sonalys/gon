@@ -2,6 +2,7 @@ package gon
 
 import (
 	"context"
+	"fmt"
 )
 
 type (
@@ -36,13 +37,10 @@ func (s *scope) WithContext(ctx context.Context) *scope {
 }
 
 func (s *scope) WithDefinitions(source Definitions) (*scope, error) {
-	// Empty store can be a direct copy.
-	if len(s.definitionStore.store) == 0 {
-		s.definitionStore.store = source
-		return s, nil
-	}
-
 	for key, value := range source {
+		if !nameRegex.MatchString(key) {
+			return nil, fmt.Errorf("invalid definition name: %s", key)
+		}
 		if err := s.definitionStore.Define(key, value); err != nil {
 			return nil, err
 		}

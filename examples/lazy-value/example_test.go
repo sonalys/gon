@@ -1,4 +1,4 @@
-package lazyvalue
+package main_test
 
 import (
 	"context"
