@@ -1,5 +1,9 @@
 # GON
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/sonalys/gon.svg)](https://pkg.go.dev/github.com/sonalys/gon)
+[![Tests](https://github.com/sonalys/gon/actions/workflows/test.yml/badge.svg)](https://github.com/sonalys/gon/actions/workflows/test.yml)
+[![codecov](https://codecov.io/github/sonalys/gon/graph/badge.svg?token=N0XL7NLXIL)](https://codecov.io/github/sonalys/gon)
+
 Gon is your dynamic and flexible rule-engine!
 
 ### Experimental
@@ -89,9 +93,16 @@ func Example_ageVerification() {
 
 ## Roadmap
 
+I want to extend the project in the direction of having further:
+
 * Better slice definition and referencing
 * Extensive test coverage
+* Benchmarks
 * More operations:
   * Contains
   * Zero ( zero-value )
   * Etc...
+
+### Contributing
+
+If you want to contribute, feel free to open discussions and issues.

@@ -71,8 +71,6 @@ func Test_Expression(t *testing.T) {
 
 	err = encoding.Encode(t.Output(), rule)
 	require.NoError(t, err)
-
-	t.Fail()
 }
 
 func Benchmark_Equal(b *testing.B) {
