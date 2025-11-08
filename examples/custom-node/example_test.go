@@ -73,8 +73,12 @@ func Example_customNode() {
 
 	fmt.Println(buffer.String())
 
-	valued := decodedNode.Eval(scope)
-	fmt.Println(valued.Value())
+	value, err := scope.Compute(decodedNode)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(value)
 
 	//Output:
 	// if(

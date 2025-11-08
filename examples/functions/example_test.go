@@ -44,10 +44,11 @@ func Example_functions() {
 		panic(err)
 	}
 
-	err, ok := rule.Eval(scope).Value().(error)
-	if ok {
+	_, err = scope.Compute(rule)
+	if err != nil {
 		panic(err)
 	}
+
 	// Output:
 	// Hello Bob, your birthday is at 1992-03-24 00:00:00 +0000 UTC
 }

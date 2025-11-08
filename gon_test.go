@@ -62,12 +62,9 @@ func Test_Expression(t *testing.T) {
 	rule, err := encoding.Decode([]byte(ruleStr), encoding.DefaultExpressionCodex)
 	require.NoError(t, err)
 
-	resp := rule.Eval(scope)
-	require.Equal(t, "surprise!", resp.Value())
-
-	if err, ok := resp.Value().(error); ok {
-		require.NoError(t, err)
-	}
+	resp, err := scope.Compute(rule)
+	require.NoError(t, err)
+	require.Equal(t, "surprise!", resp)
 
 	err = encoding.Encode(t.Output(), rule)
 	require.NoError(t, err)

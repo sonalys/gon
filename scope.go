@@ -59,6 +59,16 @@ func (s *scope) Definition(key string) (Value, bool) {
 	return value, true
 }
 
+func (s *scope) Compute(expression Computable) (any, error) {
+	result := expression.Eval(s)
+	switch t := result.Value().(type) {
+	case error:
+		return nil, t
+	default:
+		return t, nil
+	}
+}
+
 var (
 	_ Scope = &scope{}
 )

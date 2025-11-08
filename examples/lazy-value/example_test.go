@@ -28,8 +28,12 @@ func Example_lazyValue() {
 
 	lazyRule := gon.Equal(gon.Reference("lazy"), gon.Literal(5))
 
-	got := lazyRule.Eval(scope).Value()
-	fmt.Println(got)
+	value, err := scope.Compute(lazyRule)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(value)
 
 	if !called {
 		panic("should have been called")

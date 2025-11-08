@@ -30,14 +30,18 @@ type (
 		Shape() []KeyNode
 	}
 
+	// Computable represents any abstraction capable of evaluating under a scope.
+	Computable interface {
+		Eval(scope Scope) Value
+	}
+
 	// Node is the building block of any expression.
 	// It can be used to represent values, evaluations or operations.
 	// Nodes can be evaluated under a scope.
 	Node interface {
 		Named
 		Shaped
-
-		Eval(scope Scope) Value
+		Computable
 	}
 
 	// KeyNode defines a key-node pair, used for named parameters.

@@ -31,7 +31,11 @@ func Example_dates() {
 		panic(err)
 	}
 
-	value := rule.Eval(scope).Value()
+	value, err := scope.Compute(rule)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println(value)
 	// Output:
 	// pass

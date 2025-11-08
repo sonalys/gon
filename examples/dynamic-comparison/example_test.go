@@ -36,12 +36,19 @@ func Example_dynamicComparison() {
 		panic(err)
 	}
 
-	value := rule.Eval(scope).Value()
+	value, err := scope.Compute(rule)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println(value)
 
 	person.Age = 5
 
-	value = rule.Eval(scope).Value()
+	value, err = scope.Compute(rule)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println(value)
 	// Output:
 	// pass
