@@ -1,6 +1,10 @@
 package gon
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/sonalys/gon/internal/sliceutils"
+)
 
 type sumNode struct {
 	nodes []Node
@@ -33,7 +37,7 @@ func (node sumNode) Name() string {
 }
 
 func (node sumNode) Shape() []KeyNode {
-	return nil
+	return sliceutils.Map(node.nodes, func(from Node) KeyNode { return KeyNode{Node: from} })
 }
 
 func (node sumNode) Type() NodeType {

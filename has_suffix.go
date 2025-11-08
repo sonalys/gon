@@ -7,22 +7,22 @@ import (
 
 type hasSuffixNode struct {
 	text   Node
-	prefix Node
+	suffix Node
 }
 
 // Equal defines a suffix node, all input nodes should evaluate to the same type, and be not nil.
 // Returns a boolean value indicating whether the text has the suffix.
-func HasSuffix(text, prefix Node) Node {
-	if text == nil || prefix == nil {
+func HasSuffix(text, suffix Node) Node {
+	if text == nil || suffix == nil {
 		return Literal(NodeError{
-			NodeName: "prefix",
+			NodeName: "suffix",
 			Cause:    fmt.Errorf("all inputs should be not-nil"),
 		})
 	}
 
 	return hasSuffixNode{
 		text:   text,
-		prefix: prefix,
+		suffix: suffix,
 	}
 }
 
@@ -33,7 +33,7 @@ func (node hasSuffixNode) Name() string {
 func (node hasSuffixNode) Shape() []KeyNode {
 	return []KeyNode{
 		{"text", node.text},
-		{"prefix", node.prefix},
+		{"suffix", node.suffix},
 	}
 }
 
@@ -42,7 +42,7 @@ func (node hasSuffixNode) Type() NodeType {
 }
 
 func (node hasSuffixNode) Eval(scope Scope) Value {
-	text, err := scope.Compute(node.prefix)
+	text, err := scope.Compute(node.suffix)
 	if err != nil {
 		return Literal(NodeError{
 			NodeName: node.Name(),
@@ -50,7 +50,7 @@ func (node hasSuffixNode) Eval(scope Scope) Value {
 		})
 	}
 
-	prefix, err := scope.Compute(node.prefix)
+	prefix, err := scope.Compute(node.suffix)
 	if err != nil {
 		return Literal(NodeError{
 			NodeName: node.Name(),
@@ -64,7 +64,7 @@ func (node hasSuffixNode) Eval(scope Scope) Value {
 	if !ok1 || !ok2 {
 		return Literal(NodeError{
 			NodeName: node.Name(),
-			Cause:    fmt.Errorf("text and prefix should be string, got %T and %T", text, prefix),
+			Cause:    fmt.Errorf("text and suffix should be string, got %T and %T", text, prefix),
 		})
 	}
 
