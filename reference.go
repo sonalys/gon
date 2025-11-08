@@ -25,10 +25,20 @@ func (node referenceNode) Type() NodeType {
 }
 
 func (node referenceNode) Eval(scope Scope) Value {
-	expression, ok := scope.Definition(node.definitionName)
+	value, ok := scope.Definition(node.definitionName)
 	if !ok {
-		return Literal(fmt.Errorf("definition not found: %s", node.definitionName))
+		if err, ok := value.Value().(error); ok {
+			return Literal(NodeError{
+				Scalar: "reference",
+				Cause:  err,
+			})
+
+		}
+		return Literal(NodeError{
+			Scalar: "reference",
+			Cause:  fmt.Errorf("definition not found: %s", node.definitionName),
+		})
 	}
 
-	return expression.Eval(scope)
+	return value
 }

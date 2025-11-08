@@ -1,7 +1,6 @@
 package gon
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -39,7 +38,10 @@ func (node smallerNode) Type() NodeType {
 
 func Smaller(first, second Expression) Expression {
 	if first == nil || second == nil {
-		return Literal(fmt.Errorf("smaller expression cannot compare unset expressions"))
+		return Literal(NodeError{
+			Scalar: "lt",
+			Cause:  fmt.Errorf("cannot compare unset expressions"),
+		})
 	}
 
 	return smallerNode{
@@ -50,7 +52,10 @@ func Smaller(first, second Expression) Expression {
 
 func SmallerOrEqual(first, second Expression) Expression {
 	if first == nil || second == nil {
-		return Literal(fmt.Errorf("smaller or equal expression cannot compare unset expressions"))
+		return Literal(NodeError{
+			Scalar: "lte",
+			Cause:  fmt.Errorf("cannot compare unset expressions"),
+		})
 	}
 
 	return smallerNode{
@@ -66,15 +71,30 @@ func (node smallerNode) Eval(scope Scope) Value {
 
 	comparison, ok := cmpAny(firstValue, secondValue)
 	if !ok {
-		errs := make([]error, 0, 2)
 		if err, ok := firstValue.(error); ok {
-			errs = append(errs, err)
-		}
-		if err, ok := secondValue.(error); ok {
-			errs = append(errs, err)
+			return Literal(NodeError{
+				Scalar: node.Name(),
+				Cause: NodeError{
+					Scalar: "firstValue",
+					Cause:  err,
+				},
+			})
 		}
 
-		return propagateErr(Literal(errors.Join(errs...)), "cannot compare different types: %T and %T", firstValue, secondValue)
+		if err, ok := secondValue.(error); ok {
+			return Literal(NodeError{
+				Scalar: node.Name(),
+				Cause: NodeError{
+					Scalar: "secondValue",
+					Cause:  err,
+				},
+			})
+		}
+
+		return Literal(NodeError{
+			Scalar: node.Name(),
+			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
+		})
 	}
 
 	if node.inclusive {

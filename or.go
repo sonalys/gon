@@ -32,7 +32,10 @@ func (node orNode) Eval(scope Scope) Value {
 	for _, expr := range node.expressions {
 		switch value := expr.Eval(scope).Value().(type) {
 		case error:
-			return Literal(fmt.Errorf("evaluating or node: %w", value))
+			return Literal(NodeError{
+				Scalar: "or",
+				Cause:  value,
+			})
 		case bool:
 			if value {
 				return Literal(true)

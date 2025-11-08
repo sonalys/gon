@@ -2,7 +2,6 @@ package gon
 
 import (
 	"context"
-	"fmt"
 )
 
 type (
@@ -13,7 +12,7 @@ type (
 
 	Callable interface {
 		Expression
-		Call(ctx context.Context, values ...Value) Value
+		Call(ctx context.Context, name string, values ...Value) Value
 	}
 )
 
@@ -56,13 +55,23 @@ func (node callNode) Eval(scope Scope) Value {
 
 	definition, ok := scope.Definition(node.funcName)
 	if !ok {
-		return Literal(fmt.Errorf("no callable definition found for %s", node.funcName))
+		return Literal(NodeError{
+			Scalar: node.Name(),
+			Cause: DefinitionNotFoundError{
+				DefinitionName: node.funcName,
+			},
+		})
 	}
 
 	callable, ok := definition.(Callable)
 	if !ok {
-		return Literal(fmt.Errorf("definition is not callable: %s", node.funcName))
+		return Literal(NodeError{
+			Scalar: node.Name(),
+			Cause: DefinitionNotCallable{
+				DefinitionName: node.funcName,
+			},
+		})
 	}
 
-	return callable.Call(scope, values...)
+	return callable.Call(scope, node.funcName, values...)
 }

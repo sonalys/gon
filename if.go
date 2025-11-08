@@ -47,7 +47,16 @@ func (node IfNode) Eval(scope Scope) Value {
 	value := node.condition.Eval(scope)
 	fulfilled, ok := value.Value().(bool)
 	if !ok {
-		return propagateErr(value, "if expected bool, got %T", value.Value())
+		if err, ok := value.Value().(error); ok {
+			return Literal(NodeError{
+				Scalar: node.Name(),
+				Cause:  err,
+			})
+		}
+		return Literal(NodeError{
+			Scalar: node.Name(),
+			Cause:  fmt.Errorf("expected a boolean value"),
+		})
 	}
 
 	if fulfilled {

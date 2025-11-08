@@ -61,12 +61,17 @@ func (node *literalNode) Eval(scope Scope) Value {
 	return node
 }
 
-func (node *literalNode) Call(ctx context.Context, args ...Value) Value {
+func (node *literalNode) Call(ctx context.Context, name string, args ...Value) Value {
 	valueOfFunc := reflect.ValueOf(node.value)
 	typeOfFunc := valueOfFunc.Type()
 
 	if valueOfFunc.Kind() != reflect.Func {
-		return Literal(fmt.Errorf("definition is not callable: %T", valueOfFunc.Interface()))
+		return Literal(NodeError{
+			Scalar: "literal",
+			Cause: DefinitionNotCallable{
+				DefinitionName: name,
+			},
+		})
 	}
 
 	expArgs := typeOfFunc.NumIn()
@@ -80,7 +85,10 @@ func (node *literalNode) Call(ctx context.Context, args ...Value) Value {
 	}
 
 	if gotArgs != expArgs {
-		return Literal(fmt.Errorf("expected %d args, got %d", expArgs, gotArgs))
+		return Literal(NodeError{
+			Scalar: "literal",
+			Cause:  fmt.Errorf("expected %d args, got %d", expArgs, gotArgs),
+		})
 	}
 
 	argsValue := make([]reflect.Value, 0, expArgs)
@@ -99,7 +107,10 @@ func (node *literalNode) Call(ctx context.Context, args ...Value) Value {
 		expectedTypeOfArg := typeOfFunc.In(targetParamIndex)
 
 		if !typeOfArg.AssignableTo(expectedTypeOfArg) {
-			return Literal(fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", targetParamIndex, expectedTypeOfArg.String(), typeOfArg.String()))
+			return Literal(NodeError{
+				Scalar: "literal",
+				Cause:  fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", targetParamIndex, expectedTypeOfArg.String(), typeOfArg.String()),
+			})
 		}
 
 		argsValue = append(argsValue, valueOfArg)
@@ -124,18 +135,10 @@ func (node *literalNode) Call(ctx context.Context, args ...Value) Value {
 	return Literal(respValue)
 }
 
-func (node *literalNode) Definition(key string) (Expression, bool) {
+func (node *literalNode) Definition(key string) (Value, bool) {
 	parts := strings.Split(key, ".")
 
-	valueOf := reflect.ValueOf(node.value)
-
-	switch valueOf.Kind() {
-	case reflect.Struct, reflect.Map, reflect.Pointer:
-	default:
-		return Literal(fmt.Errorf("literal of type %T cannot define children attributes", node.value)), false
-	}
-
-	curValue := valueOf
+	curValue := reflect.ValueOf(node.value)
 	for i, partKey := range parts {
 		// Pointer resolver.
 		for ; curValue.Kind() == reflect.Pointer; curValue = curValue.Elem() {
@@ -151,8 +154,11 @@ func (node *literalNode) Definition(key string) (Expression, bool) {
 			curValue = curValue.MapIndex(reflect.ValueOf(partKey))
 		}
 
-		if curValue.IsZero() {
-			return Literal(fmt.Errorf("definition not found: %s", strings.Join(parts[:i+1], "."))), false
+		if !curValue.IsValid() || curValue.IsZero() {
+			return Literal(NodeError{
+				Scalar: "literal",
+				Cause:  fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
+			}), false
 		}
 	}
 

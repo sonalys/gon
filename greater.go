@@ -12,7 +12,10 @@ type (
 
 func Greater(first, second Expression) Expression {
 	if first == nil || second == nil {
-		return Literal(fmt.Errorf("greater expression cannot compare unset expressions"))
+		return Literal(NodeError{
+			Scalar: "gt",
+			Cause:  fmt.Errorf("cannot compare unset expressions"),
+		})
 	}
 
 	return greaterNode{
@@ -23,7 +26,10 @@ func Greater(first, second Expression) Expression {
 
 func GreaterOrEqual(first, second Expression) Expression {
 	if first == nil || second == nil {
-		return Literal(fmt.Errorf("greater or equal expression cannot compare unset expressions"))
+		return Literal(NodeError{
+			Scalar: "gte",
+			Cause:  fmt.Errorf("cannot compare unset expressions"),
+		})
 	}
 	return greaterNode{
 		first:     first,
@@ -64,7 +70,30 @@ func (node greaterNode) Eval(scope Scope) Value {
 
 	comparison, ok := cmpAny(firstValue, secondValue)
 	if !ok {
-		return propagateErr(nil, "cannot compare different types: %T and %T", firstValue, secondValue)
+		if err, ok := firstValue.(error); ok {
+			return Literal(NodeError{
+				Scalar: node.Name(),
+				Cause: NodeError{
+					Scalar: "firstValue",
+					Cause:  err,
+				},
+			})
+		}
+
+		if err, ok := secondValue.(error); ok {
+			return Literal(NodeError{
+				Scalar: node.Name(),
+				Cause: NodeError{
+					Scalar: "secondValue",
+					Cause:  err,
+				},
+			})
+		}
+
+		return Literal(NodeError{
+			Scalar: node.Name(),
+			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
+		})
 	}
 
 	if node.inclusive {

@@ -34,8 +34,36 @@ func (node equalNode) Type() NodeType {
 }
 
 func (node equalNode) Eval(scope Scope) Value {
-	firstValue := node.first.Eval(scope)
-	secondValue := node.second.Eval(scope)
+	firstValue := node.first.Eval(scope).Value()
+	secondValue := node.second.Eval(scope).Value()
 
-	return Literal(firstValue.Value() == secondValue.Value())
+	value, ok := cmpAny(firstValue, secondValue)
+	if !ok {
+		if err, ok := firstValue.(error); ok {
+			return Literal(NodeError{
+				Scalar: node.Name(),
+				Cause: NodeError{
+					Scalar: "firstValue",
+					Cause:  err,
+				},
+			})
+		}
+
+		if err, ok := secondValue.(error); ok {
+			return Literal(NodeError{
+				Scalar: node.Name(),
+				Cause: NodeError{
+					Scalar: "secondValue",
+					Cause:  err,
+				},
+			})
+		}
+
+		return Literal(NodeError{
+			Scalar: node.Name(),
+			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
+		})
+	}
+
+	return Literal(value == 0)
 }

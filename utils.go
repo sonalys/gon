@@ -2,21 +2,8 @@ package gon
 
 import (
 	"cmp"
-	"fmt"
 	"time"
 )
-
-func propagateErr(value Value, mask string, args ...any) Value {
-	if value == nil {
-		return Literal(fmt.Errorf(mask, args...))
-	}
-
-	if err, ok := value.Value().(error); ok {
-		return Literal(err)
-	}
-
-	return Literal(fmt.Errorf(mask, args...))
-}
 
 func safeGet[T any](slice []T, index int) T {
 	if len(slice) <= index {

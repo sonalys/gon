@@ -34,7 +34,10 @@ func (node notNode) Eval(scope Scope) Value {
 	value := node.expression.Eval(scope)
 	resp, ok := value.Value().(bool)
 	if !ok {
-		return propagateErr(value, "cannot negate non-boolean expression")
+		return Literal(NodeError{
+			Scalar: "not",
+			Cause:  fmt.Errorf("expected value is not boolean"),
+		})
 	}
 
 	return Literal(!resp)

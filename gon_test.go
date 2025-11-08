@@ -23,7 +23,7 @@ func Test_Expression(t *testing.T) {
 		// Context cancellation
 		WithContext(t.Context()).
 		// Dynamic, decoupled scope for your rules.
-		WithDefinitions(map[string]gon.Expression{
+		WithDefinitions(map[string]gon.Value{
 			// Support for static variables of any type.
 			"myName": gon.Literal("friendName"),
 			// Support for structs and maps for children attributes.
@@ -64,6 +64,10 @@ func Test_Expression(t *testing.T) {
 
 	resp := rule.Eval(scope)
 	require.Equal(t, "surprise!", resp.Value())
+
+	if err, ok := resp.Value().(error); ok {
+		require.NoError(t, err)
+	}
 
 	err = encoding.Encode(t.Output(), rule)
 	require.NoError(t, err)
