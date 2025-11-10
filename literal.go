@@ -36,7 +36,7 @@ func Literal(value any) *literalNode {
 	}
 }
 
-func (node *literalNode) Name() string {
+func (node *literalNode) Scalar() string {
 	switch node.value.Interface().(type) {
 	case time.Time:
 		return "time"
@@ -61,7 +61,7 @@ func (node *literalNode) Type() NodeType {
 	case time.Time:
 		return NodeTypeExpression
 	default:
-		return NodeTypeValue
+		return NodeTypeLiteral
 	}
 }
 
@@ -105,8 +105,8 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 
 		if !curValue.IsValid() || curValue.IsZero() {
 			return Literal(NodeError{
-				NodeName: "literal",
-				Cause:    fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
+				Scalar: "literal",
+				Cause:  fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
 			})
 		}
 	}
@@ -115,7 +115,7 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 
 	if curValue.Kind() != reflect.Func {
 		return Literal(NodeError{
-			NodeName: "literal",
+			Scalar: "literal",
 			Cause: DefinitionNotCallable{
 				DefinitionName: key,
 			},
@@ -134,8 +134,8 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 
 	if gotArgs != expArgs {
 		return Literal(NodeError{
-			NodeName: "literal",
-			Cause:    fmt.Errorf("expected %d args, got %d", expArgs, gotArgs),
+			Scalar: "literal",
+			Cause:  fmt.Errorf("expected %d args, got %d", expArgs, gotArgs),
 		})
 	}
 
@@ -156,8 +156,8 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 
 		if !typeOfArg.AssignableTo(expectedTypeOfArg) {
 			return Literal(NodeError{
-				NodeName: "literal",
-				Cause:    fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", targetParamIndex, expectedTypeOfArg.String(), typeOfArg.String()),
+				Scalar: "literal",
+				Cause:  fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", targetParamIndex, expectedTypeOfArg.String(), typeOfArg.String()),
 			})
 		}
 

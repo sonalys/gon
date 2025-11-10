@@ -15,8 +15,8 @@ type (
 func Greater(first, second Node) Node {
 	if first == nil || second == nil {
 		return Literal(NodeError{
-			NodeName: "gt",
-			Cause:    fmt.Errorf("cannot compare unset expressions"),
+			Scalar: "gt",
+			Cause:  fmt.Errorf("cannot compare unset expressions"),
 		})
 	}
 
@@ -31,8 +31,8 @@ func Greater(first, second Node) Node {
 func GreaterOrEqual(first, second Node) Node {
 	if first == nil || second == nil {
 		return Literal(NodeError{
-			NodeName: "gte",
-			Cause:    fmt.Errorf("cannot compare unset expressions"),
+			Scalar: "gte",
+			Cause:  fmt.Errorf("cannot compare unset expressions"),
 		})
 	}
 	return greaterNode{
@@ -42,7 +42,7 @@ func GreaterOrEqual(first, second Node) Node {
 	}
 }
 
-func (node greaterNode) Name() string {
+func (node greaterNode) Scalar() string {
 	if node.inclusive {
 		return "gte"
 	}
@@ -76,27 +76,27 @@ func (node greaterNode) Eval(scope Scope) Value {
 	if !ok {
 		if err, ok := firstValue.(error); ok {
 			return Literal(NodeError{
-				NodeName: node.Name(),
+				Scalar: node.Scalar(),
 				Cause: NodeError{
-					NodeName: "firstValue",
-					Cause:    err,
+					Scalar: "firstValue",
+					Cause:  err,
 				},
 			})
 		}
 
 		if err, ok := secondValue.(error); ok {
 			return Literal(NodeError{
-				NodeName: node.Name(),
+				Scalar: node.Scalar(),
 				Cause: NodeError{
-					NodeName: "secondValue",
-					Cause:    err,
+					Scalar: "secondValue",
+					Cause:  err,
 				},
 			})
 		}
 
 		return Literal(NodeError{
-			NodeName: node.Name(),
-			Cause:    fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
+			Scalar: node.Scalar(),
+			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
 		})
 	}
 

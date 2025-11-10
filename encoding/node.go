@@ -6,28 +6,19 @@ import (
 	"github.com/sonalys/gon"
 )
 
-type NodeType uint8
-
-const (
-	NodeTypeUnknown NodeType = iota
-	NodeTypeExpression
-	NodeTypeReference
-	NodeTypeLiteral
-)
-
 type Node struct {
 	Children []*Node
 	Key      []byte
 	Scalar   []byte
 	Value    any
-	Type     NodeType
+	Type     gon.NodeType
 }
 
 func translateNode(rootNode *Node, codex Codex) (gon.Node, error) {
 	switch rootNode.Type {
-	case NodeTypeReference:
+	case gon.NodeTypeReference:
 		return gon.Reference(string(rootNode.Scalar)), nil
-	case NodeTypeLiteral:
+	case gon.NodeTypeLiteral:
 		return gon.Literal(rootNode.Value), nil
 	}
 
@@ -40,13 +31,13 @@ func translateNode(rootNode *Node, codex Codex) (gon.Node, error) {
 	nodeChildren := make([]gon.KeyNode, 0, len(children))
 
 	for _, child := range children {
-		nodeChild, err := translateNode(child, codex)
+		childNode, err := translateNode(child, codex)
 		if err != nil {
 			return nil, err
 		}
 		nodeChildren = append(nodeChildren, gon.KeyNode{
 			Key:  string(child.Key),
-			Node: nodeChild,
+			Node: childNode,
 		})
 	}
 

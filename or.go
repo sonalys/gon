@@ -15,16 +15,16 @@ type orNode struct {
 func Or(nodes ...Node) Node {
 	if len(nodes) == 0 {
 		return Literal(NodeError{
-			NodeName: "or",
-			Cause:    fmt.Errorf("must receive at least one expression"),
+			Scalar: "or",
+			Cause:  fmt.Errorf("must receive at least one expression"),
 		})
 	}
 
 	for i := range nodes {
 		if nodes[i] == nil {
 			return Literal(NodeError{
-				NodeName: "or",
-				Cause:    fmt.Errorf("all expressions should be not-nil"),
+				Scalar: "or",
+				Cause:  fmt.Errorf("all expressions should be not-nil"),
 			})
 		}
 	}
@@ -34,7 +34,7 @@ func Or(nodes ...Node) Node {
 	}
 }
 
-func (node orNode) Name() string {
+func (node orNode) Scalar() string {
 	return "or"
 }
 
@@ -51,8 +51,8 @@ func (node orNode) Eval(scope Scope) Value {
 		switch value := expr.Eval(scope).Value().(type) {
 		case error:
 			return Literal(NodeError{
-				NodeName: "or",
-				Cause:    value,
+				Scalar: "or",
+				Cause:  value,
 			})
 		case bool:
 			if value {

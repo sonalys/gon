@@ -22,7 +22,7 @@ func If(condition, thenBranch Node, elseBranch ...Node) Node {
 	}
 }
 
-func (node IfNode) Name() string {
+func (node IfNode) Scalar() string {
 	return "if"
 }
 
@@ -49,13 +49,13 @@ func (node IfNode) Eval(scope Scope) Value {
 	if !ok {
 		if err, ok := value.Value().(error); ok {
 			return Literal(NodeError{
-				NodeName: node.Name(),
-				Cause:    err,
+				Scalar: node.Scalar(),
+				Cause:  err,
 			})
 		}
 		return Literal(NodeError{
-			NodeName: node.Name(),
-			Cause:    fmt.Errorf("expected a boolean value"),
+			Scalar: node.Scalar(),
+			Cause:  fmt.Errorf("expected a boolean value"),
 		})
 	}
 

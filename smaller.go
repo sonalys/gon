@@ -15,8 +15,8 @@ type smallerNode struct {
 func Smaller(first, second Node) Node {
 	if first == nil || second == nil {
 		return Literal(NodeError{
-			NodeName: "lt",
-			Cause:    fmt.Errorf("cannot compare unset expressions"),
+			Scalar: "lt",
+			Cause:  fmt.Errorf("cannot compare unset expressions"),
 		})
 	}
 
@@ -31,8 +31,8 @@ func Smaller(first, second Node) Node {
 func SmallerOrEqual(first, second Node) Node {
 	if first == nil || second == nil {
 		return Literal(NodeError{
-			NodeName: "lte",
-			Cause:    fmt.Errorf("cannot compare unset expressions"),
+			Scalar: "lte",
+			Cause:  fmt.Errorf("cannot compare unset expressions"),
 		})
 	}
 
@@ -43,7 +43,7 @@ func SmallerOrEqual(first, second Node) Node {
 	}
 }
 
-func (node smallerNode) Name() string {
+func (node smallerNode) Scalar() string {
 	if node.inclusive {
 		return "lte"
 	}
@@ -77,27 +77,27 @@ func (node smallerNode) Eval(scope Scope) Value {
 	if !ok {
 		if err, ok := firstValue.(error); ok {
 			return Literal(NodeError{
-				NodeName: node.Name(),
+				Scalar: node.Scalar(),
 				Cause: NodeError{
-					NodeName: "firstValue",
-					Cause:    err,
+					Scalar: "firstValue",
+					Cause:  err,
 				},
 			})
 		}
 
 		if err, ok := secondValue.(error); ok {
 			return Literal(NodeError{
-				NodeName: node.Name(),
+				Scalar: node.Scalar(),
 				Cause: NodeError{
-					NodeName: "secondValue",
-					Cause:    err,
+					Scalar: "secondValue",
+					Cause:  err,
 				},
 			})
 		}
 
 		return Literal(NodeError{
-			NodeName: node.Name(),
-			Cause:    fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
+			Scalar: node.Scalar(),
+			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
 		})
 	}
 

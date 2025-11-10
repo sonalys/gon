@@ -12,8 +12,8 @@ type equalNode struct {
 func Equal(first, second Node) Node {
 	if first == nil || second == nil {
 		return Literal(NodeError{
-			NodeName: "equal",
-			Cause:    fmt.Errorf("all inputs should be not-nil"),
+			Scalar: "equal",
+			Cause:  fmt.Errorf("all inputs should be not-nil"),
 		})
 	}
 
@@ -23,7 +23,7 @@ func Equal(first, second Node) Node {
 	}
 }
 
-func (node equalNode) Name() string {
+func (node equalNode) Scalar() string {
 	return "equal"
 }
 
@@ -46,27 +46,27 @@ func (node equalNode) Eval(scope Scope) Value {
 	if !ok {
 		if err, ok := firstValue.(error); ok {
 			return Literal(NodeError{
-				NodeName: node.Name(),
+				Scalar: node.Scalar(),
 				Cause: NodeError{
-					NodeName: "firstValue",
-					Cause:    err,
+					Scalar: "firstValue",
+					Cause:  err,
 				},
 			})
 		}
 
 		if err, ok := secondValue.(error); ok {
 			return Literal(NodeError{
-				NodeName: node.Name(),
+				Scalar: node.Scalar(),
 				Cause: NodeError{
-					NodeName: "secondValue",
-					Cause:    err,
+					Scalar: "secondValue",
+					Cause:  err,
 				},
 			})
 		}
 
 		return Literal(NodeError{
-			NodeName: node.Name(),
-			Cause:    fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
+			Scalar: node.Scalar(),
+			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
 		})
 	}
 

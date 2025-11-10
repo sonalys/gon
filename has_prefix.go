@@ -15,8 +15,8 @@ type hasPrefixNode struct {
 func HasPrefix(text, prefix Node) Node {
 	if text == nil || prefix == nil {
 		return Literal(NodeError{
-			NodeName: "prefix",
-			Cause:    fmt.Errorf("all inputs should be not-nil"),
+			Scalar: "prefix",
+			Cause:  fmt.Errorf("all inputs should be not-nil"),
 		})
 	}
 
@@ -26,7 +26,7 @@ func HasPrefix(text, prefix Node) Node {
 	}
 }
 
-func (node hasPrefixNode) Name() string {
+func (node hasPrefixNode) Scalar() string {
 	return "hasPrefix"
 }
 
@@ -45,16 +45,16 @@ func (node hasPrefixNode) Eval(scope Scope) Value {
 	text, err := scope.Compute(node.prefix)
 	if err != nil {
 		return Literal(NodeError{
-			NodeName: node.Name(),
-			Cause:    err,
+			Scalar: node.Scalar(),
+			Cause:  err,
 		})
 	}
 
 	prefix, err := scope.Compute(node.prefix)
 	if err != nil {
 		return Literal(NodeError{
-			NodeName: node.Name(),
-			Cause:    err,
+			Scalar: node.Scalar(),
+			Cause:  err,
 		})
 	}
 
@@ -63,8 +63,8 @@ func (node hasPrefixNode) Eval(scope Scope) Value {
 
 	if !ok1 || !ok2 {
 		return Literal(NodeError{
-			NodeName: node.Name(),
-			Cause:    fmt.Errorf("text and prefix should be string, got %T and %T", text, prefix),
+			Scalar: node.Scalar(),
+			Cause:  fmt.Errorf("text and prefix should be string, got %T and %T", text, prefix),
 		})
 	}
 

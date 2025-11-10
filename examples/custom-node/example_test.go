@@ -17,7 +17,7 @@ func (node *customNode) Type() gon.NodeType {
 	return gon.NodeTypeExpression
 }
 
-func (node *customNode) Name() string {
+func (node *customNode) Scalar() string {
 	return "customNode"
 }
 

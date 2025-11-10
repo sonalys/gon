@@ -38,7 +38,7 @@ func tokenize(input Token) []Token {
 			inComment = false
 			resetCursor()
 		case inComment:
-		case bytes.Equal(input[i:i+2], Token("//")):
+		case len(input) > i+2 && bytes.Equal(input[i:i+2], Token("//")):
 			inComment = true
 		case r == '"' && !inString:
 			inString = true

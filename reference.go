@@ -12,7 +12,7 @@ func Reference(key string) Node {
 	}
 }
 
-func (node referenceNode) Name() string {
+func (node referenceNode) Scalar() string {
 	return node.definitionName
 }
 
@@ -29,14 +29,14 @@ func (node referenceNode) Eval(scope Scope) Value {
 	if !ok {
 		if err, ok := value.Value().(error); ok {
 			return Literal(NodeError{
-				NodeName: "reference",
-				Cause:    err,
+				Scalar: "reference",
+				Cause:  err,
 			})
 
 		}
 		return Literal(NodeError{
-			NodeName: "reference",
-			Cause:    fmt.Errorf("definition not found: %s", node.definitionName),
+			Scalar: "reference",
+			Cause:  fmt.Errorf("definition not found: %s", node.definitionName),
 		})
 	}
 

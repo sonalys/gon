@@ -30,7 +30,7 @@ func Call(funcName string, argNodes ...Node) Node {
 	}
 }
 
-func (node callNode) Name() string {
+func (node callNode) Scalar() string {
 	return "call"
 }
 
@@ -63,7 +63,7 @@ func (node callNode) Eval(scope Scope) Value {
 	definition, ok := scope.Definition(node.funcName)
 	if !ok {
 		return Literal(NodeError{
-			NodeName: node.Name(),
+			Scalar: node.Scalar(),
 			Cause: DefinitionNotFoundError{
 				DefinitionName: node.funcName,
 			},
@@ -73,7 +73,7 @@ func (node callNode) Eval(scope Scope) Value {
 	callable, ok := definition.(Callable)
 	if !ok {
 		return Literal(NodeError{
-			NodeName: node.Name(),
+			Scalar: node.Scalar(),
 			Cause: DefinitionNotCallable{
 				DefinitionName: node.funcName,
 			},

@@ -8,6 +8,6 @@ const (
 	NodeTypeExpression
 	// NodeTypeReference represents a variable reference. Example: friend.name.
 	NodeTypeReference
-	// NodeTypeValue represents a direct value. Example: "string", 5.
-	NodeTypeValue
+	// NodeTypeLiteral represents a direct value. Example: "string", 5.
+	NodeTypeLiteral
 )

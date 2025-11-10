@@ -18,7 +18,7 @@ func Not(expression Node) Node {
 	}
 }
 
-func (node notNode) Name() string {
+func (node notNode) Scalar() string {
 	return "not"
 }
 
@@ -37,8 +37,8 @@ func (node notNode) Eval(scope Scope) Value {
 	resp, ok := value.Value().(bool)
 	if !ok {
 		return Literal(NodeError{
-			NodeName: "not",
-			Cause:    fmt.Errorf("expected value is not boolean"),
+			Scalar: "not",
+			Cause:  fmt.Errorf("expected value is not boolean"),
 		})
 	}
 

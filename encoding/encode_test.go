@@ -9,7 +9,7 @@ import (
 func Test_DecodePretty(t *testing.T) {
 	input := `if(
 		  condition: equal(
-		      first: myName
+		      first: true
 		      second: friend.name
 		  ),
 		  then: call(

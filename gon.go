@@ -18,9 +18,9 @@ type (
 		Type() NodeType
 	}
 
-	// Named defines a named node.
+	// Named abstracts a node scalar getter.
 	Named interface {
-		Name() string
+		Scalar() string
 	}
 
 	// Shaped defines a node capable of returning it's shape.

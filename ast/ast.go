@@ -12,21 +12,27 @@ type (
 		Children() iter.Seq[Node]
 	}
 
+	ParseableNode interface {
+		gon.Named
+		gon.Typed
+		gon.Shaped
+	}
+
 	KeyNode struct {
 		Key  string
 		Node Node
 	}
 
-	InvalidNode struct {
+	Invalid struct {
 		Error error
 	}
 
 	Expression struct {
-		Name    string
+		Scalar  string
 		KeyArgs []KeyNode
 	}
 
-	StaticValue struct {
+	Literal struct {
 		Value any
 	}
 
@@ -53,21 +59,15 @@ func recursiveWalk(rootNode Node, walkFunc func(Node) bool) bool {
 	return true
 }
 
-type NodeExpression interface {
-	gon.Named
-	gon.Typed
-	gon.Shaped
-}
-
 func Parse(rootExpression gon.Node) (Node, error) {
-	nodeExpression, ok := rootExpression.(NodeExpression)
+	nodeExpression, ok := rootExpression.(ParseableNode)
 	if !ok {
-		return nil, fmt.Errorf("could not parse node to ast: %T", rootExpression)
+		return nil, fmt.Errorf("parsing node to ast: %T", rootExpression)
 	}
 
 	switch t := nodeExpression.Type(); t {
 	case gon.NodeTypeExpression:
-		name := nodeExpression.Name()
+		name := nodeExpression.Scalar()
 		keyExpressions := nodeExpression.Shape()
 
 		keyArgs := make([]KeyNode, 0, len(keyExpressions))
@@ -85,33 +85,33 @@ func Parse(rootExpression gon.Node) (Node, error) {
 		}
 
 		return Expression{
-			Name:    name,
+			Scalar:  name,
 			KeyArgs: keyArgs,
 		}, nil
 	case gon.NodeTypeReference:
-		name := nodeExpression.Name()
+		name := nodeExpression.Scalar()
 		return Reference{
 			Name: name,
 		}, nil
-	case gon.NodeTypeValue:
+	case gon.NodeTypeLiteral:
 		valuer, ok := rootExpression.(gon.Valued)
 		if !ok {
-			return InvalidNode{
+			return Invalid{
 				Error: fmt.Errorf("node type %v should implement %T", t, new(gon.Valued)),
 			}, nil
 		}
 
-		return StaticValue{
+		return Literal{
 			Value: valuer.Value(),
 		}, nil
 	default:
-		return InvalidNode{
+		return Invalid{
 			Error: fmt.Errorf("invalid node type: %v", nodeExpression.Type()),
 		}, nil
 	}
 }
 
-func (i InvalidNode) Children() iter.Seq[Node] {
+func (i Invalid) Children() iter.Seq[Node] {
 	return func(yield func(Node) bool) {}
 }
 
@@ -129,6 +129,6 @@ func (r Reference) Children() iter.Seq[Node] {
 	return func(yield func(Node) bool) {}
 }
 
-func (s StaticValue) Children() iter.Seq[Node] {
+func (s Literal) Children() iter.Seq[Node] {
 	return func(yield func(Node) bool) {}
 }

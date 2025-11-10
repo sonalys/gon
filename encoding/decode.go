@@ -1,6 +1,10 @@
 package encoding
 
-import "github.com/sonalys/gon"
+import (
+	"fmt"
+
+	"github.com/sonalys/gon"
+)
 
 func Decode(buffer []byte, codex Codex) (gon.Node, error) {
 	tokens := tokenize(buffer)
@@ -8,8 +12,13 @@ func Decode(buffer []byte, codex Codex) (gon.Node, error) {
 
 	rootNode, err := parser.parse()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parsing input: %w", err)
 	}
 
-	return translateNode(rootNode, codex)
+	node, err := translateNode(rootNode, codex)
+	if err != nil {
+		return nil, fmt.Errorf("translating ast using codex: %w", err)
+	}
+
+	return node, nil
 }

@@ -13,16 +13,16 @@ type sumNode struct {
 func Sum(nodes ...Node) Node {
 	if len(nodes) == 0 {
 		return Literal(NodeError{
-			NodeName: "sum",
-			Cause:    fmt.Errorf("must receive at least one expression"),
+			Scalar: "sum",
+			Cause:  fmt.Errorf("must receive at least one expression"),
 		})
 	}
 
 	for i := range nodes {
 		if nodes[i] == nil {
 			return Literal(NodeError{
-				NodeName: "sum",
-				Cause:    fmt.Errorf("all expressions should be not-nil"),
+				Scalar: "sum",
+				Cause:  fmt.Errorf("all expressions should be not-nil"),
 			})
 		}
 	}
@@ -32,7 +32,7 @@ func Sum(nodes ...Node) Node {
 	}
 }
 
-func (node sumNode) Name() string {
+func (node sumNode) Scalar() string {
 	return "sum"
 }
 
@@ -51,8 +51,8 @@ func (node sumNode) Eval(scope Scope) Value {
 		curValue, err := scope.Compute(node.nodes[i])
 		if err != nil {
 			return Literal(NodeError{
-				NodeName: node.Name(),
-				Cause:    err,
+				Scalar: node.Scalar(),
+				Cause:  err,
 			})
 		}
 
@@ -62,8 +62,8 @@ func (node sumNode) Eval(scope Scope) Value {
 	sum, ok := sumAny(values...)
 	if !ok {
 		return Literal(NodeError{
-			NodeName: node.Name(),
-			Cause:    fmt.Errorf("all nodes must be of the same type"),
+			Scalar: node.Scalar(),
+			Cause:  fmt.Errorf("all nodes must be of the same type"),
 		})
 	}
 

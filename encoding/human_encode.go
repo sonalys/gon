@@ -82,7 +82,7 @@ func encodeBody(w io.Writer, root ast.Node, indentation int, cfg *humanEncodeCon
 
 	switch node := root.(type) {
 	case ast.Expression:
-		print(0, "%s(", node.Name)
+		print(0, "%s(", node.Scalar)
 
 		for i, arg := range node.KeyArgs {
 			if i > 0 || len(node.KeyArgs) != 1 || (i == 0 && len(node.KeyArgs) > 1 && arg.Key != "" && node.KeyArgs[i+1].Key != "") {
@@ -111,7 +111,7 @@ func encodeBody(w io.Writer, root ast.Node, indentation int, cfg *humanEncodeCon
 		print(0, ")")
 	case ast.Reference:
 		print(0, "%v", node.Name)
-	case ast.StaticValue:
+	case ast.Literal:
 		value := node.Value
 		if str, ok := value.(string); ok {
 			value = strconv.Quote(str)

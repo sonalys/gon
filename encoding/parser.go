@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+
+	"github.com/sonalys/gon"
 )
 
 type parser struct {
@@ -57,7 +59,7 @@ func (p *parser) parse() (*Node, error) {
 	switch token := p.consume(); {
 	case bytes.HasPrefix(token, Token("\"")) && bytes.HasSuffix(token, Token("\"")):
 		val := bytes.Trim(token, "\"")
-		return &Node{Value: string(val), Type: NodeTypeLiteral}, nil
+		return &Node{Value: string(val), Type: gon.NodeTypeLiteral}, nil
 	case isInteger(string(token)):
 		integer, err := strconv.ParseInt(string(token), 10, 64)
 		if err != nil {
@@ -65,7 +67,7 @@ func (p *parser) parse() (*Node, error) {
 		}
 
 		return &Node{
-			Type:  NodeTypeLiteral,
+			Type:  gon.NodeTypeLiteral,
 			Value: integer,
 		}, nil
 	case isFloat(string(token)):
@@ -75,24 +77,24 @@ func (p *parser) parse() (*Node, error) {
 		}
 
 		return &Node{
-			Type:  NodeTypeLiteral,
+			Type:  gon.NodeTypeLiteral,
 			Value: float,
 		}, nil
 	default:
 		switch string(token) {
 		case "true", "True":
 			return &Node{
-				Type:  NodeTypeLiteral,
+				Type:  gon.NodeTypeLiteral,
 				Value: true,
 			}, nil
 		case "false", "False":
 			return &Node{
-				Type:  NodeTypeLiteral,
+				Type:  gon.NodeTypeLiteral,
 				Value: false,
 			}, nil
 		default:
 			return &Node{
-				Type:   NodeTypeReference,
+				Type:   gon.NodeTypeReference,
 				Scalar: token,
 			}, nil
 		}
