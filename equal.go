@@ -1,8 +1,10 @@
 package gon
 
-import "fmt"
+import (
+	"fmt"
+)
 
-type equalNode struct {
+type EqualNode struct {
 	first  Node
 	second Node
 }
@@ -17,28 +19,28 @@ func Equal(first, second Node) Node {
 		}
 	}
 
-	return equalNode{
+	return EqualNode{
 		first:  first,
 		second: second,
 	}
 }
 
-func (node equalNode) Scalar() string {
+func (node EqualNode) Scalar() string {
 	return "equal"
 }
 
-func (node equalNode) Shape() []KeyNode {
+func (node EqualNode) Shape() []KeyNode {
 	return []KeyNode{
 		{"first", node.first},
 		{"second", node.second},
 	}
 }
 
-func (node equalNode) Type() NodeType {
+func (node EqualNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node equalNode) Eval(scope Scope) Value {
+func (node EqualNode) Eval(scope Scope) Value {
 	firstValue, err := scope.Compute(node.first)
 	if err != nil {
 		return NewNodeError(node, err)
@@ -55,4 +57,14 @@ func (node equalNode) Eval(scope Scope) Value {
 	}
 
 	return Literal(value == 0)
+}
+
+func (node EqualNode) Register(codex Codex) error {
+	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
+		orderedArgs, _, err := argSorter(args, "first", "second")
+		if err != nil {
+			return nil, err
+		}
+		return Equal(orderedArgs["first"], orderedArgs["second"]), nil
+	})
 }

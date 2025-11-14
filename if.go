@@ -81,3 +81,14 @@ func (node IfNode) Eval(scope Scope) Value {
 
 	return Literal(false)
 }
+
+func (node IfNode) Register(codex Codex) error {
+	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
+		orderedArgs, rest, err := argSorter(args, "condition", "then")
+		if err != nil {
+			return nil, err
+		}
+
+		return If(orderedArgs["condition"], orderedArgs["then"], rest...), nil
+	})
+}

@@ -2,6 +2,8 @@ package gon
 
 import (
 	"cmp"
+	"fmt"
+	"slices"
 	"time"
 
 	"golang.org/x/exp/constraints"
@@ -333,4 +335,27 @@ func castAll[T any](values ...any) ([]T, bool) {
 	}
 
 	return output, true
+}
+
+func argSorter(from []KeyNode, keys ...string) (map[string]Node, []Node, error) {
+	if len(from) < len(keys) {
+		return nil, nil, fmt.Errorf("missing arguments")
+	}
+
+	expectedMap := make(map[string]Node, len(keys))
+	rest := make([]Node, 0, len(from))
+
+gotArgLoop:
+	for fromIndex := range from {
+		for keyIndex := range keys {
+			if from[fromIndex].Key == "" || from[fromIndex].Key == keys[keyIndex] {
+				expectedMap[keys[keyIndex]] = from[fromIndex].Node
+				keys = slices.Delete(keys, keyIndex, keyIndex+1)
+				continue gotArgLoop
+			}
+		}
+		rest = append(rest, from[fromIndex].Node)
+	}
+
+	return expectedMap, rest, nil
 }

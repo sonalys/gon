@@ -43,4 +43,8 @@ type (
 		Key  string
 		Node Node
 	}
+
+	Codex interface {
+		Register(name string, constructor func([]KeyNode) (Node, error)) error
+	}
 )

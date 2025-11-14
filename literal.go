@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	literalNode struct {
+	LiteralNode struct {
 		value  reflect.Value
 		isLazy bool
 	}
@@ -21,7 +21,7 @@ var typeOfContext = reflect.TypeOf(context.Background())
 // Use Literal with functions to define callable definitions.
 // Use Literal with structs or maps to define definitions with children attributes.
 // time.Time is serialized as time(RFC3339) by default.
-func Literal(value any) *literalNode {
+func Literal(value any) *LiteralNode {
 	valueOf := reflect.ValueOf(value)
 
 	var isLazy bool
@@ -30,13 +30,13 @@ func Literal(value any) *literalNode {
 		isLazy = typeOf.Kind() == reflect.Func && (typeOf.NumIn() == 0 || typeOfContext.AssignableTo(typeOf.In(0)))
 	}
 
-	return &literalNode{
+	return &LiteralNode{
 		value:  valueOf,
 		isLazy: isLazy,
 	}
 }
 
-func (node *literalNode) Scalar() string {
+func (node *LiteralNode) Scalar() string {
 	switch node.value.Interface().(type) {
 	case time.Time:
 		return "time"
@@ -45,7 +45,7 @@ func (node *literalNode) Scalar() string {
 	}
 }
 
-func (node *literalNode) Shape() []KeyNode {
+func (node *LiteralNode) Shape() []KeyNode {
 	switch v := node.value.Interface().(type) {
 	case time.Time:
 		return []KeyNode{
@@ -56,7 +56,7 @@ func (node *literalNode) Shape() []KeyNode {
 	}
 }
 
-func (node *literalNode) Type() NodeType {
+func (node *LiteralNode) Type() NodeType {
 	switch node.value.Interface().(type) {
 	case time.Time:
 		return NodeTypeExpression
@@ -65,7 +65,7 @@ func (node *literalNode) Type() NodeType {
 	}
 }
 
-func (node *literalNode) Value() any {
+func (node *LiteralNode) Value() any {
 	if node.value.IsValid() {
 		if nested, ok := node.value.Interface().(Value); ok {
 			return nested.Value()
@@ -76,14 +76,14 @@ func (node *literalNode) Value() any {
 	return nil
 }
 
-func (node *literalNode) Eval(scope Scope) Value {
+func (node *LiteralNode) Eval(scope Scope) Value {
 	if node.isLazy {
 		return node.Call(scope, "")
 	}
 	return node
 }
 
-func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Value {
+func (node *LiteralNode) Call(ctx context.Context, key string, args ...Value) Value {
 	parts := strings.Split(key, ".")
 
 	curValue := node.value
@@ -171,7 +171,7 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 	return Literal(respValue)
 }
 
-func (node *literalNode) Definition(key string) (Value, bool) {
+func (node *LiteralNode) Definition(key string) (Value, bool) {
 	parts := strings.Split(key, ".")
 
 	curValue := node.value
@@ -209,8 +209,29 @@ func (node *literalNode) Definition(key string) (Value, bool) {
 	return Literal(value), true
 }
 
+func (node LiteralNode) Register(codex Codex) error {
+	return codex.Register("time", func(args []KeyNode) (Node, error) {
+		valuer, ok := args[0].Node.(Valued)
+		if !ok {
+			return nil, fmt.Errorf("time should be parsed only from string")
+		}
+
+		rawTime, ok := valuer.Value().(string)
+		if !ok {
+			return nil, fmt.Errorf("time should be parsed only from string")
+		}
+
+		t, err := time.Parse(time.RFC3339, rawTime)
+		if err != nil {
+			return nil, fmt.Errorf("time is invalid: %w", err)
+		}
+
+		return Literal(t), nil
+	})
+}
+
 var (
-	_ Value            = &literalNode{}
-	_ Callable         = &literalNode{}
-	_ DefinitionReader = &literalNode{}
+	_ Value            = &LiteralNode{}
+	_ Callable         = &LiteralNode{}
+	_ DefinitionReader = &LiteralNode{}
 )

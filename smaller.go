@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-type smallerNode struct {
+type SmallerNode struct {
 	first     Node
 	second    Node
 	inclusive bool
@@ -20,7 +20,7 @@ func Smaller(first, second Node) Node {
 		}
 	}
 
-	return smallerNode{
+	return SmallerNode{
 		first:  first,
 		second: second,
 	}
@@ -36,14 +36,14 @@ func SmallerOrEqual(first, second Node) Node {
 		}
 	}
 
-	return smallerNode{
+	return SmallerNode{
 		first:     first,
 		second:    second,
 		inclusive: true,
 	}
 }
 
-func (node smallerNode) Scalar() string {
+func (node SmallerNode) Scalar() string {
 	if node.inclusive {
 		return "lte"
 	}
@@ -51,7 +51,7 @@ func (node smallerNode) Scalar() string {
 	return "lt"
 }
 
-func (node smallerNode) Shape() []KeyNode {
+func (node SmallerNode) Shape() []KeyNode {
 	if node.inclusive {
 		return []KeyNode{
 			{"first", node.first},
@@ -65,11 +65,11 @@ func (node smallerNode) Shape() []KeyNode {
 	}
 }
 
-func (node smallerNode) Type() NodeType {
+func (node SmallerNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node smallerNode) Eval(scope Scope) Value {
+func (node SmallerNode) Eval(scope Scope) Value {
 	firstValue, err := scope.Compute(node.first)
 	if err != nil {
 		return NewNodeError(node, err)
@@ -92,6 +92,27 @@ func (node smallerNode) Eval(scope Scope) Value {
 	return Literal(comparison < 0)
 }
 
+func (node SmallerNode) Register(codex Codex) error {
+	err := codex.Register("lt", func(args []KeyNode) (Node, error) {
+		orderedArgs, _, err := argSorter(args, "first", "second")
+		if err != nil {
+			return nil, err
+		}
+		return Smaller(orderedArgs["first"], orderedArgs["second"]), nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return codex.Register("lte", func(args []KeyNode) (Node, error) {
+		orderedArgs, _, err := argSorter(args, "first", "second")
+		if err != nil {
+			return nil, err
+		}
+		return Smaller(orderedArgs["first"], orderedArgs["second"]), nil
+	})
+}
+
 var (
-	_ Node = smallerNode{}
+	_ Node = SmallerNode{}
 )

@@ -6,7 +6,7 @@ import (
 	"github.com/sonalys/gon/internal/sliceutils"
 )
 
-type orNode struct {
+type OrNode struct {
 	nodes []Node
 }
 
@@ -29,24 +29,24 @@ func Or(nodes ...Node) Node {
 		}
 	}
 
-	return orNode{
+	return OrNode{
 		nodes: nodes,
 	}
 }
 
-func (node orNode) Scalar() string {
+func (node OrNode) Scalar() string {
 	return "or"
 }
 
-func (node orNode) Shape() []KeyNode {
+func (node OrNode) Shape() []KeyNode {
 	return sliceutils.Map(node.nodes, func(from Node) KeyNode { return KeyNode{Node: from} })
 }
 
-func (node orNode) Type() NodeType {
+func (node OrNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node orNode) Eval(scope Scope) Value {
+func (node OrNode) Eval(scope Scope) Value {
 	for _, expr := range node.nodes {
 		value, err := scope.Compute(expr)
 		if err != nil {
@@ -64,4 +64,12 @@ func (node orNode) Eval(scope Scope) Value {
 	}
 
 	return Literal(false)
+}
+
+func (node OrNode) Register(codex Codex) error {
+	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
+		_, argsSlice, _ := argSorter(args)
+
+		return Or(argsSlice...), nil
+	})
 }

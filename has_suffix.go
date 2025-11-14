@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type hasSuffixNode struct {
+type HasSuffixNode struct {
 	text   Node
 	suffix Node
 }
@@ -20,28 +20,28 @@ func HasSuffix(text, suffix Node) Node {
 		}
 	}
 
-	return hasSuffixNode{
+	return HasSuffixNode{
 		text:   text,
 		suffix: suffix,
 	}
 }
 
-func (node hasSuffixNode) Scalar() string {
+func (node HasSuffixNode) Scalar() string {
 	return "hasSuffix"
 }
 
-func (node hasSuffixNode) Shape() []KeyNode {
+func (node HasSuffixNode) Shape() []KeyNode {
 	return []KeyNode{
 		{"text", node.text},
 		{"suffix", node.suffix},
 	}
 }
 
-func (node hasSuffixNode) Type() NodeType {
+func (node HasSuffixNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node hasSuffixNode) Eval(scope Scope) Value {
+func (node HasSuffixNode) Eval(scope Scope) Value {
 	text, err := scope.Compute(node.text)
 	if err != nil {
 		return NewNodeError(node, err)
@@ -60,4 +60,15 @@ func (node hasSuffixNode) Eval(scope Scope) Value {
 	}
 
 	return Literal(strings.HasSuffix(textStr, prefixStr))
+}
+
+func (node HasSuffixNode) Register(codex Codex) error {
+	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
+		orderedArgs, _, err := argSorter(args, "text", "prefix")
+		if err != nil {
+			return nil, fmt.Errorf("error decoding 'not' node: %w", err)
+		}
+
+		return HasSuffix(orderedArgs["text"], orderedArgs["prefix"]), nil
+	})
 }

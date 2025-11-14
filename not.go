@@ -2,7 +2,7 @@ package gon
 
 import "fmt"
 
-type notNode struct {
+type NotNode struct {
 	expression Node
 }
 
@@ -13,26 +13,26 @@ func Not(expression Node) Node {
 		return Literal(fmt.Errorf("not expression cannot be unset"))
 	}
 
-	return notNode{
+	return NotNode{
 		expression: expression,
 	}
 }
 
-func (node notNode) Scalar() string {
+func (node NotNode) Scalar() string {
 	return "not"
 }
 
-func (node notNode) Shape() []KeyNode {
+func (node NotNode) Shape() []KeyNode {
 	return []KeyNode{
 		{"expression", node.expression},
 	}
 }
 
-func (node notNode) Type() NodeType {
+func (node NotNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node notNode) Eval(scope Scope) Value {
+func (node NotNode) Eval(scope Scope) Value {
 	value, err := scope.Compute(node.expression)
 	if err != nil {
 		return NewNodeError(node, err)
@@ -44,4 +44,14 @@ func (node notNode) Eval(scope Scope) Value {
 	}
 
 	return Literal(!resp)
+}
+
+func (node NotNode) Register(codex Codex) error {
+	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
+		orderedArgs, _, err := argSorter(args, "expression")
+		if err != nil {
+			return nil, err
+		}
+		return Not(orderedArgs["expression"]), nil
+	})
 }

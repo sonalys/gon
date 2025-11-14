@@ -6,7 +6,7 @@ import (
 	"github.com/sonalys/gon/internal/sliceutils"
 )
 
-type sumNode struct {
+type SumNode struct {
 	nodes []Node
 }
 
@@ -27,24 +27,24 @@ func Sum(nodes ...Node) Node {
 		}
 	}
 
-	return sumNode{
+	return SumNode{
 		nodes: nodes,
 	}
 }
 
-func (node sumNode) Scalar() string {
+func (node SumNode) Scalar() string {
 	return "sum"
 }
 
-func (node sumNode) Shape() []KeyNode {
+func (node SumNode) Shape() []KeyNode {
 	return sliceutils.Map(node.nodes, func(from Node) KeyNode { return KeyNode{Node: from} })
 }
 
-func (node sumNode) Type() NodeType {
+func (node SumNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node sumNode) Eval(scope Scope) Value {
+func (node SumNode) Eval(scope Scope) Value {
 	values := make([]any, 0, len(node.nodes))
 
 	for i := range node.nodes {
@@ -62,4 +62,15 @@ func (node sumNode) Eval(scope Scope) Value {
 	}
 
 	return Literal(sum)
+}
+
+func (node SumNode) Register(codex Codex) error {
+	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
+		_, rest, err := argSorter(args)
+		if err != nil {
+			return nil, err
+		}
+
+		return Sum(rest...), nil
+	})
 }

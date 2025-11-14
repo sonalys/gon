@@ -2,10 +2,12 @@ package gon
 
 import (
 	"context"
+
+	"github.com/sonalys/gon/internal/sliceutils"
 )
 
 type (
-	callNode struct {
+	CallNode struct {
 		funcName string
 		argNodes []Node
 	}
@@ -24,17 +26,17 @@ type (
 // Returns a NodeError if the funcName is not found, callable or has wrong arguments.
 // Context doesn't need to be given as an argument, and is handled automatically by gon.
 func Call(funcName string, argNodes ...Node) Node {
-	return callNode{
+	return CallNode{
 		funcName: funcName,
 		argNodes: argNodes,
 	}
 }
 
-func (node callNode) Scalar() string {
+func (node CallNode) Scalar() string {
 	return "call"
 }
 
-func (node callNode) Shape() []KeyNode {
+func (node CallNode) Shape() []KeyNode {
 	kv := make([]KeyNode, 0, len(node.argNodes)+1)
 	kv = append(kv,
 		KeyNode{"", Literal(node.funcName)},
@@ -49,11 +51,11 @@ func (node callNode) Shape() []KeyNode {
 	return kv
 }
 
-func (node callNode) Type() NodeType {
+func (node CallNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node callNode) Eval(scope Scope) Value {
+func (node CallNode) Eval(scope Scope) Value {
 	values := make([]Value, 0, len(node.argNodes))
 
 	for i := range node.argNodes {
@@ -75,4 +77,18 @@ func (node callNode) Eval(scope Scope) Value {
 	}
 
 	return callable.Call(scope, node.funcName, values...)
+}
+
+func (node CallNode) Register(codex Codex) error {
+	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
+		valuer := args[0].Node.(Valued)
+
+		expressionTransform := func(from KeyNode) Node {
+			return from.Node
+		}
+
+		transformedArgs := sliceutils.Map(args[1:], expressionTransform)
+
+		return Call(valuer.Value().(string), transformedArgs...), nil
+	})
 }

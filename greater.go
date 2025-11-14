@@ -3,7 +3,7 @@ package gon
 import "fmt"
 
 type (
-	greaterNode struct {
+	GreaterNode struct {
 		first     Node
 		second    Node
 		inclusive bool
@@ -20,7 +20,7 @@ func Greater(first, second Node) Node {
 		}
 	}
 
-	return greaterNode{
+	return GreaterNode{
 		first:  first,
 		second: second,
 	}
@@ -35,14 +35,14 @@ func GreaterOrEqual(first, second Node) Node {
 			Cause:      fmt.Errorf("cannot compare unset expressions"),
 		}
 	}
-	return greaterNode{
+	return GreaterNode{
 		first:     first,
 		second:    second,
 		inclusive: true,
 	}
 }
 
-func (node greaterNode) Scalar() string {
+func (node GreaterNode) Scalar() string {
 	if node.inclusive {
 		return "gte"
 	}
@@ -50,7 +50,7 @@ func (node greaterNode) Scalar() string {
 	return "gt"
 }
 
-func (node greaterNode) Shape() []KeyNode {
+func (node GreaterNode) Shape() []KeyNode {
 	if node.inclusive {
 		return []KeyNode{
 			{"first", node.first},
@@ -64,11 +64,11 @@ func (node greaterNode) Shape() []KeyNode {
 	}
 }
 
-func (node greaterNode) Type() NodeType {
+func (node GreaterNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node greaterNode) Eval(scope Scope) Value {
+func (node GreaterNode) Eval(scope Scope) Value {
 	firstValue, err := scope.Compute(node.first)
 	if err != nil {
 		return NewNodeError(node, err)
@@ -89,4 +89,27 @@ func (node greaterNode) Eval(scope Scope) Value {
 	}
 
 	return Literal(comparison > 0)
+}
+
+func (node GreaterNode) Register(codex Codex) error {
+	err := codex.Register("gt", func(args []KeyNode) (Node, error) {
+		orderedArgs, _, err := argSorter(args, "first", "second")
+		if err != nil {
+			return nil, err
+		}
+		return Greater(orderedArgs["first"], orderedArgs["second"]), nil
+	})
+	if err != nil {
+		return err
+	}
+
+	err = codex.Register("gte", func(args []KeyNode) (Node, error) {
+		orderedArgs, _, err := argSorter(args, "first", "second")
+		if err != nil {
+			return nil, err
+		}
+		return Greater(orderedArgs["first"], orderedArgs["second"]), nil
+	})
+
+	return err
 }

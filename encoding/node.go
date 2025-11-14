@@ -24,7 +24,7 @@ func translateNode(rootNode *Node, codex Codex) (gon.Node, error) {
 
 	constructor, ok := codex[string(rootNode.Scalar)]
 	if !ok {
-		return nil, fmt.Errorf("not found")
+		return nil, fmt.Errorf("codex for '%s' not found", rootNode.Scalar)
 	}
 
 	children := rootNode.Children
