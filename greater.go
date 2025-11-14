@@ -14,10 +14,10 @@ type (
 // Returns a boolean value indicating whether the first node is greater than the second.
 func Greater(first, second Node) Node {
 	if first == nil || second == nil {
-		return Literal(NodeError{
-			Scalar: "gt",
-			Cause:  fmt.Errorf("cannot compare unset expressions"),
-		})
+		return NodeError{
+			NodeScalar: "gt",
+			Cause:      fmt.Errorf("cannot compare unset expressions"),
+		}
 	}
 
 	return greaterNode{
@@ -30,10 +30,10 @@ func Greater(first, second Node) Node {
 // Returns a boolean value indicating whether the first node is greater or equal than the second.
 func GreaterOrEqual(first, second Node) Node {
 	if first == nil || second == nil {
-		return Literal(NodeError{
-			Scalar: "gte",
-			Cause:  fmt.Errorf("cannot compare unset expressions"),
-		})
+		return NodeError{
+			NodeScalar: "gte",
+			Cause:      fmt.Errorf("cannot compare unset expressions"),
+		}
 	}
 	return greaterNode{
 		first:     first,
@@ -69,35 +69,19 @@ func (node greaterNode) Type() NodeType {
 }
 
 func (node greaterNode) Eval(scope Scope) Value {
-	firstValue := node.first.Eval(scope).Value()
-	secondValue := node.second.Eval(scope).Value()
+	firstValue, err := scope.Compute(node.first)
+	if err != nil {
+		return NewNodeError(node, err)
+	}
+
+	secondValue, err := scope.Compute(node.second)
+	if err != nil {
+		return NewNodeError(node, err)
+	}
 
 	comparison, ok := cmpAny(firstValue, secondValue)
 	if !ok {
-		if err, ok := firstValue.(error); ok {
-			return Literal(NodeError{
-				Scalar: node.Scalar(),
-				Cause: NodeError{
-					Scalar: "firstValue",
-					Cause:  err,
-				},
-			})
-		}
-
-		if err, ok := secondValue.(error); ok {
-			return Literal(NodeError{
-				Scalar: node.Scalar(),
-				Cause: NodeError{
-					Scalar: "secondValue",
-					Cause:  err,
-				},
-			})
-		}
-
-		return Literal(NodeError{
-			Scalar: node.Scalar(),
-			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
-		})
+		return NewNodeError(node, fmt.Errorf("cannot compare %T and %T", firstValue, secondValue))
 	}
 
 	if node.inclusive {

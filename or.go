@@ -14,18 +14,18 @@ type orNode struct {
 // It returns the value of the first error, true boolean or non-boolean expression.
 func Or(nodes ...Node) Node {
 	if len(nodes) == 0 {
-		return Literal(NodeError{
-			Scalar: "or",
-			Cause:  fmt.Errorf("must receive at least one expression"),
-		})
+		return NodeError{
+			NodeScalar: "or",
+			Cause:      fmt.Errorf("must receive at least one expression"),
+		}
 	}
 
 	for i := range nodes {
 		if nodes[i] == nil {
-			return Literal(NodeError{
-				Scalar: "or",
-				Cause:  fmt.Errorf("all expressions should be not-nil"),
-			})
+			return NodeError{
+				NodeScalar: "or",
+				Cause:      fmt.Errorf("all expressions should be not-nil"),
+			}
 		}
 	}
 
@@ -48,12 +48,12 @@ func (node orNode) Type() NodeType {
 
 func (node orNode) Eval(scope Scope) Value {
 	for _, expr := range node.nodes {
-		switch value := expr.Eval(scope).Value().(type) {
-		case error:
-			return Literal(NodeError{
-				Scalar: "or",
-				Cause:  value,
-			})
+		value, err := scope.Compute(expr)
+		if err != nil {
+			return NewNodeError(node, err)
+		}
+
+		switch value := value.(type) {
 		case bool:
 			if value {
 				return Literal(true)

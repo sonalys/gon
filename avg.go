@@ -12,18 +12,18 @@ type avgNode struct {
 
 func Avg(nodes ...Node) Node {
 	if len(nodes) == 0 {
-		return Literal(NodeError{
-			Scalar: "avg",
-			Cause:  fmt.Errorf("must receive at least one expression"),
-		})
+		return NodeError{
+			NodeScalar: "avg",
+			Cause:      fmt.Errorf("must receive at least one expression"),
+		}
 	}
 
 	for i := range nodes {
 		if nodes[i] == nil {
-			return Literal(NodeError{
-				Scalar: "avg",
-				Cause:  fmt.Errorf("all expressions should be not-nil"),
-			})
+			return NodeError{
+				NodeScalar: "avg",
+				Cause:      fmt.Errorf("all expressions should be not-nil"),
+			}
 		}
 	}
 
@@ -50,10 +50,7 @@ func (node avgNode) Eval(scope Scope) Value {
 	for i := range node.nodes {
 		curValue, err := scope.Compute(node.nodes[i])
 		if err != nil {
-			return Literal(NodeError{
-				Scalar: node.Scalar(),
-				Cause:  err,
-			})
+			return NewNodeError(node, err)
 		}
 
 		values = append(values, curValue)
@@ -61,10 +58,7 @@ func (node avgNode) Eval(scope Scope) Value {
 
 	sum, ok := avgAny(values...)
 	if !ok {
-		return Literal(NodeError{
-			Scalar: node.Scalar(),
-			Cause:  fmt.Errorf("all nodes must be of the same type"),
-		})
+		return NewNodeError(node, fmt.Errorf("all nodes must be of the same type"))
 	}
 
 	return Literal(sum)

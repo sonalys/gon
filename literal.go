@@ -104,21 +104,15 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 		}
 
 		if !curValue.IsValid() || curValue.IsZero() {
-			return Literal(NodeError{
-				Scalar: "literal",
-				Cause:  fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")),
-			})
+			return NewNodeError(node, fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")))
 		}
 	}
 
 	typeOfFunc := curValue.Type()
 
 	if curValue.Kind() != reflect.Func {
-		return Literal(NodeError{
-			Scalar: "literal",
-			Cause: DefinitionNotCallable{
-				DefinitionName: key,
-			},
+		return NewNodeError(node, DefinitionNotCallable{
+			DefinitionName: key,
 		})
 	}
 
@@ -133,10 +127,7 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 	}
 
 	if gotArgs != expArgs {
-		return Literal(NodeError{
-			Scalar: "literal",
-			Cause:  fmt.Errorf("expected %d args, got %d", expArgs, gotArgs),
-		})
+		return NewNodeError(node, fmt.Errorf("expected %d args, got %d", expArgs, gotArgs))
 	}
 
 	argsValue := make([]reflect.Value, 0, expArgs)
@@ -155,10 +146,7 @@ func (node *literalNode) Call(ctx context.Context, key string, args ...Value) Va
 		expectedTypeOfArg := typeOfFunc.In(targetParamIndex)
 
 		if !typeOfArg.AssignableTo(expectedTypeOfArg) {
-			return Literal(NodeError{
-				Scalar: "literal",
-				Cause:  fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", targetParamIndex, expectedTypeOfArg.String(), typeOfArg.String()),
-			})
+			return NewNodeError(node, fmt.Errorf("argument mismatch for function, arg %d expected %s, got %s", targetParamIndex, expectedTypeOfArg.String(), typeOfArg.String()))
 		}
 
 		argsValue = append(argsValue, valueOfArg)
@@ -222,7 +210,7 @@ func (node *literalNode) Definition(key string) (Value, bool) {
 }
 
 var (
-	_ Value              = &literalNode{}
-	_ Callable           = &literalNode{}
-	_ DefinitionResolver = &literalNode{}
+	_ Value            = &literalNode{}
+	_ Callable         = &literalNode{}
+	_ DefinitionReader = &literalNode{}
 )

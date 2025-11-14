@@ -10,12 +10,12 @@ type (
 	// It should be able to act as a context, as well as resolve definitions.
 	Scope interface {
 		context.Context
-		DefinitionResolver
+		DefinitionReader
 		Compute(Node) (any, error)
 	}
 
 	scope struct {
-		definitionStore
+		store DefinitionReadWriter
 		context.Context
 
 		parentScope Scope
@@ -23,11 +23,13 @@ type (
 )
 
 // NewScope initializes a new scope.
+// A Scope can be used to evaluate expressions under specific conditions.
+// It can also define context for evaluation and define data for the expressions.
 // It starts with a background context by default.
 func NewScope() *scope {
 	return &scope{
-		Context:         context.Background(),
-		definitionStore: definitionStore{store: make(Definitions)},
+		Context: context.Background(),
+		store:   newDefinitionResolver(),
 	}
 }
 
@@ -38,10 +40,10 @@ func (s *scope) WithContext(ctx context.Context) *scope {
 
 func (s *scope) WithDefinitions(source Definitions) (*scope, error) {
 	for key, value := range source {
-		if !nameRegex.MatchString(key) {
+		if !keyValidationRegex.MatchString(key) {
 			return nil, fmt.Errorf("invalid definition name: %s", key)
 		}
-		if err := s.Define(key, value); err != nil {
+		if err := s.store.Define(key, value); err != nil {
 			return nil, err
 		}
 	}
@@ -49,7 +51,7 @@ func (s *scope) WithDefinitions(source Definitions) (*scope, error) {
 }
 
 func (s *scope) Definition(key string) (Value, bool) {
-	value, ok := s.definitionStore.Definition(key)
+	value, ok := s.store.Definition(key)
 	if !ok {
 		if s.parentScope != nil {
 			return s.parentScope.Definition(key)
@@ -60,6 +62,8 @@ func (s *scope) Definition(key string) (Value, bool) {
 	return value, true
 }
 
+// Compute will evaluate the final value for the root node.
+// If the value is of type error, it will be returned as error instead.
 func (s *scope) Compute(node Node) (any, error) {
 	result := node.Eval(s)
 	switch t := result.Value().(type) {

@@ -14,10 +14,10 @@ type hasSuffixNode struct {
 // Returns a boolean value indicating whether the text has the suffix.
 func HasSuffix(text, suffix Node) Node {
 	if text == nil || suffix == nil {
-		return Literal(NodeError{
-			Scalar: "suffix",
-			Cause:  fmt.Errorf("all inputs should be not-nil"),
-		})
+		return NodeError{
+			NodeScalar: "suffix",
+			Cause:      fmt.Errorf("all inputs should be not-nil"),
+		}
 	}
 
 	return hasSuffixNode{
@@ -44,28 +44,19 @@ func (node hasSuffixNode) Type() NodeType {
 func (node hasSuffixNode) Eval(scope Scope) Value {
 	text, err := scope.Compute(node.suffix)
 	if err != nil {
-		return Literal(NodeError{
-			Scalar: node.Scalar(),
-			Cause:  err,
-		})
+		return NewNodeError(node, err)
 	}
 
 	prefix, err := scope.Compute(node.suffix)
 	if err != nil {
-		return Literal(NodeError{
-			Scalar: node.Scalar(),
-			Cause:  err,
-		})
+		return NewNodeError(node, err)
 	}
 
 	textStr, ok1 := text.(string)
 	prefixStr, ok2 := prefix.(string)
 
 	if !ok1 || !ok2 {
-		return Literal(NodeError{
-			Scalar: node.Scalar(),
-			Cause:  fmt.Errorf("text and suffix should be string, got %T and %T", text, prefix),
-		})
+		return NewNodeError(node, fmt.Errorf("text and suffix should be string, got %T and %T", text, prefix))
 	}
 
 	return Literal(strings.HasSuffix(textStr, prefixStr))

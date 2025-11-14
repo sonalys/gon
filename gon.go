@@ -34,6 +34,7 @@ type (
 	// It can be used to represent values, evaluations or operations.
 	// Nodes can be evaluated under a scope.
 	Node interface {
+		Named
 		Eval(scope Scope) Value
 	}
 

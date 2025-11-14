@@ -11,10 +11,10 @@ type equalNode struct {
 // Returns a boolean value indicating whether the inputs are equal.
 func Equal(first, second Node) Node {
 	if first == nil || second == nil {
-		return Literal(NodeError{
-			Scalar: "equal",
-			Cause:  fmt.Errorf("all inputs should be not-nil"),
-		})
+		return NodeError{
+			NodeScalar: "equal",
+			Cause:      fmt.Errorf("all inputs should be not-nil"),
+		}
 	}
 
 	return equalNode{
@@ -39,35 +39,19 @@ func (node equalNode) Type() NodeType {
 }
 
 func (node equalNode) Eval(scope Scope) Value {
-	firstValue := node.first.Eval(scope).Value()
-	secondValue := node.second.Eval(scope).Value()
+	firstValue, err := scope.Compute(node.first)
+	if err != nil {
+		return NewNodeError(node, err)
+	}
+
+	secondValue, err := scope.Compute(node.second)
+	if err != nil {
+		return NewNodeError(node, err)
+	}
 
 	value, ok := cmpAny(firstValue, secondValue)
 	if !ok {
-		if err, ok := firstValue.(error); ok {
-			return Literal(NodeError{
-				Scalar: node.Scalar(),
-				Cause: NodeError{
-					Scalar: "firstValue",
-					Cause:  err,
-				},
-			})
-		}
-
-		if err, ok := secondValue.(error); ok {
-			return Literal(NodeError{
-				Scalar: node.Scalar(),
-				Cause: NodeError{
-					Scalar: "secondValue",
-					Cause:  err,
-				},
-			})
-		}
-
-		return Literal(NodeError{
-			Scalar: node.Scalar(),
-			Cause:  fmt.Errorf("cannot compare %T and %T", firstValue, secondValue),
-		})
+		return NewNodeError(node, fmt.Errorf("cannot compare %T and %T", firstValue, secondValue))
 	}
 
 	return Literal(value == 0)

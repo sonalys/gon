@@ -27,17 +27,7 @@ func (node referenceNode) Type() NodeType {
 func (node referenceNode) Eval(scope Scope) Value {
 	value, ok := scope.Definition(node.definitionName)
 	if !ok {
-		if err, ok := value.Value().(error); ok {
-			return Literal(NodeError{
-				Scalar: "reference",
-				Cause:  err,
-			})
-
-		}
-		return Literal(NodeError{
-			Scalar: "reference",
-			Cause:  fmt.Errorf("definition not found: %s", node.definitionName),
-		})
+		return NewNodeError(node, fmt.Errorf("definition not found: %s", node.definitionName))
 	}
 
 	return value.Eval(scope)

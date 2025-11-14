@@ -33,13 +33,14 @@ func (node notNode) Type() NodeType {
 }
 
 func (node notNode) Eval(scope Scope) Value {
-	value := node.expression.Eval(scope)
-	resp, ok := value.Value().(bool)
+	value, err := scope.Compute(node.expression)
+	if err != nil {
+		return NewNodeError(node, err)
+	}
+
+	resp, ok := value.(bool)
 	if !ok {
-		return Literal(NodeError{
-			Scalar: "not",
-			Cause:  fmt.Errorf("expected value is not boolean"),
-		})
+		return NewNodeError(node, fmt.Errorf("expected bool got %T", value))
 	}
 
 	return Literal(!resp)

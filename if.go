@@ -15,6 +15,13 @@ func If(condition, thenBranch Node, elseBranch ...Node) Node {
 		return Literal(fmt.Errorf("if condition cannot be unset"))
 	}
 
+	if len(elseBranch) > 1 {
+		return NodeError{
+			NodeScalar: "if",
+			Cause:      fmt.Errorf("only one else branch can be set"),
+		}
+	}
+
 	return IfNode{
 		condition:  condition,
 		thenBranch: thenBranch,
@@ -44,27 +51,32 @@ func (node IfNode) Type() NodeType {
 }
 
 func (node IfNode) Eval(scope Scope) Value {
-	value := node.condition.Eval(scope)
-	fulfilled, ok := value.Value().(bool)
+	value, err := scope.Compute(node.condition)
+	if err != nil {
+		return NewNodeError(node, err)
+	}
+
+	fulfilled, ok := value.(bool)
 	if !ok {
-		if err, ok := value.Value().(error); ok {
-			return Literal(NodeError{
-				Scalar: node.Scalar(),
-				Cause:  err,
-			})
-		}
-		return Literal(NodeError{
-			Scalar: node.Scalar(),
-			Cause:  fmt.Errorf("expected a boolean value"),
-		})
+		return NewNodeError(node, fmt.Errorf("expected bool got %T", value))
 	}
 
 	if fulfilled {
-		return node.thenBranch.Eval(scope)
+		value, err := scope.Compute(node.thenBranch)
+		if err != nil {
+			return NewNodeError(node, err)
+		}
+
+		return Literal(value)
 	}
 
 	if node.elseBranch != nil {
-		return node.elseBranch.Eval(scope)
+		value, err := scope.Compute(node.elseBranch)
+		if err != nil {
+			return NewNodeError(node, err)
+		}
+
+		return Literal(value)
 	}
 
 	return Literal(false)

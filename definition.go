@@ -11,8 +11,17 @@ type (
 	// The key must be an alphanumeric+underscore+dash string from length 1 to 50, starting with a letter.
 	Definitions map[string]Value
 
-	DefinitionResolver interface {
+	DefinitionReader interface {
 		Definition(key string) (Value, bool)
+	}
+
+	DefinitionWriter interface {
+		Define(key string, value Value) error
+	}
+
+	DefinitionReadWriter interface {
+		DefinitionReader
+		DefinitionWriter
 	}
 
 	definitionStore struct {
@@ -20,7 +29,13 @@ type (
 	}
 )
 
-var nameRegex = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_\-]{1,50}$`)
+var keyValidationRegex = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_\-]{1,50}$`)
+
+func newDefinitionResolver() DefinitionReadWriter {
+	return &definitionStore{
+		store: make(map[string]Value),
+	}
+}
 
 func (r *definitionStore) Definition(key string) (Value, bool) {
 	parts := strings.Split(key, ".")
@@ -35,7 +50,7 @@ func (r *definitionStore) Definition(key string) (Value, bool) {
 		return value, true
 	}
 
-	resolver, isResolver := value.(DefinitionResolver)
+	resolver, isResolver := value.(DefinitionReader)
 	if isResolver {
 		return resolver.Definition(key[len(topKey)+1:])
 	}
@@ -44,7 +59,7 @@ func (r *definitionStore) Definition(key string) (Value, bool) {
 }
 
 func (r *definitionStore) Define(key string, value Value) error {
-	if !nameRegex.MatchString(key) {
+	if !keyValidationRegex.MatchString(key) {
 		return fmt.Errorf("definition key '%s' is invalid", key)
 	}
 
@@ -53,4 +68,4 @@ func (r *definitionStore) Define(key string, value Value) error {
 	return nil
 }
 
-var _ DefinitionResolver = &definitionStore{}
+var _ DefinitionReader = &definitionStore{}

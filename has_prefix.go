@@ -14,10 +14,10 @@ type hasPrefixNode struct {
 // Returns a boolean value indicating whether the text has the prefix.
 func HasPrefix(text, prefix Node) Node {
 	if text == nil || prefix == nil {
-		return Literal(NodeError{
-			Scalar: "prefix",
-			Cause:  fmt.Errorf("all inputs should be not-nil"),
-		})
+		return NodeError{
+			NodeScalar: "prefix",
+			Cause:      fmt.Errorf("all inputs should be not-nil"),
+		}
 	}
 
 	return hasPrefixNode{
@@ -44,28 +44,19 @@ func (node hasPrefixNode) Type() NodeType {
 func (node hasPrefixNode) Eval(scope Scope) Value {
 	text, err := scope.Compute(node.prefix)
 	if err != nil {
-		return Literal(NodeError{
-			Scalar: node.Scalar(),
-			Cause:  err,
-		})
+		return NewNodeError(node, err)
 	}
 
 	prefix, err := scope.Compute(node.prefix)
 	if err != nil {
-		return Literal(NodeError{
-			Scalar: node.Scalar(),
-			Cause:  err,
-		})
+		return NewNodeError(node, err)
 	}
 
 	textStr, ok1 := text.(string)
 	prefixStr, ok2 := prefix.(string)
 
 	if !ok1 || !ok2 {
-		return Literal(NodeError{
-			Scalar: node.Scalar(),
-			Cause:  fmt.Errorf("text and prefix should be string, got %T and %T", text, prefix),
-		})
+		return NewNodeError(node, fmt.Errorf("text and prefix should be string, got %T and %T", text, prefix))
 	}
 
 	return Literal(strings.HasPrefix(textStr, prefixStr))
