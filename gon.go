@@ -1,8 +1,17 @@
 package gon
 
 import (
+	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/encoding"
 	"github.com/sonalys/gon/internal/nodes"
 )
+
+type SerializableNode interface {
+	adapters.Node
+	adapters.Named
+	adapters.Shaped
+	encoding.AutoRegisterer
+}
 
 var (
 	Avg            = nodes.Avg
@@ -20,4 +29,5 @@ var (
 	Smaller        = nodes.Smaller
 	SmallerOrEqual = nodes.SmallerOrEqual
 	Sum            = nodes.Sum
+	IsEmpty        = nodes.IsEmpty
 )

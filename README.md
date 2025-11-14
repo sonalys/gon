@@ -134,10 +134,7 @@ I want to extend the project in the direction of having further:
 
 * Better slice definition and referencing
 * Benchmarks
-* More operations:
-  * Contains
-  * Zero ( zero-value )
-  * Etc...
+* More nodes
 
 ### Contributing
 

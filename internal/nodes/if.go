@@ -40,12 +40,12 @@ func (node *IfNode) Scalar() string {
 
 func (node *IfNode) Shape() []adapters.KeyNode {
 	kv := []adapters.KeyNode{
-		{"condition", node.condition},
-		{"then", node.thenBranch},
+		{Key: "condition", Node: node.condition},
+		{Key: "then", Node: node.thenBranch},
 	}
 	if node.elseBranch != nil {
 		kv = append(kv,
-			adapters.KeyNode{"else", node.elseBranch},
+			adapters.KeyNode{Key: "else", Node: node.elseBranch},
 		)
 	}
 	return kv

@@ -3,8 +3,8 @@ package encoding
 import (
 	"fmt"
 
-	"github.com/sonalys/gon"
 	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/internal/nodes"
 )
 
 type Node struct {
@@ -18,9 +18,9 @@ type Node struct {
 func translateNode(rootNode *Node, codex Codex) (adapters.Node, error) {
 	switch rootNode.Type {
 	case adapters.NodeTypeReference:
-		return gon.Reference(string(rootNode.Scalar)), nil
+		return nodes.Reference(string(rootNode.Scalar)), nil
 	case adapters.NodeTypeLiteral:
-		return gon.Literal(rootNode.Value), nil
+		return nodes.Literal(rootNode.Value), nil
 	}
 
 	constructor, ok := codex[string(rootNode.Scalar)]
