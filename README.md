@@ -52,6 +52,22 @@ func Example_ageVerification() {
 		panic(err)
 	}
 
+	// Write rules as code, and encode them to text:
+	exampleRule := gon.If(
+		gon.GreaterOrEqual(
+			gon.Reference("person.age"),
+			gon.Literal(18),
+		),
+		gon.Literal("pass"),
+		gon.Literal("fail"),
+	)
+
+	err = encoding.HumanEncode(os.Stdout, exampleRule, encoding.Compact(), encoding.Unnamed())
+	if err != nil {
+		panic(err)
+	}
+
+	// Or write rules as text, and parse them to code.
 	ageRuleStr := `if(gte(person.age, 18), "pass", "fail")`
 
 	rule, err := encoding.Decode([]byte(ageRuleStr), encoding.DefaultExpressionCodex)
@@ -63,8 +79,7 @@ func Example_ageVerification() {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(value)
+	fmt.Printf("\n\nBefore: %s", value)
 
 	person.Age = 5
 
@@ -72,11 +87,13 @@ func Example_ageVerification() {
 	if err != nil {
 		panic(err)
 	}
-	
-	fmt.Println(value)
+
+	fmt.Printf("\nAfter: %s", value)
 	// Output:
-	// pass
-	// fail
+	// if(gte(person.age,18),"pass","fail")
+	//
+	// Before: pass
+	// After: fail
 }
 ```
 
