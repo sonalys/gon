@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/adapters"
 )
 
 type parser struct {
@@ -18,28 +18,28 @@ func newParser(tokens []Token) *parser {
 }
 
 func (p *parser) parse() (*Node, error) {
-	if p.isNext(Token(":")) {
+	if p.isNext([]byte(":")) {
 		return nil, fmt.Errorf("invalid syntax")
 	}
 
-	if p.isNext(Token("(")) {
+	if p.isNext([]byte("(")) {
 		name := p.consume()
-		p.consumeExpected(Token("("))
+		p.consumeExpected([]byte("("))
 
 		node := &Node{
-			Scalar:   name,
+			Scalar:   name.content,
 			Children: []*Node{},
 		}
 
-		for !p.done() && !bytes.Equal(p.peek(), Token(")")) {
-			if p.isNext(Token(":")) {
+		for !p.done() && !bytes.Equal(p.peek().content, []byte(")")) {
+			if p.isNext([]byte(":")) {
 				paramName := p.consume()
 				p.consume() // skip ':'
 				childNode, err := p.parse()
 				if err != nil {
 					return nil, err
 				}
-				childNode.Key = paramName
+				childNode.Key = paramName.content
 				node.Children = append(node.Children, childNode)
 				continue
 			}
@@ -51,51 +51,51 @@ func (p *parser) parse() (*Node, error) {
 			node.Children = append(node.Children, val)
 		}
 
-		p.consumeExpected(Token(")"))
+		p.consumeExpected([]byte(")"))
 
 		return node, nil
 	}
 
 	switch token := p.consume(); {
-	case bytes.HasPrefix(token, Token("\"")) && bytes.HasSuffix(token, Token("\"")):
-		val := bytes.Trim(token, "\"")
-		return &Node{Value: string(val), Type: gon.NodeTypeLiteral}, nil
-	case isInteger(string(token)):
-		integer, err := strconv.ParseInt(string(token), 10, 64)
+	case bytes.HasPrefix(token.content, []byte("\"")) && bytes.HasSuffix(token.content, []byte("\"")):
+		val := bytes.Trim(token.content, "\"")
+		return &Node{Value: string(val), Type: adapters.NodeTypeLiteral}, nil
+	case isInteger(string(token.content)):
+		integer, err := strconv.ParseInt(string(token.content), 10, 64)
 		if err != nil {
 			return nil, err
 		}
 
 		return &Node{
-			Type:  gon.NodeTypeLiteral,
+			Type:  adapters.NodeTypeLiteral,
 			Value: integer,
 		}, nil
-	case isFloat(string(token)):
-		float, err := strconv.ParseFloat(string(token), 64)
+	case isFloat(string(token.content)):
+		float, err := strconv.ParseFloat(string(token.content), 64)
 		if err != nil {
 			return nil, err
 		}
 
 		return &Node{
-			Type:  gon.NodeTypeLiteral,
+			Type:  adapters.NodeTypeLiteral,
 			Value: float,
 		}, nil
 	default:
-		switch string(token) {
+		switch string(token.content) {
 		case "true", "True":
 			return &Node{
-				Type:  gon.NodeTypeLiteral,
+				Type:  adapters.NodeTypeLiteral,
 				Value: true,
 			}, nil
 		case "false", "False":
 			return &Node{
-				Type:  gon.NodeTypeLiteral,
+				Type:  adapters.NodeTypeLiteral,
 				Value: false,
 			}, nil
 		default:
 			return &Node{
-				Type:   gon.NodeTypeReference,
-				Scalar: token,
+				Type:   adapters.NodeTypeReference,
+				Scalar: token.content,
 			}, nil
 		}
 	}
@@ -103,29 +103,29 @@ func (p *parser) parse() (*Node, error) {
 
 func (p *parser) peek() Token {
 	if p.index >= len(p.tokens) {
-		return nil
+		return Token{}
 	}
 	return p.tokens[p.index]
 }
 
-func (p *parser) isNext(next Token) bool {
+func (p *parser) isNext(next []byte) bool {
 	if p.index+1 >= len(p.tokens) {
 		return false
 	}
-	return bytes.Equal(p.tokens[p.index+1], next)
+	return bytes.Equal(p.tokens[p.index+1].content, next)
 }
 
 func (p *parser) consume() Token {
 	if p.index >= len(p.tokens) {
-		return nil
+		return Token{}
 	}
 	t := p.tokens[p.index]
 	p.index++
 	return t
 }
 
-func (p *parser) consumeExpected(t Token) {
-	if bytes.Equal(p.peek(), t) {
+func (p *parser) consumeExpected(t []byte) {
+	if bytes.Equal(p.peek().content, t) {
 		p.consume()
 	}
 }

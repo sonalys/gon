@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/adapters"
 )
 
 type Node struct {
@@ -11,14 +12,14 @@ type Node struct {
 	Key      []byte
 	Scalar   []byte
 	Value    any
-	Type     gon.NodeType
+	Type     adapters.NodeType
 }
 
-func translateNode(rootNode *Node, codex Codex) (gon.Node, error) {
+func translateNode(rootNode *Node, codex Codex) (adapters.Node, error) {
 	switch rootNode.Type {
-	case gon.NodeTypeReference:
+	case adapters.NodeTypeReference:
 		return gon.Reference(string(rootNode.Scalar)), nil
-	case gon.NodeTypeLiteral:
+	case adapters.NodeTypeLiteral:
 		return gon.Literal(rootNode.Value), nil
 	}
 
@@ -28,14 +29,14 @@ func translateNode(rootNode *Node, codex Codex) (gon.Node, error) {
 	}
 
 	children := rootNode.Children
-	nodeChildren := make([]gon.KeyNode, 0, len(children))
+	nodeChildren := make([]adapters.KeyNode, 0, len(children))
 
 	for _, child := range children {
 		childNode, err := translateNode(child, codex)
 		if err != nil {
 			return nil, err
 		}
-		nodeChildren = append(nodeChildren, gon.KeyNode{
+		nodeChildren = append(nodeChildren, adapters.KeyNode{
 			Key:  string(child.Key),
 			Node: childNode,
 		})

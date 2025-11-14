@@ -3,10 +3,10 @@ package encoding
 import (
 	"fmt"
 
-	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/adapters"
 )
 
-func Decode(buffer []byte, codex Codex) (gon.Node, error) {
+func Decode(buffer []byte, codex Codex) (adapters.Node, error) {
 	tokens := tokenize(buffer)
 	parser := newParser(tokens)
 

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/adapters"
 	"github.com/sonalys/gon/ast"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,7 +12,7 @@ import (
 
 type unparsableNode struct{}
 
-func (u unparsableNode) Eval(scope gon.Scope) gon.Value {
+func (u unparsableNode) Eval(scope adapters.Scope) adapters.Value {
 	panic("unimplemented")
 }
 
@@ -19,16 +20,16 @@ func (u unparsableNode) Scalar() string {
 	panic("unimplemented")
 }
 
-func (u unparsableNode) Shape() []gon.KeyNode {
+func (u unparsableNode) Shape() []adapters.KeyNode {
 	panic("unimplemented")
 }
 
-func (u unparsableNode) Type() gon.NodeType {
-	return gon.NodeType(255)
+func (u unparsableNode) Type() adapters.NodeType {
+	return adapters.NodeType(255)
 }
 
 var _ ast.ParseableNode = unparsableNode{}
-var _ gon.Node = unparsableNode{}
+var _ adapters.Node = unparsableNode{}
 
 func Test_Parse(t *testing.T) {
 	t.Run("should parse entire tree", func(t *testing.T) {

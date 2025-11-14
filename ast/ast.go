@@ -3,22 +3,22 @@ package ast
 import (
 	"fmt"
 
-	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/adapters"
 )
 
 type (
-	Node interface {
+	AstNode interface {
 	}
 
 	ParseableNode interface {
-		gon.Named
-		gon.Typed
-		gon.Shaped
+		adapters.Named
+		adapters.Typed
+		adapters.Shaped
 	}
 
 	KeyNode struct {
 		Key  string
-		Node Node
+		Node AstNode
 	}
 
 	Invalid struct {
@@ -39,14 +39,14 @@ type (
 	}
 )
 
-func Parse(rootExpression gon.Node) (Node, error) {
+func Parse(rootExpression adapters.Node) (AstNode, error) {
 	nodeExpression, ok := rootExpression.(ParseableNode)
 	if !ok {
 		return nil, fmt.Errorf("parsing node to ast: %T", rootExpression)
 	}
 
 	switch t := nodeExpression.Type(); t {
-	case gon.NodeTypeExpression:
+	case adapters.NodeTypeExpression:
 		name := nodeExpression.Scalar()
 		keyExpressions := nodeExpression.Shape()
 
@@ -68,16 +68,16 @@ func Parse(rootExpression gon.Node) (Node, error) {
 			Scalar:  name,
 			KeyArgs: keyArgs,
 		}, nil
-	case gon.NodeTypeReference:
+	case adapters.NodeTypeReference:
 		name := nodeExpression.Scalar()
 		return Reference{
 			Name: name,
 		}, nil
-	case gon.NodeTypeLiteral:
-		valuer, ok := rootExpression.(gon.Valued)
+	case adapters.NodeTypeLiteral:
+		valuer, ok := rootExpression.(adapters.Valued)
 		if !ok {
 			return Invalid{
-				Error: fmt.Errorf("node type %v should implement %T", t, new(gon.Valued)),
+				Error: fmt.Errorf("node type %v should implement %T", t, new(adapters.Valued)),
 			}, nil
 		}
 

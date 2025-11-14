@@ -2,22 +2,16 @@ package gon
 
 import (
 	"context"
+
+	"github.com/sonalys/gon/adapters"
 )
 
 type (
-	// Scope defines a block capable of evaluating expressions.
-	// It should be able to act as a context, as well as resolve definitions.
-	Scope interface {
-		context.Context
-		DefinitionReader
-		Compute(Node) (any, error)
-	}
-
 	scope struct {
-		store DefinitionReadWriter
+		store adapters.DefinitionReadWriter
 		context.Context
 
-		parentScope Scope
+		parentScope adapters.Scope
 	}
 )
 
@@ -40,7 +34,7 @@ func (s *scope) WithContext(ctx context.Context) *scope {
 func (s *scope) WithDefinitions(source Definitions) (*scope, error) {
 	for key, value := range source {
 		if !keyValidationRegex.MatchString(key) {
-			return nil, InvalidDefinitionKey{
+			return nil, adapters.InvalidDefinitionKey{
 				DefinitionKey: key,
 			}
 		}
@@ -51,7 +45,7 @@ func (s *scope) WithDefinitions(source Definitions) (*scope, error) {
 	return s, nil
 }
 
-func (s *scope) Definition(key string) (Value, bool) {
+func (s *scope) Definition(key string) (adapters.Value, bool) {
 	value, ok := s.store.Definition(key)
 	if !ok {
 		if s.parentScope != nil {
@@ -65,7 +59,7 @@ func (s *scope) Definition(key string) (Value, bool) {
 
 // Compute will evaluate the final value for the root node.
 // If the value is of type error, it will be returned as error instead.
-func (s *scope) Compute(node Node) (any, error) {
+func (s *scope) Compute(node adapters.Node) (any, error) {
 	result := node.Eval(s)
 	switch t := result.Value().(type) {
 	case error:
@@ -76,5 +70,5 @@ func (s *scope) Compute(node Node) (any, error) {
 }
 
 var (
-	_ Scope = &scope{}
+	_ adapters.Scope = &scope{}
 )

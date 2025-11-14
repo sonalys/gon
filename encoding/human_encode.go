@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/adapters"
 	"github.com/sonalys/gon/ast"
 )
 
 // HumanEncode encodes the node in a human-friendly format.
-func HumanEncode(w io.Writer, root gon.Node, opts ...HumanEncodeOption) error {
+func HumanEncode(w io.Writer, root adapters.Node, opts ...HumanEncodeOption) error {
 	cfg := &humanEncodeConfig{
 		showParamName: true,
 	}
@@ -38,27 +38,7 @@ type HumanEncodeOption interface {
 	applyHumanEncodeOption(*humanEncodeConfig)
 }
 
-type prettyOpt struct{}
-
-func (p prettyOpt) applyHumanEncodeOption(opt *humanEncodeConfig) {
-	opt.compact = true
-}
-
-type hideParamName struct{}
-
-func (p hideParamName) applyHumanEncodeOption(opt *humanEncodeConfig) {
-	opt.showParamName = false
-}
-
-func Compact() *prettyOpt {
-	return &prettyOpt{}
-}
-
-func Unnamed() *hideParamName {
-	return &hideParamName{}
-}
-
-func encodeBody(w io.Writer, root ast.Node, indentation int, cfg *humanEncodeConfig) error {
+func encodeBody(w io.Writer, root ast.AstNode, indentation int, cfg *humanEncodeConfig) error {
 	print := func(indentation int, mask string, args ...any) {
 		if cfg.compact {
 			indentation = 0

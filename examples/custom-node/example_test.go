@@ -6,28 +6,29 @@ import (
 	"maps"
 
 	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/adapters"
 	"github.com/sonalys/gon/encoding"
 )
 
 type customNode struct {
-	input gon.Node
+	input adapters.Node
 }
 
-func (node *customNode) Type() gon.NodeType {
-	return gon.NodeTypeExpression
+func (node *customNode) Type() adapters.NodeType {
+	return adapters.NodeTypeExpression
 }
 
 func (node *customNode) Scalar() string {
 	return "customNode"
 }
 
-func (node *customNode) Shape() []gon.KeyNode {
-	return []gon.KeyNode{
+func (node *customNode) Shape() []adapters.KeyNode {
+	return []adapters.KeyNode{
 		{Key: "myCustomParam", Node: node.input},
 	}
 }
 
-func (node *customNode) Eval(scope gon.Scope) gon.Value {
+func (node *customNode) Eval(scope adapters.Scope) adapters.Value {
 	valued := node.input.Eval(scope)
 
 	fmt.Printf("got: %v\n", valued.Value())
@@ -36,7 +37,7 @@ func (node *customNode) Eval(scope gon.Scope) gon.Value {
 }
 
 var (
-	_ gon.Node = &customNode{}
+	_ adapters.Node = &customNode{}
 )
 
 func Example_customNode() {
@@ -51,7 +52,7 @@ func Example_customNode() {
 
 	customCodex := maps.Clone(encoding.DefaultExpressionCodex)
 
-	customCodex["customNode"] = func(args []gon.KeyNode) (gon.Node, error) {
+	customCodex["customNode"] = func(args []adapters.KeyNode) (adapters.Node, error) {
 		return &customNode{
 			input: args[0].Node,
 		}, nil

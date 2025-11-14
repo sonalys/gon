@@ -1,6 +1,6 @@
 # GON
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/sonalys/gon.svg)](https://pkg.go.dev/github.com/sonalys/gon)
+[![Go Reference](https://pkg.go.dev/badge/github.com/sonalys/nodes.svg)](https://pkg.go.dev/github.com/sonalys/gon)
 [![Tests](https://github.com/sonalys/gon/actions/workflows/test.yml/badge.svg)](https://github.com/sonalys/gon/actions/workflows/test.yml)
 [![Linter](https://github.com/sonalys/gon/actions/workflows/lint.yml/badge.svg)](https://github.com/sonalys/gon/actions/workflows/lint.yml)
 [![codecov](https://codecov.io/github/sonalys/gon/graph/badge.svg?token=N0XL7NLXIL)](https://codecov.io/github/sonalys/gon)

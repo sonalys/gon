@@ -3,11 +3,12 @@ package encoding
 import (
 	"fmt"
 
-	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/internal/nodes"
 )
 
 type (
-	NodeConstructor func(keyedNodes []gon.KeyNode) (gon.Node, error)
+	NodeConstructor func(keyedNodes []adapters.KeyNode) (adapters.Node, error)
 	Codex           map[string]NodeConstructor
 	DecodeConfig    struct {
 		NodeCodex Codex
@@ -16,7 +17,7 @@ type (
 
 var DefaultExpressionCodex = Codex{}
 
-func (c *Codex) Register(name string, constructor func([]gon.KeyNode) (gon.Node, error)) error {
+func (c *Codex) Register(name string, constructor func([]adapters.KeyNode) (adapters.Node, error)) error {
 	if _, conflicts := (*c)[name]; conflicts {
 		return fmt.Errorf("node with name '%s' is already registered", name)
 	}
@@ -27,7 +28,7 @@ func (c *Codex) Register(name string, constructor func([]gon.KeyNode) (gon.Node,
 }
 
 type AutoRegisterer interface {
-	Register(codex gon.Codex) error
+	Register(codex adapters.Codex) error
 }
 
 func (c *Codex) AutoRegister(nodes ...AutoRegisterer) error {
@@ -42,18 +43,18 @@ func (c *Codex) AutoRegister(nodes ...AutoRegisterer) error {
 
 func init() {
 	err := DefaultExpressionCodex.AutoRegister(
-		&gon.AvgNode{},
-		&gon.CallNode{},
-		&gon.EqualNode{},
-		&gon.GreaterNode{},
-		&gon.HasPrefixNode{},
-		&gon.HasSuffixNode{},
-		&gon.IfNode{},
-		&gon.LiteralNode{},
-		&gon.NotNode{},
-		&gon.OrNode{},
-		&gon.SmallerNode{},
-		&gon.SumNode{},
+		&nodes.AvgNode{},
+		&nodes.CallNode{},
+		&nodes.EqualNode{},
+		&nodes.GreaterNode{},
+		&nodes.HasPrefixNode{},
+		&nodes.HasSuffixNode{},
+		&nodes.IfNode{},
+		&nodes.LiteralNode{},
+		&nodes.NotNode{},
+		&nodes.OrNode{},
+		&nodes.SmallerNode{},
+		&nodes.SumNode{},
 	)
 	if err != nil {
 		panic(fmt.Errorf("unexpected error registering default nodes: %s", err))
