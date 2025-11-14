@@ -80,6 +80,7 @@ type (
 	SerializableNode interface {
 		Node
 		Named
+		Typed
 		Shaped
 		AutoRegisterer
 	}

@@ -10,12 +10,6 @@ type (
 	AstNode interface {
 	}
 
-	ParseableNode interface {
-		adapters.Named
-		adapters.Typed
-		adapters.Shaped
-	}
-
 	KeyNode struct {
 		Key  string
 		Node AstNode
@@ -40,7 +34,7 @@ type (
 )
 
 func Parse(rootExpression adapters.Node) (AstNode, error) {
-	nodeExpression, ok := rootExpression.(ParseableNode)
+	nodeExpression, ok := rootExpression.(adapters.SerializableNode)
 	if !ok {
 		return nil, fmt.Errorf("parsing node to ast: %T", rootExpression)
 	}

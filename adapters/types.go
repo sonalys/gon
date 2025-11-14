@@ -10,8 +10,9 @@ const (
 	NodeTypeReference
 	// NodeTypeLiteral represents a direct value. Example: "string", 5.
 	NodeTypeLiteral
+	_nodeTypeCeiling
 )
 
 func (t NodeType) IsValid() bool {
-	return t > NodeTypeInvalid && t <= NodeTypeLiteral
+	return t > NodeTypeInvalid && t < _nodeTypeCeiling
 }

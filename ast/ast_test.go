@@ -12,6 +12,10 @@ import (
 
 type unparsableNode struct{}
 
+func (u unparsableNode) Register(codex adapters.Codex) error {
+	panic("unimplemented")
+}
+
 func (u unparsableNode) Eval(scope adapters.Scope) adapters.Value {
 	panic("unimplemented")
 }
@@ -28,7 +32,7 @@ func (u unparsableNode) Type() adapters.NodeType {
 	return adapters.NodeType(255)
 }
 
-var _ ast.ParseableNode = unparsableNode{}
+var _ adapters.SerializableNode = unparsableNode{}
 var _ adapters.Node = unparsableNode{}
 
 func Test_Parse(t *testing.T) {

@@ -5,15 +5,10 @@ import (
 
 	"github.com/sonalys/gon"
 	"github.com/sonalys/gon/adapters"
-	"github.com/sonalys/gon/ast"
 	"github.com/sonalys/gon/encoding"
 	"github.com/sonalys/gon/internal/nodes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-)
-
-var (
-	_ ast.ParseableNode = &nodes.IfNode{}
 )
 
 func Test_If(t *testing.T) {

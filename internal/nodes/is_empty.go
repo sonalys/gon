@@ -64,6 +64,10 @@ func (node *IsEmptyNode) Register(codex adapters.Codex) error {
 	})
 }
 
+func (node *IsEmptyNode) Type() adapters.NodeType {
+	return adapters.NodeTypeExpression
+}
+
 var (
 	_ adapters.SerializableNode = &IsEmptyNode{}
 )
