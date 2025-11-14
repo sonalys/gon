@@ -9,6 +9,27 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type unparsableNode struct{}
+
+func (u unparsableNode) Eval(scope gon.Scope) gon.Value {
+	panic("unimplemented")
+}
+
+func (u unparsableNode) Scalar() string {
+	panic("unimplemented")
+}
+
+func (u unparsableNode) Shape() []gon.KeyNode {
+	panic("unimplemented")
+}
+
+func (u unparsableNode) Type() gon.NodeType {
+	return gon.NodeType(255)
+}
+
+var _ ast.ParseableNode = unparsableNode{}
+var _ gon.Node = unparsableNode{}
+
 func Test_Parse(t *testing.T) {
 	t.Run("should parse entire tree", func(t *testing.T) {
 		rootNode := gon.If(gon.Literal(true), gon.Reference("key"))
@@ -35,5 +56,15 @@ func Test_Parse(t *testing.T) {
 		}
 
 		assert.Equal(t, expected, astNode)
+	})
+
+	t.Run("should return invalid node for unknown type", func(t *testing.T) {
+		rootNode := &unparsableNode{}
+
+		astNode, err := ast.Parse(rootNode)
+		require.NoError(t, err)
+
+		_, ok := astNode.(ast.Invalid)
+		require.True(t, ok)
 	})
 }

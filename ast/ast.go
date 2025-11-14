@@ -2,14 +2,12 @@ package ast
 
 import (
 	"fmt"
-	"iter"
 
 	"github.com/sonalys/gon"
 )
 
 type (
 	Node interface {
-		Children() iter.Seq[Node]
 	}
 
 	ParseableNode interface {
@@ -40,24 +38,6 @@ type (
 		Name string
 	}
 )
-
-func Walk(rootNode Node, walkFunc func(Node) bool) {
-	recursiveWalk(rootNode, walkFunc)
-}
-
-func recursiveWalk(rootNode Node, walkFunc func(Node) bool) bool {
-	if !walkFunc(rootNode) {
-		return false
-	}
-
-	for child := range rootNode.Children() {
-		if !recursiveWalk(child, walkFunc) {
-			return false
-		}
-	}
-
-	return true
-}
 
 func Parse(rootExpression gon.Node) (Node, error) {
 	nodeExpression, ok := rootExpression.(ParseableNode)
@@ -109,26 +89,4 @@ func Parse(rootExpression gon.Node) (Node, error) {
 			Error: fmt.Errorf("invalid node type: %v", nodeExpression.Type()),
 		}, nil
 	}
-}
-
-func (i Invalid) Children() iter.Seq[Node] {
-	return func(yield func(Node) bool) {}
-}
-
-func (e Expression) Children() iter.Seq[Node] {
-	return func(yield func(Node) bool) {
-		for _, child := range e.KeyArgs {
-			if !yield(child.Node) {
-				return
-			}
-		}
-	}
-}
-
-func (r Reference) Children() iter.Seq[Node] {
-	return func(yield func(Node) bool) {}
-}
-
-func (s Literal) Children() iter.Seq[Node] {
-	return func(yield func(Node) bool) {}
 }
