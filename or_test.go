@@ -11,6 +11,20 @@ import (
 func Test_Or(t *testing.T) {
 	scope := gon.NewScope()
 
+	t.Run("should have at least one child", func(t *testing.T) {
+		expr := gon.Or()
+
+		_, err := scope.Compute(expr)
+		require.Error(t, err)
+	})
+
+	t.Run("should not have unset children", func(t *testing.T) {
+		expr := gon.Or(nil)
+
+		_, err := scope.Compute(expr)
+		require.Error(t, err)
+	})
+
 	t.Run("should return first true expression", func(t *testing.T) {
 		expr := gon.Or(
 			gon.Literal(false),
