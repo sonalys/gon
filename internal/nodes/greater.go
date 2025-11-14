@@ -53,14 +53,14 @@ func (node *GreaterNode) Scalar() string {
 func (node *GreaterNode) Shape() []adapters.KeyNode {
 	if node.inclusive {
 		return []adapters.KeyNode{
-			{"first", node.first},
-			{"second", node.second},
+			{Key: "first", Node: node.first},
+			{Key: "second", Node: node.second},
 		}
 	}
 
 	return []adapters.KeyNode{
-		{"first", node.first},
-		{"second", node.second},
+		{Key: "first", Node: node.first},
+		{Key: "second", Node: node.second},
 	}
 }
 

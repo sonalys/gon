@@ -33,12 +33,12 @@ func (node *CallNode) Scalar() string {
 func (node *CallNode) Shape() []adapters.KeyNode {
 	kv := make([]adapters.KeyNode, 0, len(node.argNodes)+1)
 	kv = append(kv,
-		adapters.KeyNode{"", Literal(node.funcName)},
+		adapters.KeyNode{Key: "", Node: Literal(node.funcName)},
 	)
 
 	for i := range node.argNodes {
 		kv = append(kv,
-			adapters.KeyNode{"", node.argNodes[i]},
+			adapters.KeyNode{Key: "", Node: node.argNodes[i]},
 		)
 	}
 

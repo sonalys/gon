@@ -28,7 +28,7 @@ func (node *NotNode) Scalar() string {
 
 func (node *NotNode) Shape() []adapters.KeyNode {
 	return []adapters.KeyNode{
-		{"expression", node.expression},
+		{Key: "expression", Node: node.expression},
 	}
 }
 

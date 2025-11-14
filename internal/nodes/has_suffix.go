@@ -34,8 +34,8 @@ func (node *HasSuffixNode) Scalar() string {
 
 func (node *HasSuffixNode) Shape() []adapters.KeyNode {
 	return []adapters.KeyNode{
-		{"text", node.text},
-		{"suffix", node.suffix},
+		{Key: "text", Node: node.text},
+		{Key: "suffix", Node: node.suffix},
 	}
 }
 
