@@ -24,7 +24,7 @@ func Test_DecodePretty(t *testing.T) {
 	got, err := Decode([]byte(input), DefaultExpressionCodex)
 	require.NoError(t, err)
 
-	err = HumanEncode(t.Output(), got)
+	err = HumanEncode(t.Output(), got, Compact(), Unnamed())
 	require.NoError(t, err)
 }
 
