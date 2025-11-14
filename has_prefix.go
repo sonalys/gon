@@ -42,7 +42,7 @@ func (node hasPrefixNode) Type() NodeType {
 }
 
 func (node hasPrefixNode) Eval(scope Scope) Value {
-	text, err := scope.Compute(node.prefix)
+	text, err := scope.Compute(node.text)
 	if err != nil {
 		return NewNodeError(node, err)
 	}

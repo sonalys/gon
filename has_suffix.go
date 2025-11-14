@@ -42,7 +42,7 @@ func (node hasSuffixNode) Type() NodeType {
 }
 
 func (node hasSuffixNode) Eval(scope Scope) Value {
-	text, err := scope.Compute(node.suffix)
+	text, err := scope.Compute(node.text)
 	if err != nil {
 		return NewNodeError(node, err)
 	}
