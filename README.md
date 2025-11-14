@@ -109,19 +109,22 @@ func Example_ageVerification() {
 
 ## Standard Nodes
 
-* Literal
-* Reference
+* Avg
 * Call
 * Equal
 * Greater
-* Smaller
-* If
-* Or
-* Not
+* GreaterOrEqual
 * HasPrefix
 * HasSuffix
+* If
+* IsEmpty
+* Literal
+* Not
+* Or
+* Reference
+* Smaller
+* SmallerOrEqual
 * Sum
-* Avg
 
 ## Limitations
 

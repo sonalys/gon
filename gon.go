@@ -13,6 +13,7 @@ var (
 	HasPrefix      = nodes.HasPrefix
 	HasSuffix      = nodes.HasSuffix
 	If             = nodes.If
+	IsEmpty        = nodes.IsEmpty
 	Literal        = nodes.Literal
 	Not            = nodes.Not
 	Or             = nodes.Or
@@ -20,5 +21,4 @@ var (
 	Smaller        = nodes.Smaller
 	SmallerOrEqual = nodes.SmallerOrEqual
 	Sum            = nodes.Sum
-	IsEmpty        = nodes.IsEmpty
 )
