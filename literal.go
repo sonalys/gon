@@ -37,6 +37,10 @@ func Literal(value any) *LiteralNode {
 }
 
 func (node *LiteralNode) Scalar() string {
+	if !node.value.IsValid() || !node.value.CanInterface() {
+		return "literal"
+	}
+
 	switch node.value.Interface().(type) {
 	case time.Time:
 		return "time"
@@ -46,6 +50,10 @@ func (node *LiteralNode) Scalar() string {
 }
 
 func (node *LiteralNode) Shape() []KeyNode {
+	if !node.value.IsValid() || !node.value.CanInterface() {
+		return nil
+	}
+
 	switch v := node.value.Interface().(type) {
 	case time.Time:
 		return []KeyNode{
@@ -211,7 +219,7 @@ func (node *LiteralNode) Definition(key string) (Value, bool) {
 	return Literal(value), true
 }
 
-func (node LiteralNode) Register(codex Codex) error {
+func (node *LiteralNode) Register(codex Codex) error {
 	return codex.Register("time", func(args []KeyNode) (Node, error) {
 		valuer, ok := args[0].Node.(Valued)
 		if !ok {

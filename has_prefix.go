@@ -20,28 +20,28 @@ func HasPrefix(text, prefix Node) Node {
 		}
 	}
 
-	return HasPrefixNode{
+	return &HasPrefixNode{
 		text:   text,
 		prefix: prefix,
 	}
 }
 
-func (node HasPrefixNode) Scalar() string {
+func (node *HasPrefixNode) Scalar() string {
 	return "hasPrefix"
 }
 
-func (node HasPrefixNode) Shape() []KeyNode {
+func (node *HasPrefixNode) Shape() []KeyNode {
 	return []KeyNode{
 		{"text", node.text},
 		{"prefix", node.prefix},
 	}
 }
 
-func (node HasPrefixNode) Type() NodeType {
+func (node *HasPrefixNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node HasPrefixNode) Eval(scope Scope) Value {
+func (node *HasPrefixNode) Eval(scope Scope) Value {
 	text, err := scope.Compute(node.text)
 	if err != nil {
 		return NewNodeError(node, err)
@@ -62,7 +62,7 @@ func (node HasPrefixNode) Eval(scope Scope) Value {
 	return Literal(strings.HasPrefix(textStr, prefixStr))
 }
 
-func (node HasPrefixNode) Register(codex Codex) error {
+func (node *HasPrefixNode) Register(codex Codex) error {
 	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
 		orderedArgs, _, err := argSorter(args, "text", "prefix")
 		if err != nil {

@@ -42,18 +42,18 @@ func (c *Codex) AutoRegister(nodes ...AutoRegisterer) error {
 
 func init() {
 	err := DefaultExpressionCodex.AutoRegister(
-		gon.AvgNode{},
-		gon.CallNode{},
-		gon.EqualNode{},
-		gon.GreaterNode{},
-		gon.HasPrefixNode{},
-		gon.HasSuffixNode{},
-		gon.IfNode{},
-		gon.LiteralNode{},
-		gon.NotNode{},
-		gon.OrNode{},
-		gon.SmallerNode{},
-		gon.SumNode{},
+		&gon.AvgNode{},
+		&gon.CallNode{},
+		&gon.EqualNode{},
+		&gon.GreaterNode{},
+		&gon.HasPrefixNode{},
+		&gon.HasSuffixNode{},
+		&gon.IfNode{},
+		&gon.LiteralNode{},
+		&gon.NotNode{},
+		&gon.OrNode{},
+		&gon.SmallerNode{},
+		&gon.SumNode{},
 	)
 	if err != nil {
 		panic(fmt.Errorf("unexpected error registering default nodes: %s", err))

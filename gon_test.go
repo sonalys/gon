@@ -8,6 +8,7 @@ import (
 
 	"github.com/sonalys/gon"
 	"github.com/sonalys/gon/encoding"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -85,5 +86,33 @@ func Benchmark_Equal(b *testing.B) {
 
 	for b.Loop() {
 		isEqual.Eval(scope)
+	}
+}
+
+func Test_Banner(t *testing.T) {
+	shapedList := []interface {
+		gon.Shaped
+		gon.Named
+	}{
+		&gon.AvgNode{},
+		&gon.CallNode{},
+		&gon.EqualNode{},
+		&gon.GreaterNode{},
+		&gon.HasPrefixNode{},
+		&gon.HasSuffixNode{},
+		&gon.IfNode{},
+		&gon.LiteralNode{},
+		&gon.NotNode{},
+		&gon.OrNode{},
+		&gon.SmallerNode{},
+		&gon.SumNode{},
+	}
+
+	for _, shaped := range shapedList {
+		t.Run(shaped.Scalar(), func(t *testing.T) {
+			assert.NotPanics(t, func() {
+				_ = shaped.Shape()
+			})
+		})
 	}
 }

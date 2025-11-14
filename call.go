@@ -26,17 +26,17 @@ type (
 // Returns a NodeError if the funcName is not found, callable or has wrong arguments.
 // Context doesn't need to be given as an argument, and is handled automatically by gon.
 func Call(funcName string, argNodes ...Node) Node {
-	return CallNode{
+	return &CallNode{
 		funcName: funcName,
 		argNodes: argNodes,
 	}
 }
 
-func (node CallNode) Scalar() string {
+func (node *CallNode) Scalar() string {
 	return "call"
 }
 
-func (node CallNode) Shape() []KeyNode {
+func (node *CallNode) Shape() []KeyNode {
 	kv := make([]KeyNode, 0, len(node.argNodes)+1)
 	kv = append(kv,
 		KeyNode{"", Literal(node.funcName)},
@@ -51,11 +51,11 @@ func (node CallNode) Shape() []KeyNode {
 	return kv
 }
 
-func (node CallNode) Type() NodeType {
+func (node *CallNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node CallNode) Eval(scope Scope) Value {
+func (node *CallNode) Eval(scope Scope) Value {
 	values := make([]Value, 0, len(node.argNodes))
 
 	for i := range node.argNodes {
@@ -79,7 +79,7 @@ func (node CallNode) Eval(scope Scope) Value {
 	return callable.Call(scope, node.funcName, values...)
 }
 
-func (node CallNode) Register(codex Codex) error {
+func (node *CallNode) Register(codex Codex) error {
 	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
 		valuer := args[0].Node.(Valued)
 

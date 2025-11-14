@@ -25,24 +25,24 @@ func Sum(nodes ...Node) Node {
 		}
 	}
 
-	return SumNode{
+	return &SumNode{
 		nodes: nodes,
 	}
 }
 
-func (node SumNode) Scalar() string {
+func (node *SumNode) Scalar() string {
 	return "sum"
 }
 
-func (node SumNode) Shape() []KeyNode {
+func (node *SumNode) Shape() []KeyNode {
 	return sliceutils.Map(node.nodes, func(from Node) KeyNode { return KeyNode{Node: from} })
 }
 
-func (node SumNode) Type() NodeType {
+func (node *SumNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node SumNode) Eval(scope Scope) Value {
+func (node *SumNode) Eval(scope Scope) Value {
 	values := make([]any, 0, len(node.nodes))
 
 	for i := range node.nodes {
@@ -62,7 +62,7 @@ func (node SumNode) Eval(scope Scope) Value {
 	return Literal(sum)
 }
 
-func (node SumNode) Register(codex Codex) error {
+func (node *SumNode) Register(codex Codex) error {
 	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
 		_, rest, err := argSorter(args)
 		if err != nil {

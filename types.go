@@ -11,3 +11,7 @@ const (
 	// NodeTypeLiteral represents a direct value. Example: "string", 5.
 	NodeTypeLiteral
 )
+
+func (t NodeType) IsValid() bool {
+	return t > NodeTypeInvalid && t <= NodeTypeLiteral
+}

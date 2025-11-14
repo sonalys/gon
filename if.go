@@ -25,18 +25,18 @@ func If(condition, thenBranch Node, elseBranch ...Node) Node {
 		}
 	}
 
-	return IfNode{
+	return &IfNode{
 		condition:  condition,
 		thenBranch: thenBranch,
 		elseBranch: safeGet(elseBranch, 0),
 	}
 }
 
-func (node IfNode) Scalar() string {
+func (node *IfNode) Scalar() string {
 	return "if"
 }
 
-func (node IfNode) Shape() []KeyNode {
+func (node *IfNode) Shape() []KeyNode {
 	kv := []KeyNode{
 		{"condition", node.condition},
 		{"then", node.thenBranch},
@@ -49,11 +49,11 @@ func (node IfNode) Shape() []KeyNode {
 	return kv
 }
 
-func (node IfNode) Type() NodeType {
+func (node *IfNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node IfNode) Eval(scope Scope) Value {
+func (node *IfNode) Eval(scope Scope) Value {
 	value, err := scope.Compute(node.condition)
 	if err != nil {
 		return NewNodeError(node, err)
@@ -85,7 +85,7 @@ func (node IfNode) Eval(scope Scope) Value {
 	return Literal(false)
 }
 
-func (node IfNode) Register(codex Codex) error {
+func (node *IfNode) Register(codex Codex) error {
 	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
 		orderedArgs, rest, err := argSorter(args, "condition", "then")
 		if err != nil {

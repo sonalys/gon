@@ -25,24 +25,24 @@ func Avg(nodes ...Node) Node {
 		}
 	}
 
-	return AvgNode{
+	return &AvgNode{
 		nodes: nodes,
 	}
 }
 
-func (node AvgNode) Scalar() string {
+func (node *AvgNode) Scalar() string {
 	return "avg"
 }
 
-func (node AvgNode) Shape() []KeyNode {
+func (node *AvgNode) Shape() []KeyNode {
 	return sliceutils.Map(node.nodes, func(from Node) KeyNode { return KeyNode{Node: from} })
 }
 
-func (node AvgNode) Type() NodeType {
+func (node *AvgNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node AvgNode) Eval(scope Scope) Value {
+func (node *AvgNode) Eval(scope Scope) Value {
 	values := make([]any, 0, len(node.nodes))
 
 	for i := range node.nodes {
@@ -62,7 +62,7 @@ func (node AvgNode) Eval(scope Scope) Value {
 	return Literal(sum)
 }
 
-func (node AvgNode) Register(codex Codex) error {
+func (node *AvgNode) Register(codex Codex) error {
 	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
 		_, rest, err := argSorter(args)
 		if err != nil {

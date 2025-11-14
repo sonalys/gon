@@ -18,7 +18,7 @@ func Greater(first, second Node) Node {
 		}
 	}
 
-	return GreaterNode{
+	return &GreaterNode{
 		first:  first,
 		second: second,
 	}
@@ -33,14 +33,14 @@ func GreaterOrEqual(first, second Node) Node {
 			Cause:      ErrAllNodesMustBeSet,
 		}
 	}
-	return GreaterNode{
+	return &GreaterNode{
 		first:     first,
 		second:    second,
 		inclusive: true,
 	}
 }
 
-func (node GreaterNode) Scalar() string {
+func (node *GreaterNode) Scalar() string {
 	if node.inclusive {
 		return "gte"
 	}
@@ -48,7 +48,7 @@ func (node GreaterNode) Scalar() string {
 	return "gt"
 }
 
-func (node GreaterNode) Shape() []KeyNode {
+func (node *GreaterNode) Shape() []KeyNode {
 	if node.inclusive {
 		return []KeyNode{
 			{"first", node.first},
@@ -62,11 +62,11 @@ func (node GreaterNode) Shape() []KeyNode {
 	}
 }
 
-func (node GreaterNode) Type() NodeType {
+func (node *GreaterNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node GreaterNode) Eval(scope Scope) Value {
+func (node *GreaterNode) Eval(scope Scope) Value {
 	firstValue, err := scope.Compute(node.first)
 	if err != nil {
 		return NewNodeError(node, err)
@@ -92,7 +92,7 @@ func (node GreaterNode) Eval(scope Scope) Value {
 	return Literal(comparison > 0)
 }
 
-func (node GreaterNode) Register(codex Codex) error {
+func (node *GreaterNode) Register(codex Codex) error {
 	err := codex.Register("gt", func(args []KeyNode) (Node, error) {
 		orderedArgs, _, err := argSorter(args, "first", "second")
 		if err != nil {

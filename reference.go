@@ -1,28 +1,28 @@
 package gon
 
-type referenceNode struct {
+type ReferenceNode struct {
 	definitionName string
 }
 
 func Reference(key string) Node {
-	return referenceNode{
+	return &ReferenceNode{
 		definitionName: key,
 	}
 }
 
-func (node referenceNode) Scalar() string {
+func (node *ReferenceNode) Scalar() string {
 	return node.definitionName
 }
 
-func (node referenceNode) Shape() []KeyNode {
+func (node *ReferenceNode) Shape() []KeyNode {
 	return nil
 }
 
-func (node referenceNode) Type() NodeType {
+func (node *ReferenceNode) Type() NodeType {
 	return NodeTypeReference
 }
 
-func (node referenceNode) Eval(scope Scope) Value {
+func (node *ReferenceNode) Eval(scope Scope) Value {
 	value, ok := scope.Definition(node.definitionName)
 	if !ok {
 		return NewNodeError(node, DefinitionNotFoundError{

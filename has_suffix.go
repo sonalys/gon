@@ -20,28 +20,28 @@ func HasSuffix(text, suffix Node) Node {
 		}
 	}
 
-	return HasSuffixNode{
+	return &HasSuffixNode{
 		text:   text,
 		suffix: suffix,
 	}
 }
 
-func (node HasSuffixNode) Scalar() string {
+func (node *HasSuffixNode) Scalar() string {
 	return "hasSuffix"
 }
 
-func (node HasSuffixNode) Shape() []KeyNode {
+func (node *HasSuffixNode) Shape() []KeyNode {
 	return []KeyNode{
 		{"text", node.text},
 		{"suffix", node.suffix},
 	}
 }
 
-func (node HasSuffixNode) Type() NodeType {
+func (node *HasSuffixNode) Type() NodeType {
 	return NodeTypeExpression
 }
 
-func (node HasSuffixNode) Eval(scope Scope) Value {
+func (node *HasSuffixNode) Eval(scope Scope) Value {
 	text, err := scope.Compute(node.text)
 	if err != nil {
 		return NewNodeError(node, err)
@@ -62,7 +62,7 @@ func (node HasSuffixNode) Eval(scope Scope) Value {
 	return Literal(strings.HasSuffix(textStr, prefixStr))
 }
 
-func (node HasSuffixNode) Register(codex Codex) error {
+func (node *HasSuffixNode) Register(codex Codex) error {
 	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
 		orderedArgs, _, err := argSorter(args, "text", "prefix")
 		if err != nil {
