@@ -68,7 +68,7 @@ func (node AvgNode) Register(codex Codex) error {
 	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
 		_, rest, err := argSorter(args)
 		if err != nil {
-			return nil, fmt.Errorf("error decoding 'avg' node: %w", err)
+			return nil, err
 		}
 
 		return Avg(rest...), nil

@@ -66,7 +66,7 @@ func (node HasPrefixNode) Register(codex Codex) error {
 	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
 		orderedArgs, _, err := argSorter(args, "text", "prefix")
 		if err != nil {
-			return nil, fmt.Errorf("error decoding 'not' node: %w", err)
+			return nil, err
 		}
 
 		return HasPrefix(orderedArgs["text"], orderedArgs["prefix"]), nil
