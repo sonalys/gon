@@ -16,7 +16,7 @@ func Smaller(first, second Node) Node {
 	if first == nil || second == nil {
 		return NodeError{
 			NodeScalar: "lt",
-			Cause:      fmt.Errorf("cannot compare unset expressions"),
+			Cause:      ErrAllNodesMustBeSet,
 		}
 	}
 
@@ -32,7 +32,7 @@ func SmallerOrEqual(first, second Node) Node {
 	if first == nil || second == nil {
 		return NodeError{
 			NodeScalar: "lte",
-			Cause:      fmt.Errorf("cannot compare unset expressions"),
+			Cause:      ErrAllNodesMustBeSet,
 		}
 	}
 

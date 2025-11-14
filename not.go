@@ -10,7 +10,7 @@ type NotNode struct {
 // It inverts the result of the evaluated boolean.
 func Not(expression Node) Node {
 	if expression == nil {
-		return Literal(fmt.Errorf("not expression cannot be unset"))
+		return Literal(ErrAllNodesMustBeSet)
 	}
 
 	return NotNode{

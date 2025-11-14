@@ -16,7 +16,7 @@ func HasSuffix(text, suffix Node) Node {
 	if text == nil || suffix == nil {
 		return NodeError{
 			NodeScalar: "suffix",
-			Cause:      fmt.Errorf("all inputs should be not-nil"),
+			Cause:      ErrAllNodesMustBeSet,
 		}
 	}
 

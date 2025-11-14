@@ -15,7 +15,7 @@ func Equal(first, second Node) Node {
 	if first == nil || second == nil {
 		return NodeError{
 			NodeScalar: "equal",
-			Cause:      fmt.Errorf("all inputs should be not-nil"),
+			Cause:      ErrAllNodesMustBeSet,
 		}
 	}
 

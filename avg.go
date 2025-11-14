@@ -22,7 +22,7 @@ func Avg(nodes ...Node) Node {
 		if nodes[i] == nil {
 			return NodeError{
 				NodeScalar: "avg",
-				Cause:      fmt.Errorf("all expressions should be not-nil"),
+				Cause:      ErrAllNodesMustBeSet,
 			}
 		}
 	}
@@ -58,7 +58,7 @@ func (node AvgNode) Eval(scope Scope) Value {
 
 	sum, ok := avgAny(values...)
 	if !ok {
-		return NewNodeError(node, fmt.Errorf("all nodes must be of the same type"))
+		return NewNodeError(node, ErrAllNodesMustMatch)
 	}
 
 	return Literal(sum)

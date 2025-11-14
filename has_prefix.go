@@ -16,7 +16,7 @@ func HasPrefix(text, prefix Node) Node {
 	if text == nil || prefix == nil {
 		return NodeError{
 			NodeScalar: "prefix",
-			Cause:      fmt.Errorf("all inputs should be not-nil"),
+			Cause:      ErrAllNodesMustBeSet,
 		}
 	}
 

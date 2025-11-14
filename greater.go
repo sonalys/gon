@@ -16,7 +16,7 @@ func Greater(first, second Node) Node {
 	if first == nil || second == nil {
 		return NodeError{
 			NodeScalar: "gt",
-			Cause:      fmt.Errorf("cannot compare unset expressions"),
+			Cause:      ErrAllNodesMustBeSet,
 		}
 	}
 
@@ -32,7 +32,7 @@ func GreaterOrEqual(first, second Node) Node {
 	if first == nil || second == nil {
 		return NodeError{
 			NodeScalar: "gte",
-			Cause:      fmt.Errorf("cannot compare unset expressions"),
+			Cause:      ErrAllNodesMustBeSet,
 		}
 	}
 	return GreaterNode{

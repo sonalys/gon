@@ -24,7 +24,7 @@ func Or(nodes ...Node) Node {
 		if nodes[i] == nil {
 			return NodeError{
 				NodeScalar: "or",
-				Cause:      fmt.Errorf("all expressions should be not-nil"),
+				Cause:      ErrAllNodesMustBeSet,
 			}
 		}
 	}

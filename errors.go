@@ -18,6 +18,13 @@ type (
 	DefinitionNotCallable struct {
 		DefinitionName string
 	}
+
+	StringError string
+)
+
+const (
+	ErrAllNodesMustMatch StringError = "all nodes must be of the same type"
+	ErrAllNodesMustBeSet StringError = "all nodes must be set"
 )
 
 func NewNodeError(namedNode Named, err error) NodeError {
@@ -25,6 +32,10 @@ func NewNodeError(namedNode Named, err error) NodeError {
 		NodeScalar: namedNode.Scalar(),
 		Cause:      err,
 	}
+}
+
+func (e StringError) Error() string {
+	return string(e)
 }
 
 func (e NodeError) Value() any {
