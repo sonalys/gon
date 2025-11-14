@@ -116,7 +116,6 @@ func Example_ageVerification() {
 I want to extend the project in the direction of having further:
 
 * Better slice definition and referencing
-* Extensive test coverage
 * Benchmarks
 * More operations:
   * Contains
