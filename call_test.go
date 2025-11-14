@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/encoding"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -72,5 +74,61 @@ func Test_Call(t *testing.T) {
 
 		got := node.Eval(scope).Value()
 		require.Equal(t, 5, got)
+	})
+}
+
+func Test_Call_Encoding(t *testing.T) {
+	t.Run("should decode without children", func(t *testing.T) {
+		require.NotPanics(t, func() {
+			node := gon.Call("funcName")
+
+			shaped, ok := node.(gon.Shaped)
+			require.True(t, ok)
+
+			kns := shaped.Shape()
+
+			registerer, ok := node.(encoding.AutoRegisterer)
+			require.True(t, ok)
+
+			codex := make(encoding.Codex)
+
+			err := registerer.Register(&codex)
+			require.NoError(t, err)
+
+			named, ok := node.(gon.Named)
+			require.True(t, ok)
+			assert.NotEmpty(t, named.Scalar())
+
+			got, err := codex[named.Scalar()](kns)
+			require.NoError(t, err)
+			require.Equal(t, node, got)
+		})
+	})
+
+	t.Run("should decode with children", func(t *testing.T) {
+		require.NotPanics(t, func() {
+			node := gon.Call("funcName", gon.Literal(1))
+
+			shaped, ok := node.(gon.Shaped)
+			require.True(t, ok)
+
+			kns := shaped.Shape()
+
+			registerer, ok := node.(encoding.AutoRegisterer)
+			require.True(t, ok)
+
+			codex := make(encoding.Codex)
+
+			err := registerer.Register(&codex)
+			require.NoError(t, err)
+
+			named, ok := node.(gon.Named)
+			require.True(t, ok)
+			assert.NotEmpty(t, named.Scalar())
+
+			got, err := codex[named.Scalar()](kns)
+			require.NoError(t, err)
+			require.Equal(t, node, got)
+		})
 	})
 }

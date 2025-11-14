@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/encoding"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -110,5 +112,34 @@ func Test_GreaterOrEqual(t *testing.T) {
 		got, ok := node.Eval(scope).Value().(bool)
 		require.True(t, ok)
 		require.False(t, got)
+	})
+}
+
+func Test_Greater_Encoding(t *testing.T) {
+	t.Run("should decode with children", func(t *testing.T) {
+		require.NotPanics(t, func() {
+			node := gon.Greater(gon.Literal(true), gon.Literal(1))
+
+			shaped, ok := node.(gon.Shaped)
+			require.True(t, ok)
+
+			kns := shaped.Shape()
+
+			registerer, ok := node.(encoding.AutoRegisterer)
+			require.True(t, ok)
+
+			codex := make(encoding.Codex)
+
+			err := registerer.Register(&codex)
+			require.NoError(t, err)
+
+			named, ok := node.(gon.Named)
+			require.True(t, ok)
+			assert.NotEmpty(t, named.Scalar())
+
+			got, err := codex[named.Scalar()](kns)
+			require.NoError(t, err)
+			require.Equal(t, node, got)
+		})
 	})
 }

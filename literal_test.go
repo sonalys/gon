@@ -2,8 +2,11 @@ package gon_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/sonalys/gon"
+	"github.com/sonalys/gon/encoding"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -225,5 +228,71 @@ func Test_Literal_Value(t *testing.T) {
 
 		got := outer.Value()
 		require.Equal(t, 1, got)
+	})
+}
+
+func Test_Literal_Encoding(t *testing.T) {
+	t.Run("should decode bool", func(t *testing.T) {
+		require.NotPanics(t, func() {
+			node := gon.Literal(true)
+			kns := node.Shape()
+
+			codex := make(encoding.Codex)
+
+			err := node.Register(&codex)
+			require.NoError(t, err)
+
+			assert.NotEmpty(t, node.Scalar())
+
+			got, err := codex[node.Scalar()](kns)
+			require.NoError(t, err)
+			require.Equal(t, node, got)
+		})
+	})
+
+	t.Run("should decode time", func(t *testing.T) {
+		require.NotPanics(t, func() {
+			t1 := time.Now().Truncate(time.Second).Round(0)
+			node := gon.Literal(t1)
+			kns := node.Shape()
+
+			codex := make(encoding.Codex)
+
+			err := node.Register(&codex)
+			require.NoError(t, err)
+
+			assert.NotEmpty(t, node.Scalar())
+
+			got, err := codex[node.Scalar()](kns)
+			require.NoError(t, err)
+
+			gotLiteral, ok := got.(*gon.LiteralNode)
+			require.True(t, ok)
+
+			require.Equal(t, t1, gotLiteral.Value())
+		})
+	})
+
+	t.Run("should decode string", func(t *testing.T) {
+		require.NotPanics(t, func() {
+			value := "value"
+			node := gon.Literal(value)
+			kns := node.Shape()
+
+			codex := make(encoding.Codex)
+
+			err := node.Register(&codex)
+			require.NoError(t, err)
+
+			assert.NotEmpty(t, node.Scalar())
+
+			got, err := codex[node.Scalar()](kns)
+			require.NoError(t, err)
+
+			gotLiteral, ok := got.(*gon.LiteralNode)
+			require.True(t, ok)
+
+			require.Equal(t, value, gotLiteral.Value())
+		})
 	})
 }

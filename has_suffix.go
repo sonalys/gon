@@ -64,11 +64,11 @@ func (node *HasSuffixNode) Eval(scope Scope) Value {
 
 func (node *HasSuffixNode) Register(codex Codex) error {
 	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
-		orderedArgs, _, err := argSorter(args, "text", "prefix")
+		orderedArgs, _, err := argSorter(args, "text", "suffix")
 		if err != nil {
 			return nil, err
 		}
 
-		return HasSuffix(orderedArgs["text"], orderedArgs["prefix"]), nil
+		return HasSuffix(orderedArgs["text"], orderedArgs["suffix"]), nil
 	})
 }

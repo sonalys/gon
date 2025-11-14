@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -51,7 +52,9 @@ func (node *LiteralNode) Scalar() string {
 
 func (node *LiteralNode) Shape() []KeyNode {
 	if !node.value.IsValid() || !node.value.CanInterface() {
-		return nil
+		return []KeyNode{
+			{Node: node},
+		}
 	}
 
 	switch v := node.value.Interface().(type) {
@@ -60,7 +63,9 @@ func (node *LiteralNode) Shape() []KeyNode {
 			{"", Literal(v.Format(time.RFC3339))},
 		}
 	default:
-		return nil
+		return []KeyNode{
+			{Node: node},
+		}
 	}
 }
 
@@ -220,10 +225,10 @@ func (node *LiteralNode) Definition(key string) (Value, bool) {
 }
 
 func (node *LiteralNode) Register(codex Codex) error {
-	return codex.Register("time", func(args []KeyNode) (Node, error) {
+	err := codex.Register("time", func(args []KeyNode) (Node, error) {
 		valuer, ok := args[0].Node.(Valued)
 		if !ok {
-			return nil, fmt.Errorf("time should be parsed only from string")
+			return nil, fmt.Errorf("invalid value received")
 		}
 
 		rawTime, ok := valuer.Value().(string)
@@ -238,6 +243,45 @@ func (node *LiteralNode) Register(codex Codex) error {
 
 		return Literal(t), nil
 	})
+	if err != nil {
+		return err
+	}
+
+	err = codex.Register("bool", func(args []KeyNode) (Node, error) {
+		valuer, ok := args[0].Node.(Valued)
+		if !ok {
+			return nil, fmt.Errorf("invalid value received")
+		}
+
+		raw, ok := valuer.Value().(string)
+		if !ok {
+			return nil, fmt.Errorf("bool should be parsed only from string")
+		}
+
+		t, err := strconv.ParseBool(raw)
+		if err != nil {
+			return nil, fmt.Errorf("time is invalid: %w", err)
+		}
+
+		return Literal(t), nil
+	})
+	if err != nil {
+		return err
+	}
+
+	err = codex.Register("literal", func(args []KeyNode) (Node, error) {
+		valuer, ok := args[0].Node.(Valued)
+		if !ok {
+			return nil, fmt.Errorf("invalid value received")
+		}
+
+		return Literal(valuer.Value()), nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 var (

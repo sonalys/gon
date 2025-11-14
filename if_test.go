@@ -5,6 +5,7 @@ import (
 
 	"github.com/sonalys/gon"
 	"github.com/sonalys/gon/ast"
+	"github.com/sonalys/gon/encoding"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -82,5 +83,61 @@ func Test_If(t *testing.T) {
 
 		_, err := scope.Compute(expr)
 		require.ErrorAs(t, err, &gon.NodeError{})
+	})
+}
+
+func Test_If_Encoding(t *testing.T) {
+	t.Run("should decode without else", func(t *testing.T) {
+		require.NotPanics(t, func() {
+			node := gon.If(gon.Literal(true), gon.Literal(1))
+
+			shaped, ok := node.(gon.Shaped)
+			require.True(t, ok)
+
+			kns := shaped.Shape()
+
+			registerer, ok := node.(encoding.AutoRegisterer)
+			require.True(t, ok)
+
+			codex := make(encoding.Codex)
+
+			err := registerer.Register(&codex)
+			require.NoError(t, err)
+
+			named, ok := node.(gon.Named)
+			require.True(t, ok)
+			assert.NotEmpty(t, named.Scalar())
+
+			got, err := codex[named.Scalar()](kns)
+			require.NoError(t, err)
+			require.Equal(t, node, got)
+		})
+	})
+
+	t.Run("should decode with else", func(t *testing.T) {
+		require.NotPanics(t, func() {
+			node := gon.If(gon.Literal(true), gon.Literal(1), gon.Literal(2))
+
+			shaped, ok := node.(gon.Shaped)
+			require.True(t, ok)
+
+			kns := shaped.Shape()
+
+			registerer, ok := node.(encoding.AutoRegisterer)
+			require.True(t, ok)
+
+			codex := make(encoding.Codex)
+
+			err := registerer.Register(&codex)
+			require.NoError(t, err)
+
+			named, ok := node.(gon.Named)
+			require.True(t, ok)
+			assert.NotEmpty(t, named.Scalar())
+
+			got, err := codex[named.Scalar()](kns)
+			require.NoError(t, err)
+			require.Equal(t, node, got)
+		})
 	})
 }

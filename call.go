@@ -2,6 +2,7 @@ package gon
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/sonalys/gon/internal/sliceutils"
 )
@@ -81,14 +82,21 @@ func (node *CallNode) Eval(scope Scope) Value {
 
 func (node *CallNode) Register(codex Codex) error {
 	return codex.Register(node.Scalar(), func(args []KeyNode) (Node, error) {
-		valuer := args[0].Node.(Valued)
+		funcName, ok := args[0].Node.(Valued).Value().(string)
+		if !ok {
+			return nil, fmt.Errorf("expected string, got %T", funcName)
+		}
 
 		expressionTransform := func(from KeyNode) Node {
 			return from.Node
 		}
 
+		if len(args) == 1 {
+			return Call(funcName), nil
+		}
+
 		transformedArgs := sliceutils.Map(args[1:], expressionTransform)
 
-		return Call(valuer.Value().(string), transformedArgs...), nil
+		return Call(funcName, transformedArgs...), nil
 	})
 }
