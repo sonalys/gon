@@ -1,7 +1,6 @@
 package gon
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -43,7 +42,9 @@ func (r *definitionStore) Definition(key string) (Value, bool) {
 
 	value, ok := r.store[topKey]
 	if !ok {
-		return Literal(fmt.Errorf("definition '%s' not found", topKey)), false
+		return Literal(DefinitionNotFoundError{
+			DefinitionKey: topKey,
+		}), false
 	}
 
 	if len(parts) == 1 {
@@ -55,12 +56,16 @@ func (r *definitionStore) Definition(key string) (Value, bool) {
 		return resolver.Definition(key[len(topKey)+1:])
 	}
 
-	return Literal(fmt.Errorf("definition '%s' doesn't have children attributes", topKey)), false
+	return Literal(DefinitionNotFoundError{
+		DefinitionKey: key,
+	}), false
 }
 
 func (r *definitionStore) Define(key string, value Value) error {
 	if !keyValidationRegex.MatchString(key) {
-		return fmt.Errorf("definition key '%s' is invalid", key)
+		return InvalidDefinitionKey{
+			DefinitionKey: key,
+		}
 	}
 
 	r.store[key] = value

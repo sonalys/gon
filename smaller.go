@@ -1,9 +1,5 @@
 package gon
 
-import (
-	"fmt"
-)
-
 type SmallerNode struct {
 	first     Node
 	second    Node
@@ -82,7 +78,10 @@ func (node SmallerNode) Eval(scope Scope) Value {
 
 	comparison, ok := cmpAny(firstValue, secondValue)
 	if !ok {
-		return NewNodeError(node, fmt.Errorf("cannot compare %T and %T", firstValue, secondValue))
+		return NewNodeError(node, IncompatiblePairError{
+			First:  firstValue,
+			Second: secondValue,
+		})
 	}
 
 	if node.inclusive {

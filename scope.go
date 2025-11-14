@@ -2,7 +2,6 @@ package gon
 
 import (
 	"context"
-	"fmt"
 )
 
 type (
@@ -41,7 +40,9 @@ func (s *scope) WithContext(ctx context.Context) *scope {
 func (s *scope) WithDefinitions(source Definitions) (*scope, error) {
 	for key, value := range source {
 		if !keyValidationRegex.MatchString(key) {
-			return nil, fmt.Errorf("invalid definition name: %s", key)
+			return nil, InvalidDefinitionKey{
+				DefinitionKey: key,
+			}
 		}
 		if err := s.store.Define(key, value); err != nil {
 			return nil, err

@@ -65,14 +65,14 @@ func (node CallNode) Eval(scope Scope) Value {
 	definition, ok := scope.Definition(node.funcName)
 	if !ok {
 		return NewNodeError(node, DefinitionNotFoundError{
-			DefinitionName: node.funcName,
+			DefinitionKey: node.funcName,
 		})
 	}
 
 	callable, ok := definition.(Callable)
 	if !ok {
-		return NewNodeError(node, DefinitionNotCallable{
-			DefinitionName: node.funcName,
+		return NewNodeError(node, DefinitionNotCallableError{
+			DefinitionKey: node.funcName,
 		})
 	}
 

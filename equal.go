@@ -1,9 +1,5 @@
 package gon
 
-import (
-	"fmt"
-)
-
 type EqualNode struct {
 	first  Node
 	second Node
@@ -53,7 +49,10 @@ func (node EqualNode) Eval(scope Scope) Value {
 
 	value, ok := cmpAny(firstValue, secondValue)
 	if !ok {
-		return NewNodeError(node, fmt.Errorf("cannot compare %T and %T", firstValue, secondValue))
+		return NewNodeError(node, IncompatiblePairError{
+			First:  firstValue,
+			Second: secondValue,
+		})
 	}
 
 	return Literal(value == 0)

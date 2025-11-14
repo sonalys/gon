@@ -37,7 +37,7 @@ func Test_Call(t *testing.T) {
 		err, ok := got.Value().(error)
 		require.True(t, ok)
 
-		var target gon.DefinitionNotCallable
+		var target gon.DefinitionNotCallableError
 		require.ErrorAs(t, err, &target)
 	})
 

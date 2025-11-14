@@ -12,7 +12,10 @@ type IfNode struct {
 
 func If(condition, thenBranch Node, elseBranch ...Node) Node {
 	if condition == nil {
-		return Literal(fmt.Errorf("if condition cannot be unset"))
+		return NodeError{
+			NodeScalar: "if",
+			Cause:      fmt.Errorf("condition cannot be unset"),
+		}
 	}
 
 	if len(elseBranch) > 1 {

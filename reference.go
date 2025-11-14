@@ -1,7 +1,5 @@
 package gon
 
-import "fmt"
-
 type referenceNode struct {
 	definitionName string
 }
@@ -27,7 +25,9 @@ func (node referenceNode) Type() NodeType {
 func (node referenceNode) Eval(scope Scope) Value {
 	value, ok := scope.Definition(node.definitionName)
 	if !ok {
-		return NewNodeError(node, fmt.Errorf("definition not found: %s", node.definitionName))
+		return NewNodeError(node, DefinitionNotFoundError{
+			DefinitionKey: node.definitionName,
+		})
 	}
 
 	return value.Eval(scope)

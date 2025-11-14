@@ -104,15 +104,17 @@ func (node *LiteralNode) Call(ctx context.Context, key string, args ...Value) Va
 		}
 
 		if !curValue.IsValid() || curValue.IsZero() {
-			return NewNodeError(node, fmt.Errorf("definition '%s' not found", strings.Join(parts[:i+1], ".")))
+			return NewNodeError(node, DefinitionNotFoundError{
+				DefinitionKey: strings.Join(parts[:i+1], "."),
+			})
 		}
 	}
 
 	typeOfFunc := curValue.Type()
 
 	if curValue.Kind() != reflect.Func {
-		return NewNodeError(node, DefinitionNotCallable{
-			DefinitionName: key,
+		return NewNodeError(node, DefinitionNotCallableError{
+			DefinitionKey: key,
 		})
 	}
 
@@ -200,7 +202,7 @@ func (node *LiteralNode) Definition(key string) (Value, bool) {
 			partPath := strings.Join(parts[:i+1], ".")
 
 			return Literal(DefinitionNotFoundError{
-				DefinitionName: partPath,
+				DefinitionKey: partPath,
 			}), false
 		}
 	}

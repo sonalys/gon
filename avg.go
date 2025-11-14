@@ -1,8 +1,6 @@
 package gon
 
 import (
-	"fmt"
-
 	"github.com/sonalys/gon/internal/sliceutils"
 )
 
@@ -14,7 +12,7 @@ func Avg(nodes ...Node) Node {
 	if len(nodes) == 0 {
 		return NodeError{
 			NodeScalar: "avg",
-			Cause:      fmt.Errorf("must receive at least one expression"),
+			Cause:      ErrMustHaveArguments,
 		}
 	}
 

@@ -6,25 +6,39 @@ import (
 )
 
 type (
+	StringError string
+
 	NodeError struct {
 		NodeScalar string
 		Cause      error
 	}
 
 	DefinitionNotFoundError struct {
-		DefinitionName string
+		DefinitionKey string
 	}
 
-	DefinitionNotCallable struct {
-		DefinitionName string
+	DefinitionNotCallableError struct {
+		DefinitionKey string
 	}
 
-	StringError string
+	InvalidDefinitionKey struct {
+		DefinitionKey string
+	}
+
+	IncompatiblePairError struct {
+		First  any
+		Second any
+	}
+
+	DefinitionError interface {
+		Key() string
+	}
 )
 
 const (
 	ErrAllNodesMustMatch StringError = "all nodes must be of the same type"
 	ErrAllNodesMustBeSet StringError = "all nodes must be set"
+	ErrMustHaveArguments StringError = "must have at least one argument"
 )
 
 func NewNodeError(namedNode Named, err error) NodeError {
@@ -63,14 +77,37 @@ func (e NodeError) Unwrap() error {
 }
 
 func (e DefinitionNotFoundError) Error() string {
-	return fmt.Sprintf("definition '%s' not found", e.DefinitionName)
+	return fmt.Sprintf("definition '%s' not found", e.DefinitionKey)
 }
 
-func (e DefinitionNotCallable) Error() string {
-	return fmt.Sprintf("definition '%s' not callable", e.DefinitionName)
+func (e DefinitionNotCallableError) Error() string {
+	return fmt.Sprintf("definition '%s' not callable", e.DefinitionKey)
+}
+
+func (e IncompatiblePairError) Error() string {
+	return fmt.Sprintf("types %T and %T are not compatible", e.First, e.Second)
+}
+
+func (e InvalidDefinitionKey) Error() string {
+	return fmt.Sprintf("definition key '%s' is invalid", e.DefinitionKey)
+}
+
+func (e DefinitionNotCallableError) Key() string {
+	return e.DefinitionKey
+}
+
+func (e DefinitionNotFoundError) Key() string {
+	return e.DefinitionKey
+}
+
+func (e InvalidDefinitionKey) Key() string {
+	return e.DefinitionKey
 }
 
 var (
-	_ Node  = NodeError{}
-	_ Value = NodeError{}
+	_ Node            = NodeError{}
+	_ Value           = NodeError{}
+	_ DefinitionError = DefinitionNotCallableError{}
+	_ DefinitionError = DefinitionNotFoundError{}
+	_ DefinitionError = InvalidDefinitionKey{}
 )
