@@ -2,6 +2,7 @@ package nodes
 
 import (
 	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/gonutils"
 	"github.com/sonalys/gon/internal/sliceutils"
 )
 
@@ -65,7 +66,7 @@ func (node *AvgNode) Eval(scope adapters.Scope) adapters.Value {
 
 func (node *AvgNode) Register(codex adapters.Codex) error {
 	return codex.Register(node.Scalar(), func(args []adapters.KeyNode) (adapters.Node, error) {
-		_, rest, err := argSorter(args)
+		_, rest, err := gonutils.SortArgs(args)
 		if err != nil {
 			return nil, err
 		}
@@ -73,3 +74,5 @@ func (node *AvgNode) Register(codex adapters.Codex) error {
 		return Avg(rest...), nil
 	})
 }
+
+var _ adapters.SerializableNode = &AvgNode{}

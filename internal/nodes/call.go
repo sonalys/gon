@@ -93,3 +93,5 @@ func (node *CallNode) Register(codex adapters.Codex) error {
 		return Call(funcName, transformedArgs...), nil
 	})
 }
+
+var _ adapters.SerializableNode = &CallNode{}

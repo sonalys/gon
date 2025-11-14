@@ -8,6 +8,7 @@ import (
 	"github.com/sonalys/gon"
 	"github.com/sonalys/gon/adapters"
 	"github.com/sonalys/gon/encoding"
+	"github.com/sonalys/gon/gonutils"
 )
 
 type customNode struct {
@@ -36,8 +37,22 @@ func (node *customNode) Eval(scope adapters.Scope) adapters.Value {
 	return gon.Literal(true)
 }
 
+func (node *customNode) Register(codex adapters.Codex) error {
+	return codex.Register(node.Scalar(), func(args []adapters.KeyNode) (adapters.Node, error) {
+		orderedArgs, _, err := gonutils.SortArgs(args, "myCustomParam")
+		if err != nil {
+			return nil, err
+		}
+
+		return &customNode{
+			input: orderedArgs["myCustomParam"],
+		}, nil
+	})
+}
+
 var (
-	_ adapters.Node = &customNode{}
+	// Ensure these constraints are met if you want your node to encode/decode properly.
+	_ adapters.SerializableNode = &customNode{}
 )
 
 func Example_customNode() {
@@ -52,10 +67,9 @@ func Example_customNode() {
 
 	customCodex := maps.Clone(encoding.DefaultExpressionCodex)
 
-	customCodex["customNode"] = func(args []adapters.KeyNode) (adapters.Node, error) {
-		return &customNode{
-			input: args[0].Node,
-		}, nil
+	err = customCodex.AutoRegister(&customNode{})
+	if err != nil {
+		panic(err)
 	}
 
 	decodedNode, err := encoding.Decode(buffer.Bytes(), customCodex)

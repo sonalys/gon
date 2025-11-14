@@ -1,6 +1,9 @@
 package nodes
 
-import "github.com/sonalys/gon/adapters"
+import (
+	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/gonutils"
+)
 
 type (
 	GreaterNode struct {
@@ -96,7 +99,7 @@ func (node *GreaterNode) Eval(scope adapters.Scope) adapters.Value {
 
 func (node *GreaterNode) Register(codex adapters.Codex) error {
 	err := codex.Register("gt", func(args []adapters.KeyNode) (adapters.Node, error) {
-		orderedArgs, _, err := argSorter(args, "first", "second")
+		orderedArgs, _, err := gonutils.SortArgs(args, "first", "second")
 		if err != nil {
 			return nil, err
 		}
@@ -107,7 +110,7 @@ func (node *GreaterNode) Register(codex adapters.Codex) error {
 	}
 
 	err = codex.Register("gte", func(args []adapters.KeyNode) (adapters.Node, error) {
-		orderedArgs, _, err := argSorter(args, "first", "second")
+		orderedArgs, _, err := gonutils.SortArgs(args, "first", "second")
 		if err != nil {
 			return nil, err
 		}
@@ -116,3 +119,5 @@ func (node *GreaterNode) Register(codex adapters.Codex) error {
 
 	return err
 }
+
+var _ adapters.SerializableNode = &GreaterNode{}

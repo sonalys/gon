@@ -73,6 +73,17 @@ type (
 		Register(name string, constructor func([]KeyNode) (Node, error)) error
 	}
 
+	AutoRegisterer interface {
+		Register(codex Codex) error
+	}
+
+	SerializableNode interface {
+		Node
+		Named
+		Shaped
+		AutoRegisterer
+	}
+
 	// Callable defines a node that can be called.
 	// It represents a function as a node.
 	Callable interface {

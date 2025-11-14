@@ -65,5 +65,5 @@ func (node *IsEmptyNode) Register(codex adapters.Codex) error {
 }
 
 var (
-	_ adapters.Shaped = &IsEmptyNode{}
+	_ adapters.SerializableNode = &IsEmptyNode{}
 )

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/gonutils"
 )
 
 type HasSuffixNode struct {
@@ -66,7 +67,7 @@ func (node *HasSuffixNode) Eval(scope adapters.Scope) adapters.Value {
 
 func (node *HasSuffixNode) Register(codex adapters.Codex) error {
 	return codex.Register(node.Scalar(), func(args []adapters.KeyNode) (adapters.Node, error) {
-		orderedArgs, _, err := argSorter(args, "text", "suffix")
+		orderedArgs, _, err := gonutils.SortArgs(args, "text", "suffix")
 		if err != nil {
 			return nil, err
 		}
@@ -74,3 +75,5 @@ func (node *HasSuffixNode) Register(codex adapters.Codex) error {
 		return HasSuffix(orderedArgs["text"], orderedArgs["suffix"]), nil
 	})
 }
+
+var _ adapters.SerializableNode = &HasSuffixNode{}

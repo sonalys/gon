@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/gonutils"
 )
 
 type HasPrefixNode struct {
@@ -66,7 +67,7 @@ func (node *HasPrefixNode) Eval(scope adapters.Scope) adapters.Value {
 
 func (node *HasPrefixNode) Register(codex adapters.Codex) error {
 	return codex.Register(node.Scalar(), func(args []adapters.KeyNode) (adapters.Node, error) {
-		orderedArgs, _, err := argSorter(args, "text", "prefix")
+		orderedArgs, _, err := gonutils.SortArgs(args, "text", "prefix")
 		if err != nil {
 			return nil, err
 		}
@@ -74,3 +75,5 @@ func (node *HasPrefixNode) Register(codex adapters.Codex) error {
 		return HasPrefix(orderedArgs["text"], orderedArgs["prefix"]), nil
 	})
 }
+
+var _ adapters.SerializableNode = &HasPrefixNode{}

@@ -27,11 +27,7 @@ func (c *Codex) Register(name string, constructor func([]adapters.KeyNode) (adap
 	return nil
 }
 
-type AutoRegisterer interface {
-	Register(codex adapters.Codex) error
-}
-
-func (c *Codex) AutoRegister(nodes ...AutoRegisterer) error {
+func (c *Codex) AutoRegister(nodes ...adapters.AutoRegisterer) error {
 	for _, registerer := range nodes {
 		if err := registerer.Register(c); err != nil {
 			return err
@@ -56,6 +52,7 @@ func init() {
 		&nodes.SmallerNode{},
 		&nodes.SumNode{},
 		&nodes.IsEmptyNode{},
+		&nodes.ReferenceNode{},
 	)
 	if err != nil {
 		panic(fmt.Errorf("unexpected error registering default nodes: %s", err))

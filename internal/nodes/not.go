@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/gonutils"
 )
 
 type NotNode struct {
@@ -52,10 +53,12 @@ func (node *NotNode) Eval(scope adapters.Scope) adapters.Value {
 
 func (node *NotNode) Register(codex adapters.Codex) error {
 	return codex.Register(node.Scalar(), func(args []adapters.KeyNode) (adapters.Node, error) {
-		orderedArgs, _, err := argSorter(args, "expression")
+		orderedArgs, _, err := gonutils.SortArgs(args, "expression")
 		if err != nil {
 			return nil, err
 		}
 		return Not(orderedArgs["expression"]), nil
 	})
 }
+
+var _ adapters.SerializableNode = &NotNode{}

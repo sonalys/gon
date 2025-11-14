@@ -2,6 +2,7 @@ package nodes
 
 import (
 	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/gonutils"
 	"github.com/sonalys/gon/internal/sliceutils"
 )
 
@@ -67,8 +68,10 @@ func (node *OrNode) Eval(scope adapters.Scope) adapters.Value {
 
 func (node *OrNode) Register(codex adapters.Codex) error {
 	return codex.Register(node.Scalar(), func(args []adapters.KeyNode) (adapters.Node, error) {
-		_, argsSlice, _ := argSorter(args)
+		_, argsSlice, _ := gonutils.SortArgs(args)
 
 		return Or(argsSlice...), nil
 	})
 }
+
+var _ adapters.SerializableNode = &OrNode{}

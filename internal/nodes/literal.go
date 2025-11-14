@@ -290,4 +290,5 @@ var (
 	_ adapters.Value            = &LiteralNode{}
 	_ adapters.Callable         = &LiteralNode{}
 	_ adapters.DefinitionReader = &LiteralNode{}
+	_ adapters.SerializableNode = &LiteralNode{}
 )

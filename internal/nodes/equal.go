@@ -1,6 +1,9 @@
 package nodes
 
-import "github.com/sonalys/gon/adapters"
+import (
+	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/gonutils"
+)
 
 type EqualNode struct {
 	first  adapters.Node
@@ -62,10 +65,12 @@ func (node *EqualNode) Eval(scope adapters.Scope) adapters.Value {
 
 func (node *EqualNode) Register(codex adapters.Codex) error {
 	return codex.Register(node.Scalar(), func(args []adapters.KeyNode) (adapters.Node, error) {
-		orderedArgs, _, err := argSorter(args, "first", "second")
+		orderedArgs, _, err := gonutils.SortArgs(args, "first", "second")
 		if err != nil {
 			return nil, err
 		}
 		return Equal(orderedArgs["first"], orderedArgs["second"]), nil
 	})
 }
+
+var _ adapters.SerializableNode = &EqualNode{}

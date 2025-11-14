@@ -133,7 +133,7 @@ func Test_IsEmpty_Encoding(t *testing.T) {
 
 			kns := shaped.Shape()
 
-			registerer, ok := node.(encoding.AutoRegisterer)
+			registerer, ok := node.(adapters.AutoRegisterer)
 			require.True(t, ok)
 
 			codex := make(encoding.Codex)

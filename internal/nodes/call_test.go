@@ -89,7 +89,7 @@ func Test_Call_Encoding(t *testing.T) {
 
 			kns := shaped.Shape()
 
-			registerer, ok := node.(encoding.AutoRegisterer)
+			registerer, ok := node.(adapters.AutoRegisterer)
 			require.True(t, ok)
 
 			codex := make(encoding.Codex)
@@ -116,7 +116,7 @@ func Test_Call_Encoding(t *testing.T) {
 
 			kns := shaped.Shape()
 
-			registerer, ok := node.(encoding.AutoRegisterer)
+			registerer, ok := node.(adapters.AutoRegisterer)
 			require.True(t, ok)
 
 			codex := make(encoding.Codex)

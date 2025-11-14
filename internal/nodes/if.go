@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sonalys/gon/adapters"
+	"github.com/sonalys/gon/gonutils"
 )
 
 type IfNode struct {
@@ -89,7 +90,7 @@ func (node *IfNode) Eval(scope adapters.Scope) adapters.Value {
 
 func (node *IfNode) Register(codex adapters.Codex) error {
 	return codex.Register(node.Scalar(), func(args []adapters.KeyNode) (adapters.Node, error) {
-		orderedArgs, rest, err := argSorter(args, "condition", "then")
+		orderedArgs, rest, err := gonutils.SortArgs(args, "condition", "then")
 		if err != nil {
 			return nil, err
 		}
@@ -97,3 +98,5 @@ func (node *IfNode) Register(codex adapters.Codex) error {
 		return If(orderedArgs["condition"], orderedArgs["then"], rest...), nil
 	})
 }
+
+var _ adapters.SerializableNode = &IfNode{}
