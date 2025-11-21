@@ -193,7 +193,7 @@ func (node *LiteralNode) Definition(key string) (adapters.Value, bool) {
 
 	curValue := node.value
 
-	if !curValue.IsValid() || curValue.IsZero() {
+	if !curValue.IsValid() {
 		return Literal(nil), false
 	}
 
@@ -213,7 +213,7 @@ func (node *LiteralNode) Definition(key string) (adapters.Value, bool) {
 			curValue = curValue.MapIndex(reflect.ValueOf(partKey))
 		}
 
-		if !curValue.IsValid() || curValue.IsZero() {
+		if !curValue.IsValid() {
 			partPath := strings.Join(parts[:i+1], ".")
 
 			return Literal(adapters.DefinitionNotFoundError{

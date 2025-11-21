@@ -53,6 +53,7 @@ func init() {
 		&nodes.SumNode{},
 		&nodes.IsEmptyNode{},
 		&nodes.ReferenceNode{},
+		&nodes.ExistsNode{},
 	)
 	if err != nil {
 		panic(fmt.Errorf("unexpected error registering default nodes: %s", err))

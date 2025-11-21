@@ -106,6 +106,7 @@ func Example_ageVerification() {
 * [Custom Node](./examples/custom-node/example_test.go)
 * [Functions](./examples/functions/example_test.go)
 * [Object access rule](./examples/object-access-rule/example_test.go)
+* [Feature flags](./examples/feature-flag/example_test.go)
 
 ## Standard Nodes
 
@@ -125,6 +126,7 @@ func Example_ageVerification() {
 * Smaller
 * SmallerOrEqual
 * Sum
+* Exists
 
 ## Limitations
 

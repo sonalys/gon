@@ -21,4 +21,5 @@ var (
 	Smaller        = nodes.Smaller
 	SmallerOrEqual = nodes.SmallerOrEqual
 	Sum            = nodes.Sum
+	Exists         = nodes.Exists
 )
