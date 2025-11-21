@@ -7,7 +7,9 @@ import (
 var (
 	Avg            = nodes.Avg
 	Call           = nodes.Call
+	Coalesce       = nodes.Coalesce
 	Equal          = nodes.Equal
+	Exists         = nodes.Exists
 	Greater        = nodes.Greater
 	GreaterOrEqual = nodes.GreaterOrEqual
 	HasPrefix      = nodes.HasPrefix
@@ -21,5 +23,4 @@ var (
 	Smaller        = nodes.Smaller
 	SmallerOrEqual = nodes.SmallerOrEqual
 	Sum            = nodes.Sum
-	Exists         = nodes.Exists
 )

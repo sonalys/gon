@@ -112,7 +112,9 @@ func Example_ageVerification() {
 
 * Avg
 * Call
+* Coalesce
 * Equal
+* Exists
 * Greater
 * GreaterOrEqual
 * HasPrefix
@@ -126,7 +128,6 @@ func Example_ageVerification() {
 * Smaller
 * SmallerOrEqual
 * Sum
-* Exists
 
 ## Limitations
 

@@ -41,19 +41,20 @@ func init() {
 	err := DefaultExpressionCodex.AutoRegister(
 		&nodes.AvgNode{},
 		&nodes.CallNode{},
+		&nodes.CoalesceNode{},
 		&nodes.EqualNode{},
+		&nodes.ExistsNode{},
 		&nodes.GreaterNode{},
 		&nodes.HasPrefixNode{},
 		&nodes.HasSuffixNode{},
 		&nodes.IfNode{},
+		&nodes.IsEmptyNode{},
 		&nodes.LiteralNode{},
 		&nodes.NotNode{},
 		&nodes.OrNode{},
+		&nodes.ReferenceNode{},
 		&nodes.SmallerNode{},
 		&nodes.SumNode{},
-		&nodes.IsEmptyNode{},
-		&nodes.ReferenceNode{},
-		&nodes.ExistsNode{},
 	)
 	if err != nil {
 		panic(fmt.Errorf("unexpected error registering default nodes: %s", err))
