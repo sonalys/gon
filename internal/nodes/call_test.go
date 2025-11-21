@@ -29,7 +29,7 @@ func Test_Call(t *testing.T) {
 	t.Run("definition not callable", func(t *testing.T) {
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(1),
 			})
 		require.NoError(t, err)
@@ -48,7 +48,7 @@ func Test_Call(t *testing.T) {
 	t.Run("should call func without context", func(t *testing.T) {
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(func() int {
 					return 5
 				}),
@@ -64,7 +64,7 @@ func Test_Call(t *testing.T) {
 	t.Run("should call func with context", func(t *testing.T) {
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(func(ctx context.Context) int {
 					require.NotNil(t, ctx)
 					return 5

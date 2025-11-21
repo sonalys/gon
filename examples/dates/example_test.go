@@ -17,7 +17,7 @@ func Example_dates() {
 
 	scope, err := gon.
 		NewScope().
-		WithDefinitions(gon.Definitions{
+		WithValues(gon.Values{
 			"person": gon.Literal(person),
 		})
 	if err != nil {

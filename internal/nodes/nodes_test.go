@@ -40,7 +40,7 @@ func Test_Banner(t *testing.T) {
 func Benchmark_Equal(b *testing.B) {
 	scope, _ := gon.NewScope().
 		WithContext(b.Context()).
-		WithDefinitions(gon.Definitions{
+		WithValues(gon.Values{
 			"var1": nodes.Literal(1),
 			"var2": nodes.Literal(1),
 		})

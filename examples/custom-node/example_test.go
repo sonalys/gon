@@ -79,7 +79,7 @@ func Example_customNode() {
 
 	scope, err := gon.
 		NewScope().
-		WithDefinitions(gon.Definitions{
+		WithValues(gon.Values{
 			"var": gon.Literal("my-var"),
 		})
 	if err != nil {

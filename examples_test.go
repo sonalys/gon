@@ -23,7 +23,7 @@ func Test_Expression(t *testing.T) {
 		// Context cancellation
 		WithContext(t.Context()).
 		// Dynamic, decoupled scope for your rules.
-		WithDefinitions(gon.Definitions{
+		WithValues(gon.Values{
 			// Support for static variables of any type.
 			"myName": gon.Literal("friendName"),
 			// Support for structs and maps for children attributes.

@@ -21,7 +21,7 @@ func Example_dynamicComparison() {
 
 	scope, err := gon.
 		NewScope().
-		WithDefinitions(gon.Definitions{
+		WithValues(gon.Values{
 			"person":     gon.Literal(person),
 			"age_config": gon.Literal(config),
 		})

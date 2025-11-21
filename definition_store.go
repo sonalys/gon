@@ -9,9 +9,9 @@ import (
 )
 
 type (
-	// Definitions defines how scope definitions are configured.
+	// Values defines how scope definitions are configured.
 	// The key must be an alphanumeric+underscore+dash string from length 1 to 50, starting with a letter.
-	Definitions map[string]adapters.Value
+	Values map[string]adapters.Value
 
 	definitionStore struct {
 		store map[string]adapters.Value

@@ -12,7 +12,7 @@ func Example_lazyValue() {
 
 	scope, err := gon.
 		NewScope().
-		WithDefinitions(gon.Definitions{
+		WithValues(gon.Values{
 			"lazy": gon.Literal(func(ctx context.Context) int {
 				called = true
 				return 5

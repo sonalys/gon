@@ -22,7 +22,7 @@ func Example_functions() {
 
 	scope, err := gon.
 		NewScope().
-		WithDefinitions(gon.Definitions{
+		WithValues(gon.Values{
 			"friend": gon.Literal(person),
 			"greet": gon.Literal(func(name string, birthday time.Time) string {
 

@@ -19,7 +19,7 @@ func Test_Literal_Definition(t *testing.T) {
 
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(&str{
 					Value: 5,
 				}),
@@ -41,7 +41,7 @@ func Test_Literal_Definition(t *testing.T) {
 
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(str{
 					Value: &expected,
 				}),
@@ -67,7 +67,7 @@ func Test_Literal_Definition(t *testing.T) {
 
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(str{
 					Attribute: attribute{
 						Value: expected,
@@ -95,7 +95,7 @@ func Test_Literal_Definition(t *testing.T) {
 
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(str{
 					Attribute: &attribute{
 						Value: expected,
@@ -115,7 +115,7 @@ func Test_Literal_Definition(t *testing.T) {
 
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(&str{
 					"value": 5,
 				}),
@@ -135,7 +135,7 @@ func Test_Literal_Definition(t *testing.T) {
 
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(str{
 					"value": &expected,
 				}),
@@ -153,7 +153,7 @@ func Test_Literal_Definition(t *testing.T) {
 
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(map[string]map[string]int{
 					"attribute": {
 						"value": expected,
@@ -173,7 +173,7 @@ func Test_Literal_Definition(t *testing.T) {
 
 		scope, err := gon.
 			NewScope().
-			WithDefinitions(gon.Definitions{
+			WithValues(gon.Values{
 				"var": nodes.Literal(map[string]*map[string]int{
 					"attribute": {
 						"value": expected,
@@ -202,7 +202,7 @@ func Test_Literal_Call(t *testing.T) {
 		valued := node.Call(t.Context(), "attribute.value")
 		require.Equal(t, expected, valued.Value())
 
-		scope, err := gon.NewScope().WithDefinitions(gon.Definitions{
+		scope, err := gon.NewScope().WithValues(gon.Values{
 			"var": node,
 		})
 		require.NoError(t, err)

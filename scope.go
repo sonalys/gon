@@ -31,7 +31,7 @@ func (s *scope) WithContext(ctx context.Context) *scope {
 	return s
 }
 
-func (s *scope) WithDefinitions(source Definitions) (*scope, error) {
+func (s *scope) WithValues(source Values) (*scope, error) {
 	for key, value := range source {
 		if !keyValidationRegex.MatchString(key) {
 			return nil, adapters.InvalidDefinitionKey{

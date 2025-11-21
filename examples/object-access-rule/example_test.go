@@ -23,7 +23,7 @@ func Example_objectAccessRule() {
 
 	scope, err := gon.
 		NewScope().
-		WithDefinitions(gon.Definitions{
+		WithValues(gon.Values{
 			"file": gon.Literal(file),
 		})
 	if err != nil {
